@@ -4,21 +4,21 @@
 
 :root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
 html { scroll-behavior: smooth; }
-body { @apply bg-surface text-ink antialiased; }
+body { @apply bg-surface font-sans text-ink antialiased; }
 
 @layer components {
-  .label { @apply mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-muted; }
-  .hint { @apply mt-1 text-xs text-muted; }
-  .input { @apply w-full rounded-xl border border-line bg-white px-3.5 py-3 text-[15px] outline-none transition placeholder:text-muted/70 focus:border-kola focus:ring-4 focus:ring-kola/10; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition duration-200 active:scale-[.98] disabled:opacity-50; }
-  .btn-primary { @apply btn bg-kola text-white shadow-[0_8px_22px_rgba(27,42,87,.14)] hover:bg-kola-dark hover:shadow-[0_10px_28px_rgba(27,42,87,.20)]; }
-  .btn-secondary { @apply btn border border-line bg-white text-ink shadow-sm hover:border-kola/30 hover:bg-kola-light; }
-  .btn-danger { @apply btn text-red-700 hover:bg-red-50; }
-  .panel { @apply rounded-2xl border border-line/80 bg-white p-6 shadow-[0_12px_34px_rgba(31,39,62,.05)]; }
-  .error { @apply rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800; }
-  .eyebrow { @apply text-[11px] font-bold uppercase tracking-[0.18em] text-mango; }
-  .display { @apply font-sans tracking-[-0.055em]; }
+  .label { @apply mb-2 block text-[13px] font-medium tracking-[0.02em] text-muted; }
+  .hint { @apply mt-2 text-[13px] text-muted; }
+  .input { @apply w-full rounded-xl border border-line bg-white px-4 py-4 text-[15px] font-normal outline-none transition placeholder:text-muted focus:border-kola focus:ring-4 focus:ring-kola/10; }
+  .btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-3 text-[15px] font-medium transition duration-200 active:scale-[.98] disabled:opacity-50; }
+  .btn-primary { @apply btn bg-kola text-white hover:bg-kola-dark; }
+  .btn-secondary { @apply btn border border-line bg-white text-ink hover:border-kola hover:bg-kola-light; }
+  .btn-danger { @apply btn text-danger hover:bg-red-50; }
+  .panel { @apply rounded-2xl border border-line bg-white p-6; }
+  .error { @apply rounded-xl bg-red-50 px-4 py-3 text-[15px] text-danger; }
+  .eyebrow { @apply text-[13px] font-medium tracking-[0.02em] text-muted; }
+  .display { @apply font-serif font-semibold tracking-[-0.035em]; }
 }
 
-:focus-visible { outline: 3px solid #D4A64A; outline-offset: 3px; }
+:focus-visible { outline: 2px solid #E8A33D; outline-offset: 3px; }
 @media (prefers-reduced-motion: no-preference) { a, button { transition-timing-function: var(--ease-out); } }
