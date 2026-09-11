@@ -14,6 +14,7 @@ export default function OnboardingForm({ userId, siteUrl }) {
   const [slugEdited, setSlugEdited] = useState(false);
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [whatsapp, setWhatsapp] = useState("");
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,6 +36,7 @@ export default function OnboardingForm({ userId, siteUrl }) {
       slug: cleanSlug,
       category,
       whatsapp: whatsapp.trim() || null,
+      address: address.trim() || null,
     });
     setLoading(false);
     if (error) {
@@ -73,6 +75,10 @@ export default function OnboardingForm({ userId, siteUrl }) {
           <label className="label" htmlFor="whatsapp">WhatsApp number</label>
           <input id="whatsapp" type="tel" className="input" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="0803 123 4567" />
           <p className="hint">Customers will use this to reach you.</p>
+        </div>
+        <div>
+          <label className="label" htmlFor="address">Shop or pickup address</label>
+          <input id="address" className="input" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Optional" />
         </div>
         {error && <p className="error">{error}</p>}
         <button className="btn-primary w-full" disabled={loading}>{loading ? "Creating store…" : "Create my store"}</button>
