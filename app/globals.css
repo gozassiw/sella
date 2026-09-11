@@ -2,18 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
+html { scroll-behavior: smooth; }
 body { @apply bg-surface text-ink antialiased; }
 
 @layer components {
-  .label { @apply block text-sm font-semibold mb-1.5; }
-  .hint { @apply text-xs text-muted mt-1; }
-  .input { @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] outline-none focus:border-kola focus:ring-2 focus:ring-kola/20; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50; }
-  .btn-primary { @apply btn bg-kola text-white hover:bg-kola-dark; }
-  .btn-secondary { @apply btn border border-line bg-white text-ink hover:bg-surface; }
+  .label { @apply mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted; }
+  .hint { @apply mt-1 text-xs text-muted; }
+  .input { @apply w-full rounded-xl border border-line bg-white px-3.5 py-3 text-[15px] outline-none transition placeholder:text-muted/70 focus:border-kola focus:ring-4 focus:ring-kola/10; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition duration-200 active:scale-[.97] disabled:opacity-50; }
+  .btn-primary { @apply btn bg-kola text-white shadow-[0_8px_22px_rgba(24,34,67,.16)] hover:bg-kola-dark hover:shadow-[0_10px_28px_rgba(24,34,67,.22)]; }
+  .btn-secondary { @apply btn border border-line bg-white text-ink shadow-sm hover:border-kola/30 hover:bg-surface; }
   .btn-danger { @apply btn text-red-700 hover:bg-red-50; }
-  .panel { @apply rounded-2xl border border-line bg-white p-5; }
-  .error { @apply rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-800; }
+  .panel { @apply rounded-3xl border border-line/80 bg-white p-6 shadow-[0_14px_40px_rgba(32,37,54,.06)]; }
+  .error { @apply rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800; }
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.18em] text-mango; }
+  .display { @apply font-serif tracking-[-0.035em]; }
 }
 
-:focus-visible { outline: 3px solid #E8A33D; outline-offset: 2px; }
+:focus-visible { outline: 3px solid #C8943E; outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) { a, button { transition-timing-function: var(--ease-out); } }

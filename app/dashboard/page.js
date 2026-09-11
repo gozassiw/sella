@@ -1,64 +1,7 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { ArrowUpRight, Check, Package, ShoppingBag, WalletCards } from "lucide-react";
 import { getMyStore } from "@/lib/store";
-import ShareStore from "@/components/ShareStore";
+import { formatNaira, storeUrl } from "@/lib/utils";
 import { SITE_URL } from "@/lib/config";
-import { storeUrl } from "@/lib/utils";
-
-export default async function DashboardHome() {
-  const { supabase, store } = await getMyStore();
-
-  const [{ count: productCount }, { count: lowStockCount }] = await Promise.all([
-    supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id),
-    supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).lte("stock", 3),
-  ]);
-
-  const steps = [
-    { done: (productCount || 0) > 0, label: "Add your first product", href: "/dashboard/products/new" },
-    { done: !!store.logo_url, label: "Upload your logo", href: "/dashboard/settings" },
-    { done: !!store.whatsapp, label: "Add your WhatsApp number", href: "/dashboard/settings" },
-  ];
-  const trialDays = store.trial_starts_at ? Math.max(0, Math.ceil((new Date(store.trial_ends_at) - new Date()) / 86400000)) : null;
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Welcome back</h1>
-        {store.approval_status === "pending" && <div className="mt-3 rounded-2xl border border-mango bg-[#FFF8E7] p-4 text-sm"><p className="font-semibold">Your store is pending approval.</p><p className="mt-1 text-muted">You can keep adding products and completing your settings. Your store will become visible to buyers after review. Your 14-day free trial starts when your store is approved.</p></div>}
-        {store.approval_status === "rejected" && <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p className="font-semibold">Your store needs attention before approval.</p>{store.rejection_reason && <p className="mt-1">{store.rejection_reason}</p>}</div>}
-        {store.plan === "trial" && trialDays !== null && <p className="mt-1 text-sm text-muted">{trialDays} days left in your free trial.</p>}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="panel">
-          <p className="text-sm text-muted">Products</p>
-          <p className="mt-1 text-3xl font-bold">{productCount || 0}</p>
-        </div>
-        <Link href="/dashboard/products" className="panel hover:border-kola">
-          <p className="text-sm text-muted">Running low (3 or fewer)</p>
-          <p className={`mt-1 text-3xl font-bold ${lowStockCount ? "text-red-700" : ""}`}>{lowStockCount || 0}</p>
-        </Link>
-      </div>
-
-      {steps.some((s) => !s.done) && (
-        <div className="panel">
-          <h2 className="font-semibold">Get your store ready</h2>
-          <ul className="mt-4 space-y-2">
-            {steps.map((s) => (
-              <li key={s.label}>
-                <Link href={s.href} className="flex items-center gap-3 rounded-xl p-2 hover:bg-surface">
-                  <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${s.done ? "border-kola bg-kola text-white" : "border-line"}`}>
-                    {s.done && <Check size={14} strokeWidth={3} />}
-                  </span>
-                  <span className={s.done ? "text-muted line-through" : ""}>{s.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <ShareStore url={storeUrl(SITE_URL, store.slug)} storeName={store.name} />
-    </div>
-  );
-}
+import ShareStore from "@/components/ShareStore";
+export default async function DashboardHome() { const { supabase, store } = await getMyStore(); const [{ count: productCount }, { count: lowStockCount }, { count: orderCount }, { data: recentOrders }] = await Promise.all([supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id), supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).lte("stock", 3), supabase.from("orders").select("id", { count: "exact", head: true }).eq("store_id", store.id), supabase.from("orders").select("id,order_number,total,status,payment_status,created_at,customers(name)").eq("store_id", store.id).order("created_at", { ascending: false }).limit(5)]); const trialDays = store.trial_starts_at ? Math.max(0, Math.ceil((new Date(store.trial_ends_at) - new Date()) / 86400000)) : null; const steps = [{ done: (productCount || 0) > 0, label: "Add your first product", href: "/dashboard/products/new" }, { done: !!store.logo_url, label: "Add your brand mark", href: "/dashboard/settings" }, { done: !!store.whatsapp, label: "Add a WhatsApp number", href: "/dashboard/settings" }]; return <div className="space-y-10"><header className="flex flex-wrap items-end justify-between gap-5"><div><p className="eyebrow">{store.approval_status === "approved" ? "Your workspace" : "Getting ready"}</p><h1 className="display mt-2 text-4xl font-bold md:text-5xl">Good to see you.</h1><p className="mt-3 text-muted">A clear view of what is happening in {store.name}.</p></div><div className="flex items-center gap-3"><Link href="/dashboard/products/new" className="btn-primary">Add product <ArrowUpRight size={16} /></Link></div></header>{store.approval_status === "pending" && <div className="rounded-3xl border border-[#E7D1A6] bg-[#FFF7E7] p-5"><p className="font-semibold text-kola">Your storefront is being reviewed.</p><p className="mt-1 max-w-2xl text-sm leading-6 text-muted">You can keep building your catalogue. We will make the store visible to buyers once it is approved. Your trial starts then.</p></div>}{store.approval_status === "rejected" && <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-800"><p className="font-semibold">A little more detail is needed before approval.</p><p className="mt-1">{store.rejection_reason || "Please update your store information and try again."}</p></div>}<section className="grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-kola p-6 text-white shadow-[0_16px_40px_rgba(24,34,67,.16)]"><div className="flex items-center justify-between"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10"><Package size={19} /></span><span className="text-xs font-semibold text-white/60">Catalogue</span></div><p className="mt-8 text-4xl font-bold">{productCount || 0}</p><p className="mt-1 text-sm text-white/70">products listed</p><Link href="/dashboard/products" className="mt-6 inline-flex items-center gap-1 text-sm font-semibold">Open products <ArrowUpRight size={15} /></Link></div><Link href="/dashboard/orders" className="rounded-3xl border border-line bg-white p-6 shadow-[0_14px_40px_rgba(32,37,54,.05)] transition hover:-translate-y-0.5 hover:shadow-lg"><div className="flex items-center justify-between"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F2E8D6] text-kola"><ShoppingBag size={19} /></span><span className="text-xs font-semibold text-muted">All time</span></div><p className="mt-8 text-4xl font-bold">{orderCount || 0}</p><p className="mt-1 text-sm text-muted">orders received</p><span className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-kola">View orders <ArrowUpRight size={15} /></span></Link><Link href="/dashboard/wallet" className="rounded-3xl border border-line bg-white p-6 shadow-[0_14px_40px_rgba(32,37,54,.05)] transition hover:-translate-y-0.5 hover:shadow-lg"><div className="flex items-center justify-between"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E9ECF4] text-kola"><WalletCards size={19} /></span><span className="text-xs font-semibold text-muted">Finance</span></div><p className="mt-8 text-4xl font-bold">{lowStockCount || 0}</p><p className="mt-1 text-sm text-muted">products running low</p><span className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-kola">Open wallet <ArrowUpRight size={15} /></span></Link></section><section className="grid gap-6 lg:grid-cols-[1.15fr_.85fr]"><div className="rounded-3xl border border-line bg-white p-6 shadow-[0_14px_40px_rgba(32,37,54,.05)]"><div className="flex items-end justify-between"><div><p className="eyebrow">Recent activity</p><h2 className="display mt-2 text-2xl font-bold">Latest orders</h2></div><Link href="/dashboard/orders" className="text-sm font-semibold text-kola">See all</Link></div><div className="mt-5 divide-y divide-line">{recentOrders?.length ? recentOrders.map((order) => <Link key={order.id} href={`/dashboard/orders?order=${order.id}`} className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"><div className="min-w-0"><p className="truncate font-semibold">{order.customers?.name || "Customer"}</p><p className="mt-1 text-xs text-muted">Order #{order.order_number} · {order.status}</p></div><div className="shrink-0 text-right"><p className="font-semibold">{formatNaira(order.total)}</p><p className="mt-1 text-xs text-muted">{order.payment_status}</p></div></Link>) : <p className="py-5 text-sm text-muted">Your first order will appear here.</p>}</div></div><div className="rounded-3xl bg-[#EDE5D7] p-6"><p className="eyebrow">Your next steps</p><h2 className="display mt-2 text-2xl font-bold">Make it yours.</h2><ul className="mt-5 space-y-3">{steps.map((step) => <li key={step.label}><Link href={step.href} className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-white/50"><span className={`flex h-7 w-7 items-center justify-center rounded-full border ${step.done ? "border-kola bg-kola text-white" : "border-kola/25 text-transparent"}`}><Check size={14} strokeWidth={3} /></span><span className={`text-sm font-semibold ${step.done ? "text-muted line-through" : "text-ink"}`}>{step.label}</span></Link></li>)}</ul>{trialDays !== null && <p className="mt-6 border-t border-kola/15 pt-4 text-xs font-semibold text-muted">{trialDays} days remain in your free trial.</p>}</div></section><ShareStore url={storeUrl(SITE_URL, store.slug)} storeName={store.name} /></div>; }
