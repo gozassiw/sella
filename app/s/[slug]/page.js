@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatNaira, whatsappLink } from "@/lib/utils";
 import { BRAND } from "@/lib/config";
 import CartLink from "@/components/CartLink";
+import FollowStoreButton from "@/components/FollowStoreButton";
 
 async function loadStore(slug) {
   const supabase = createClient();
@@ -25,6 +26,8 @@ export async function generateMetadata({ params }) {
 export default async function StorePage({ params }) {
   const { supabase, store } = await loadStore(params.slug);
   if (!store) notFound();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: follow } = user ? await supabase.from("buyer_store_follows").select("id").eq("user_id", user.id).eq("store_id", store.id).maybeSingle() : { data: null };
 
   const { data: products } = await supabase
     .from("products")
@@ -63,6 +66,7 @@ export default async function StorePage({ params }) {
             <CartLink color={color} />
             <Link href="/login?next=%2Faccount" className="rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white">Buyer login</Link>
             <Link href="/signup?next=%2Faccount" className="rounded-full bg-white px-4 py-2 text-sm font-semibold" style={{ color }}>Create buyer account</Link>
+            <FollowStoreButton storeId={store.id} initialFollowing={Boolean(follow)} color={color} />
           </div>
         </div>
       </header>
