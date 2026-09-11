@@ -83,6 +83,8 @@ npm run build
 - `/admin` — private admin controls for configured admin emails
 
 Product creation includes a **Suggest description** action. It uses `OPENAI_API_KEY` when configured and falls back to a safe template when it is not.
+
+Buyer accounts and the buyer dashboard work before TransactPay is configured. The wallet displays an unconnected state until the three TransactPay credentials are added.
 - `/api/payments/transactpay` — TransactPay webhook receiver
 
 ## Next stages
