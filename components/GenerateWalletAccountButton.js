@@ -1,0 +1,3 @@
+"use client";
+import { useState } from "react";
+export default function GenerateWalletAccountButton() { const [busy, setBusy] = useState(false); const [error, setError] = useState(""); async function generate() { setBusy(true); setError(""); const response = await fetch("/api/buyer/wallet", { method: "POST" }); const data = await response.json().catch(() => ({})); setBusy(false); if (!response.ok) return setError(data.error || "Unable to generate account."); window.location.reload(); } return <div><button type="button" className="btn-primary" onClick={generate} disabled={busy}>{busy ? "Generating…" : "Generate dedicated account number"}</button>{error && <p className="mt-3 text-sm text-red-700">{error}</p>}</div>; }

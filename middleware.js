@@ -46,6 +46,15 @@ export async function middleware(request) {
     url.searchParams.set("next", path);
     return NextResponse.redirect(url);
   }
+  if (user && path.startsWith("/account") && !path.startsWith("/account/setup")) {
+    const { data: profile } = await supabase.from("buyer_profiles").select("id").eq("user_id", user.id).maybeSingle();
+    if (!profile) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/account/setup";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
     const requestedNext = request.nextUrl.searchParams.get("next");

@@ -1,0 +1,3 @@
+import { createClient } from "@/lib/supabase/server";
+import BuyerProfileForm from "@/components/BuyerProfileForm";
+export default async function BuyerProfilePage() { const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser(); const { data: profile } = await supabase.from("buyer_profiles").select("full_name,whatsapp").eq("user_id", user.id).maybeSingle(); return <div className="mx-auto max-w-xl"><p className="text-sm font-semibold text-kola">Your profile</p><h1 className="mt-1 text-3xl font-bold">Personal details</h1><p className="mt-2 text-sm text-muted">Sellers use these details to contact you about delivery or pickup.</p><div className="mt-6 panel"><BuyerProfileForm profile={profile} /></div></div>; }

@@ -1,0 +1,4 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import BuyerProfileForm from "@/components/BuyerProfileForm";
+export default async function BuyerSetupPage() { const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) redirect("/login?next=/account/setup"); const { data: profile } = await supabase.from("buyer_profiles").select("id").eq("user_id", user.id).maybeSingle(); if (profile) redirect("/account"); return <div className="mx-auto flex min-h-[70vh] max-w-lg items-center"><div className="panel w-full"><p className="text-sm font-semibold text-kola">Buyer setup</p><h1 className="mt-1 text-3xl font-bold">Tell us about you</h1><p className="mt-2 text-sm text-muted">Your full name and WhatsApp number are required so sellers can fulfil your orders and contact you.</p><div className="mt-6"><BuyerProfileForm /></div></div></div>; }
