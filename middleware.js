@@ -23,6 +23,20 @@ export async function middleware(request) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
+  const configuredDomain = String(process.env.NEXT_PUBLIC_STORE_DOMAIN || "")
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() || "";
+  const baseHost = configuredDomain.toLowerCase();
+  const subdomain = configuredDomain && host.endsWith(`.${baseHost}`)
+    ? host.slice(0, -(baseHost.length + 1))
+    : "";
+  const reservedSubdomains = new Set(["www", "app", "api"]);
+  if (subdomain && !reservedSubdomains.has(subdomain) && !path.startsWith("/_next") && !path.startsWith("/api") && !path.startsWith("/auth") && !path.startsWith("/login") && !path.startsWith("/signup") && !path.startsWith("/account") && !path.startsWith("/dashboard") && !path.startsWith("/onboarding") && !path.startsWith("/s/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = path === "/" ? `/s/${subdomain}` : `/s/${subdomain}${path}`;
+    return NextResponse.rewrite(url);
+  }
   const isPrivate = path.startsWith("/dashboard") || path.startsWith("/onboarding") || path.startsWith("/account");
   const isAuthPage = path === "/login" || path === "/signup";
 
@@ -41,5 +55,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding", "/account/:path*", "/login", "/signup"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

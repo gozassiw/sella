@@ -84,3 +84,9 @@ begin
   return jsonb_build_object('success', true, 'order_id', v_order.id);
 end; $$;
 grant execute on function public.pay_order_from_wallet(uuid) to authenticated;
+
+-- Supabase SQL Editor-created tables need explicit grants in addition to RLS.
+-- RLS still limits each authenticated user to their own store and records.
+grant select on public.stores, public.products to anon;
+grant select, insert, update, delete on public.stores, public.products, public.customers, public.orders, public.order_items, public.expenses, public.wallets, public.wallet_transactions, public.reports, public.subscriptions, public.payment_webhook_events to authenticated;
+grant usage, select on all sequences in schema public to authenticated;

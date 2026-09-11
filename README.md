@@ -33,6 +33,7 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_STORE_DOMAIN` — optional root domain for seller subdomains, e.g. `sella.com.ng`; leave blank to use `/s/{slug}` links
 - `NEXT_PUBLIC_BRAND_NAME`
 - `SUPABASE_SERVICE_ROLE_KEY` — server-only; never expose it to the browser
 - `TRANSACTPAY_BASE_URL` — use `https://payment-api-service.transactpay.ai` for the current sandbox/API base
@@ -43,6 +44,8 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for virtual-account generation. Configure the webhook URL in TransactPay under **Settings & Security → API & Webhooks** as:
 
 `https://sella-production.vercel.app/api/payments/transactpay`
+
+Buyers register from the **Create buyer account** link shown on each storefront, cart, and checkout page. Seller onboarding remains available through the main signup flow. When `NEXT_PUBLIC_STORE_DOMAIN` is configured and a wildcard domain such as `*.sella.com.ng` is added in Vercel, a store slug such as `jude` is published at `https://jude.sella.com.ng`; until then, the safe fallback is `https://sella-production.vercel.app/s/jude`.
 
 The provider must be configured with a real merchant account and test/live keys before account numbers or payment confirmations can be exercised. Confirm with TransactPay that the intended escrow/hold arrangement is permitted under its licensing before processing real transactions.
 

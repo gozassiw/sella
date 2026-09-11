@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
-import { slugify } from "@/lib/utils";
+import { slugify, storeUrl } from "@/lib/utils";
 
 const CATEGORIES = ["Fashion & clothing", "Food & drinks", "Beauty & hair", "Phones & electronics", "Home & kitchen", "Health & wellness", "Kids & babies", "Other"];
 
@@ -61,7 +61,7 @@ export default function OnboardingForm({ userId, siteUrl }) {
             value={slug}
             onChange={(e) => { setSlugEdited(true); setSlug(e.target.value.toLowerCase()); }}
           />
-          <p className="hint break-all">{siteUrl}/s/{slugify(slug) || "your-store"}</p>
+          <p className="hint break-all">{storeUrl(siteUrl, slugify(slug) || "your-store")}</p>
         </div>
         <div>
           <label className="label" htmlFor="category">What do you sell?</label>

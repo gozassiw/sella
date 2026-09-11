@@ -59,7 +59,11 @@ export default async function StorePage({ params }) {
               Chat on WhatsApp
             </a>
           )}
-          <div className="mt-4"><CartLink color={color} /></div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <CartLink color={color} />
+            <Link href="/login?next=%2Faccount" className="rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white">Buyer login</Link>
+            <Link href="/signup?next=%2Faccount" className="rounded-full bg-white px-4 py-2 text-sm font-semibold" style={{ color }}>Create buyer account</Link>
+          </div>
         </div>
       </header>
 
