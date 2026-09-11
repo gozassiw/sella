@@ -8,6 +8,7 @@ import AuthShell from "@/components/AuthShell";
 export default function SignupPage({ searchParams }) {
   const router = useRouter();
   const nextPath = typeof searchParams?.next === "string" && searchParams.next.startsWith("/") ? searchParams.next : "/onboarding";
+  const isBuyerSignup = nextPath === "/account" || nextPath.startsWith("/account/") || nextPath === "/cart" || nextPath === "/checkout";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ export default function SignupPage({ searchParams }) {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Start your 14-day free trial."
+      subtitle={isBuyerSignup ? "Create one Sella account to shop, track orders, and use your wallet across stores." : "Start your 14-day free trial."}
       footer={<>Already have an account? <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="font-semibold text-kola">Log in</Link></>}
     >
       <form onSubmit={submit} className="space-y-4">
