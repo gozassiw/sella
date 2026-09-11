@@ -48,7 +48,15 @@ export async function middleware(request) {
   }
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    const requestedNext = request.nextUrl.searchParams.get("next");
+    if (requestedNext && requestedNext.startsWith("/")) {
+      url.pathname = requestedNext;
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle();
+    url.pathname = store ? "/dashboard" : "/account";
+    url.search = "";
     return NextResponse.redirect(url);
   }
   return response;

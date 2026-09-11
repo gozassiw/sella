@@ -18,10 +18,15 @@ export default function LoginPage({ searchParams }) {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return setError("That email and password don't match. Try again.");
-    router.push(nextPath);
+    let destination = nextPath;
+    if (nextPath === "/dashboard" && data.user) {
+      const { data: store } = await supabase.from("stores").select("id").eq("owner_id", data.user.id).maybeSingle();
+      if (!store) destination = "/account";
+    }
+    router.push(destination);
     router.refresh();
   }
 
