@@ -20,5 +20,5 @@ body { @apply bg-surface font-sans text-ink antialiased; }
   .display { @apply font-serif font-semibold tracking-[-0.035em]; }
 }
 
-:focus-visible { outline: 2px solid #E8A33D; outline-offset: 3px; }
+:focus-visible { outline: 2px solid #B9E769; outline-offset: 3px; }
 @media (prefers-reduced-motion: no-preference) { a, button { transition-timing-function: var(--ease-out); } }
