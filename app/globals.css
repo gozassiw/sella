@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-surface text-ink antialiased; }
+
+@layer components {
+  .label { @apply block text-sm font-semibold mb-1.5; }
+  .hint { @apply text-xs text-muted mt-1; }
+  .input { @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] outline-none focus:border-kola focus:ring-2 focus:ring-kola/20; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50; }
+  .btn-primary { @apply btn bg-kola text-white hover:bg-kola-dark; }
+  .btn-secondary { @apply btn border border-line bg-white text-ink hover:bg-surface; }
+  .btn-danger { @apply btn text-red-700 hover:bg-red-50; }
+  .panel { @apply rounded-2xl border border-line bg-white p-5; }
+  .error { @apply rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-800; }
+}
+
+:focus-visible { outline: 3px solid #FFB020; outline-offset: 2px; }

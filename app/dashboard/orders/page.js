@@ -1,0 +1,9 @@
+import { getMyStore } from "@/lib/store";
+import { formatNaira } from "@/lib/utils";
+import OrderStatusForm from "@/components/OrderStatusForm";
+
+export default async function SellerOrdersPage() {
+  const { supabase, store } = await getMyStore();
+  const { data: orders } = await supabase.from("orders").select("id,order_number,total,status,payment_status,escrow_status,fulfilment_method,created_at,customers(name,phone,email,address),order_items(name,price,quantity)").eq("store_id", store.id).order("created_at", { ascending: false });
+  return <div><div><h1 className="text-2xl font-bold">Orders</h1><p className="mt-1 text-sm text-muted">Website orders from your Sella storefront.</p></div><div className="mt-6 space-y-4">{orders?.length ? orders.map((order) => <div key={order.id} className="panel"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-semibold">Order #{order.order_number}</p><p className="mt-1 text-sm text-muted">{order.customers?.name} · {order.customers?.phone || order.customers?.email}</p></div><div className="flex items-center gap-3"><p className="font-bold">{formatNaira(order.total)}</p><OrderStatusForm order={order} /></div></div><div className="mt-4 grid gap-4 border-t border-line pt-4 text-sm md:grid-cols-3"><div><p className="text-muted">Items</p><p className="mt-1">{order.order_items?.map((item) => `${item.quantity} × ${item.name}`).join(", ")}</p></div><div><p className="text-muted">Fulfilment</p><p className="mt-1 capitalize">{order.fulfilment_method}{order.customers?.address && ` · ${order.customers.address}`}</p></div><div><p className="text-muted">Payment</p><p className="mt-1 capitalize">{order.payment_status} · escrow {order.escrow_status}</p></div></div></div>) : <div className="panel py-12 text-center text-muted">New online orders will appear here.</div>}</div></div>;
+}

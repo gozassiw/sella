@@ -1,0 +1,12 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { ensureBuyerWallet } from "@/lib/buyer";
+import { formatNaira } from "@/lib/utils";
+
+export default async function AccountPage() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const wallet = await ensureBuyerWallet(user);
+  const { data: orders } = await supabase.from("orders").select("id,order_number,total,status,payment_status,created_at,stores(name,slug)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(5);
+  return <div><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-semibold text-kola">Buyer account</p><h1 className="mt-1 text-3xl font-bold">Welcome back</h1><p className="mt-2 text-sm text-muted">{user.email}</p></div><Link href="/account/wallet" className="btn-primary">Open wallet</Link></div><div className="mt-8 grid gap-4 md:grid-cols-2"><div className="panel"><p className="text-sm text-muted">Wallet balance</p><p className="mt-2 text-3xl font-bold">{formatNaira(wallet?.balance)}</p><Link href="/account/wallet" className="mt-4 inline-flex text-sm font-semibold text-kola">View funding account →</Link></div><div className="panel"><p className="text-sm text-muted">Orders</p><p className="mt-2 text-3xl font-bold">{orders?.length || 0}</p><Link href="/account/orders" className="mt-4 inline-flex text-sm font-semibold text-kola">View all orders →</Link></div></div><section className="mt-8"><h2 className="text-xl font-bold">Recent orders</h2><div className="mt-4 space-y-3">{orders?.length ? orders.map((order) => <Link key={order.id} href={`/account/orders/${order.id}`} className="flex items-center justify-between rounded-2xl border border-line bg-white p-4 hover:border-kola"><div><p className="font-semibold">{order.stores?.name || "Store"}</p><p className="mt-1 text-sm text-muted">Order #{order.order_number} · {order.status}</p></div><div className="text-right"><p className="font-bold">{formatNaira(order.total)}</p><p className="mt-1 text-xs text-muted">{order.payment_status}</p></div></Link>) : <div className="panel text-sm text-muted">You have not placed an order yet.</div>}</div></section></div>;
+}
