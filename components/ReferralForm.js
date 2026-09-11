@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+export default function ReferralForm() { const [code, setCode] = useState(""); const [message, setMessage] = useState(""); async function create() { const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser(); const next = `SELLA-${String(user?.id || "USER").slice(0, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`; const { error } = await supabase.from("referrals").insert({ referrer_user_id: user.id, code: next }); if (error) return setMessage(error.message); setCode(next); setMessage("Share this code with another seller."); } return <div><button type="button" className="btn-primary" onClick={create}>Create referral code</button>{code && <p className="mt-4 text-xl font-bold text-kola">{code}</p>}{message && <p className="mt-2 text-sm text-muted">{message}</p>}</div>; }

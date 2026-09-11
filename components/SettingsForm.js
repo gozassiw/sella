@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { uploadImage } from "@/lib/upload";
-import { slugify } from "@/lib/utils";
+import { slugify, storeUrl } from "@/lib/utils";
 
 const COLOURS = ["#0E5E4A", "#1F3A93", "#7A1F5C", "#9A3412", "#111827", "#5B21B6"];
 
@@ -124,7 +124,7 @@ export default function SettingsForm({ store, userId, siteUrl }) {
         <div>
           <label className="label" htmlFor="slug">Store link</label>
           <input id="slug" required className="input" value={form.slug} onChange={update("slug")} />
-          <p className="hint break-all">{siteUrl}/s/{slugify(form.slug) || "your-store"}</p>
+          <p className="hint break-all">{storeUrl(siteUrl, slugify(form.slug) || "your-store")}</p>
         </div>
         <div>
           <label className="label" htmlFor="description">About your business</label>

@@ -1,14 +1,25 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Package, ShoppingBag, Settings, ExternalLink, LogOut } from "lucide-react";
+import { Home, Package, ShoppingBag, WalletCards, Users, BarChart3, Receipt, BadgeCheck, Settings, ExternalLink, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/config";
+import { SITE_URL } from "@/lib/config";
+import { storeUrl } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/products", label: "Products", icon: Package },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/dashboard/wallet", label: "Wallet", icon: WalletCards },
+  { href: "/dashboard/customers", label: "Customers", icon: Users },
+  { href: "/dashboard/offline-sales", label: "Offline sales", icon: Receipt },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/billing", label: "Plans & billing", icon: WalletCards },
+  { href: "/dashboard/verification", label: "Verification", icon: BadgeCheck },
+  { href: "/dashboard/expenses", label: "Expenses", icon: Receipt },
+  { href: "/dashboard/referrals", label: "Referrals", icon: Users },
+  { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -50,7 +61,7 @@ export default function DashboardNav({ store }) {
           ))}
         </nav>
         <div className="mt-auto space-y-1">
-          <a href={`/s/${store.slug}`} target="_blank" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface">
+          <a href={storeUrl(SITE_URL, store.slug)} target="_blank" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface">
             <ExternalLink size={18} /> View my store
           </a>
           <button onClick={signOut} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface">
@@ -62,7 +73,7 @@ export default function DashboardNav({ store }) {
       {/* Mobile top bar + bottom tabs */}
       <div className="flex items-center justify-between border-b border-line bg-white px-4 py-3 md:hidden">
         <span className="truncate font-semibold">{store.name}</span>
-        <a href={`/s/${store.slug}`} target="_blank" className="flex items-center gap-1 text-sm font-semibold text-kola">
+        <a href={storeUrl(SITE_URL, store.slug)} target="_blank" className="flex items-center gap-1 text-sm font-semibold text-kola">
           View store <ExternalLink size={14} />
         </a>
       </div>

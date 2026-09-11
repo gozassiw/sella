@@ -35,6 +35,7 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_STORE_DOMAIN` — optional root domain for seller subdomains, e.g. `sella.com.ng`; leave blank to use `/s/{slug}` links
 - `NEXT_PUBLIC_BRAND_NAME`
+- `ADMIN_EMAILS` — comma-separated email addresses allowed to open `/admin`
 - `SUPABASE_SERVICE_ROLE_KEY` — server-only; never expose it to the browser
 - `TRANSACTPAY_BASE_URL` — use `https://payment-api-service.transactpay.ai` for the current sandbox/API base
 - `TRANSACTPAY_PUBLIC_KEY`
@@ -72,15 +73,24 @@ npm run build
 - `/account/orders` — buyer order history
 - `/account/wallet` — buyer wallet and funding account
 - `/dashboard/orders` — seller order management
+- `/dashboard/wallet` — seller wallet and withdrawals
+- `/dashboard/customers` — seller customer list
+- `/dashboard/offline-sales` — offline sale records
+- `/dashboard/invoices` — invoices and receipts
+- `/dashboard/analytics` — sales, expense, and profit reports
+- `/dashboard/billing` — subscription plans
+- `/dashboard/verification` — seller verification submissions
+- `/admin` — private admin controls for configured admin emails
+
+Product creation includes a **Suggest description** action. It uses `OPENAI_API_KEY` when configured and falls back to a safe template when it is not.
 - `/api/payments/transactpay` — TransactPay webhook receiver
 
 ## Next stages
 
 1. ~~Seller signup, stores, products, storefront~~
 2. ~~Cart, checkout, orders, stock updates, wallet and payment foundation~~
-3. Offline sales, invoices, receipts, and customers list
-4. Analytics, profit reporting, and expenses
-5. Plans, billing, referrals, and platform admin panel
-6. Verification, reports, withdrawals, and escrow release workflows
-7. Custom domains and subdomains
-8. AI store setup and product descriptions
+3. ~~Offline sales, customers list, analytics, profit reporting, and expenses~~
+4. ~~Plans, billing, referrals, and platform admin panel foundation~~
+5. ~~Verification, reports, withdrawals, and escrow release workflows~~
+6. Custom domains and wildcard subdomains after a root domain is connected
+7. AI store setup and product descriptions after an AI provider key is configured

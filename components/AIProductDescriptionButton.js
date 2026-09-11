@@ -1,0 +1,3 @@
+"use client";
+import { useState } from "react";
+export default function AIProductDescriptionButton({ name, onDescription }) { const [busy, setBusy] = useState(false); async function generate() { setBusy(true); const response = await fetch("/api/ai/product-description", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name }) }); const data = await response.json().catch(() => ({})); setBusy(false); if (response.ok && data.description) onDescription(data.description); } return <button type="button" className="btn-secondary" onClick={generate} disabled={busy || !name.trim()}>{busy ? "Writing…" : "Suggest description"}</button>; }

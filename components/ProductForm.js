@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { X, ImagePlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadImage } from "@/lib/upload";
+import AIProductDescriptionButton from "@/components/AIProductDescriptionButton";
 
 const MAX_PHOTOS = 4;
 
@@ -113,6 +114,7 @@ export default function ProductForm({ storeId, userId, product }) {
         <div>
           <label className="label" htmlFor="description">Description</label>
           <textarea id="description" rows={4} className="input" value={form.description} onChange={update("description")} placeholder="Sizes, colours, material, what's included…" />
+          <div className="mt-2"><AIProductDescriptionButton name={form.name} onDescription={(description) => setForm((current) => ({ ...current, description }))} /></div>
         </div>
       </div>
 
