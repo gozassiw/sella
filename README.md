@@ -37,12 +37,12 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 - `SUPABASE_SERVICE_ROLE_KEY` — server-only; never expose it to the browser
 - `TRANSACTPAY_BASE_URL` — use `https://payment-api-service.transactpay.ai` for the current sandbox/API base
 - `TRANSACTPAY_PUBLIC_KEY`
+- `TRANSACTPAY_SECRET_KEY` — server-only; reserved for protected provider operations
 - `TRANSACTPAY_ENCRYPTION_KEY`
-- `TRANSACTPAY_WEBHOOK_SECRET` if TransactPay provides a signing secret for the merchant account
 
 TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for virtual-account generation. Configure the webhook URL in TransactPay under **Settings & Security → API & Webhooks** as:
 
-`https://your-domain.com/api/payments/transactpay`
+`https://sella-production.vercel.app/api/payments/transactpay`
 
 The provider must be configured with a real merchant account and test/live keys before account numbers or payment confirmations can be exercised. Confirm with TransactPay that the intended escrow/hold arrangement is permitted under its licensing before processing real transactions.
 
