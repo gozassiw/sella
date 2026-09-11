@@ -18,13 +18,15 @@ export default async function DashboardHome() {
     { done: !!store.logo_url, label: "Upload your logo", href: "/dashboard/settings" },
     { done: !!store.whatsapp, label: "Add your WhatsApp number", href: "/dashboard/settings" },
   ];
-  const trialDays = Math.max(0, Math.ceil((new Date(store.trial_ends_at) - new Date()) / 86400000));
+  const trialDays = store.trial_starts_at ? Math.max(0, Math.ceil((new Date(store.trial_ends_at) - new Date()) / 86400000)) : null;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Welcome back</h1>
-        {store.plan === "trial" && <p className="mt-1 text-sm text-muted">{trialDays} days left in your free trial.</p>}
+        {store.approval_status === "pending" && <div className="mt-3 rounded-2xl border border-mango bg-[#FFF8E7] p-4 text-sm"><p className="font-semibold">Your store is pending approval.</p><p className="mt-1 text-muted">You can keep adding products and completing your settings. Your store will become visible to buyers after review. Your 14-day free trial starts when your store is approved.</p></div>}
+        {store.approval_status === "rejected" && <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p className="font-semibold">Your store needs attention before approval.</p>{store.rejection_reason && <p className="mt-1">{store.rejection_reason}</p>}</div>}
+        {store.plan === "trial" && trialDays !== null && <p className="mt-1 text-sm text-muted">{trialDays} days left in your free trial.</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

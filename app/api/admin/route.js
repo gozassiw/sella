@@ -25,6 +25,10 @@ export async function POST(request) {
     } else if (body.action === "verification") {
       const { error } = await admin.from("stores").update({ verification_approved: Boolean(body.approved), nin_status: body.approved ? "verified" : "pending" }).eq("id", body.storeId);
       if (error) throw error;
+    } else if (body.action === "store_approval") {
+      const approved = body.approvalStatus === "approved";
+      const { error } = await admin.from("stores").update({ approval_status: approved ? "approved" : "rejected", is_published: approved, approved_at: approved ? new Date().toISOString() : null, rejected_at: approved ? null : new Date().toISOString(), rejection_reason: approved ? null : (body.reason || "Please update your store details and resubmit for review."), trial_starts_at: approved ? new Date().toISOString() : null, ...(approved ? { trial_ends_at: new Date(Date.now() + 14 * 86400000).toISOString() } : {}) }).eq("id", body.storeId);
+      if (error) throw error;
     } else return NextResponse.json({ error: "Unknown admin action." }, { status: 400 });
     await admin.from("admin_audit_logs").insert({ admin_user_id: user.id, action: body.action, entity_id: body.storeId || body.withdrawalId || body.reportId || null, details: body });
     return NextResponse.json({ success: true });

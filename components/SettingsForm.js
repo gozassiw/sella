@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { uploadImage } from "@/lib/upload";
 import { slugify, storeUrl } from "@/lib/utils";
 
-const COLOURS = ["#0E5E4A", "#1F3A93", "#7A1F5C", "#9A3412", "#111827", "#5B21B6"];
+const COLOURS = ["#1B2A57", "#2B4C8A", "#7A1F5C", "#9A3412", "#111827", "#5B21B6"];
 
 export default function SettingsForm({ store, userId, siteUrl }) {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function SettingsForm({ store, userId, siteUrl }) {
     whatsapp: store.whatsapp || "",
     phone: store.phone || "",
     address: store.address || "",
-    brand_color: store.brand_color || "#0E5E4A",
+    brand_color: store.brand_color || "#1B2A57",
     logo_url: store.logo_url || "",
     is_published: store.is_published,
   });
@@ -63,7 +63,7 @@ export default function SettingsForm({ store, userId, siteUrl }) {
         address: form.address.trim() || null,
         brand_color: form.brand_color,
         logo_url: form.logo_url || null,
-        is_published: form.is_published,
+        is_published: store.approval_status === "approved" && form.is_published,
       })
       .eq("id", store.id);
     setSaving(false);
@@ -148,12 +148,12 @@ export default function SettingsForm({ store, userId, siteUrl }) {
         </div>
       </div>
 
-      <label className="panel flex cursor-pointer items-center justify-between">
+      <label className={`panel flex items-center justify-between ${store.approval_status === "approved" ? "cursor-pointer" : "cursor-not-allowed opacity-75"}`}>
         <span>
           <span className="block font-semibold">Store is open</span>
-          <span className="text-sm text-muted">Turn off to hide your store from customers.</span>
+          <span className="text-sm text-muted">{store.approval_status === "approved" ? "Turn off to hide your store from customers." : "Your store will go live after admin approval."}</span>
         </span>
-        <input type="checkbox" className="h-5 w-5 accent-kola" checked={form.is_published} onChange={update("is_published")} />
+        <input type="checkbox" className="h-5 w-5 accent-kola" checked={form.is_published} onChange={update("is_published")} disabled={store.approval_status !== "approved"} />
       </label>
 
       {error && <p className="error">{error}</p>}

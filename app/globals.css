@@ -16,4 +16,4 @@ body { @apply bg-surface text-ink antialiased; }
   .error { @apply rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-800; }
 }
 
-:focus-visible { outline: 3px solid #FFB020; outline-offset: 2px; }
+:focus-visible { outline: 3px solid #E8A33D; outline-offset: 2px; }

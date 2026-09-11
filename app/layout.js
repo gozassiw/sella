@@ -7,6 +7,7 @@ const sora = Sora({ subsets: ["latin"], variable: "--font-sora", display: "swap"
 export const metadata = {
   title: `${BRAND} — Your business, online and organised`,
   description: "Create an online store, record sales, track stock and manage customers from one app.",
+  icons: { icon: "/brand/sella-mark.png", apple: "/brand/sella-mark.png" },
 };
 
 export default function RootLayout({ children }) {

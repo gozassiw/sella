@@ -85,6 +85,10 @@ npm run build
 Product creation includes a **Suggest description** action. It uses `OPENAI_API_KEY` when configured and falls back to a safe template when it is not.
 
 Buyer accounts and the buyer dashboard work before TransactPay is configured. The wallet displays an unconnected state until the three TransactPay credentials are added.
+
+Seller stores start in **Pending approval**. Sellers can continue adding products and completing settings while pending, but the store is not visible to buyers and cannot accept orders. Admin approval publishes the store and starts the 14-day free trial; the trial clock therefore begins at approval rather than sign-up.
+
+The Supabase project runs in `eu-west-1`, which is the intended Europe region for this deployment and is substantially closer to Nigeria than US regions. The performance pass also added explicit column selection, parallel independent queries, public-data caching, optimized Next.js images, and indexes for store approval, product feeds, buyer orders, seller orders, and follows.
 - `/api/payments/transactpay` — TransactPay webhook receiver
 
 ## Next stages
