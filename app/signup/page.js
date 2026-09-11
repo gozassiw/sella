@@ -14,6 +14,7 @@ export default function SignupPage({ searchParams }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
@@ -26,7 +27,11 @@ export default function SignupPage({ searchParams }) {
       options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}` },
     });
     setLoading(false);
-    if (error) return setError(error.message);
+    if (error) {
+      const limited = error.message.toLowerCase().includes("rate limit");
+      setRateLimited(limited);
+      return setError(limited ? "Too many confirmation emails were requested. Please wait before trying again, or use Log in if this email was already registered." : error.message);
+    }
     if (data.session) {
       router.push(nextPath);
       router.refresh();
@@ -57,7 +62,7 @@ export default function SignupPage({ searchParams }) {
           <input id="password" type="password" required minLength={6} className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
           <p className="hint">At least 6 characters.</p>
         </div>
-        {error && <p className="error">{error}</p>}
+        {error && <div className="space-y-2"><p className="error">{error}</p>{rateLimited && <p className="text-xs text-muted">For testing, the email service may need time to reset. A custom SMTP provider in Supabase removes this limit.</p>}</div>}
         <button className="btn-primary w-full" disabled={loading}>{loading ? "Creating account…" : "Create account"}</button>
       </form>
     </AuthShell>
