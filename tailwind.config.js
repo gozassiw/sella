@@ -4,14 +4,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        kola: { DEFAULT: "#182243", dark: "#10172F", light: "#E9ECF4" },
-        mango: "#C8943E",
-        surface: "#F7F3EC",
-        ink: "#202536",
-        muted: "#687083",
-        line: "#E9E3D8",
+        kola: { DEFAULT: "#243A92", dark: "#182865", light: "#E9EDFF" },
+        mango: "#E6A23C",
+        coral: "#E86E61",
+        surface: "#FFF9F1",
+        ink: "#20243A",
+        muted: "#69708A",
+        line: "#EEE5D8",
       },
-      fontFamily: { sans: ["var(--font-sora)", "system-ui", "sans-serif"] },
+      fontFamily: { sans: ["var(--font-sora)", "Trebuchet MS", "system-ui", "sans-serif"], serif: ["Georgia", "Cambria", "Times New Roman", "serif"] },
     },
   },
   plugins: [],

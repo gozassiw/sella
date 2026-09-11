@@ -11,7 +11,7 @@ body { @apply bg-surface text-ink antialiased; }
   .hint { @apply mt-1 text-xs text-muted; }
   .input { @apply w-full rounded-xl border border-line bg-white px-3.5 py-3 text-[15px] outline-none transition placeholder:text-muted/70 focus:border-kola focus:ring-4 focus:ring-kola/10; }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition duration-200 active:scale-[.97] disabled:opacity-50; }
-  .btn-primary { @apply btn bg-kola text-white shadow-[0_8px_22px_rgba(24,34,67,.16)] hover:bg-kola-dark hover:shadow-[0_10px_28px_rgba(24,34,67,.22)]; }
+  .btn-primary { @apply btn bg-kola text-white shadow-[0_8px_22px_rgba(36,58,146,.18)] hover:bg-kola-dark hover:shadow-[0_10px_28px_rgba(36,58,146,.28)]; }
   .btn-secondary { @apply btn border border-line bg-white text-ink shadow-sm hover:border-kola/30 hover:bg-surface; }
   .btn-danger { @apply btn text-red-700 hover:bg-red-50; }
   .panel { @apply rounded-3xl border border-line/80 bg-white p-6 shadow-[0_14px_40px_rgba(32,37,54,.06)]; }
@@ -20,5 +20,5 @@ body { @apply bg-surface text-ink antialiased; }
   .display { @apply font-serif tracking-[-0.035em]; }
 }
 
-:focus-visible { outline: 3px solid #C8943E; outline-offset: 3px; }
+:focus-visible { outline: 3px solid #E6A23C; outline-offset: 3px; }
 @media (prefers-reduced-motion: no-preference) { a, button { transition-timing-function: var(--ease-out); } }
