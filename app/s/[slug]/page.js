@@ -66,7 +66,7 @@ export default async function StorePage({ params }) {
             <CartLink color={color} />
             <Link href="/login?next=%2Faccount" className="rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white">Buyer login</Link>
             <Link href="/signup?next=%2Faccount%2Fsetup" className="rounded-full bg-white px-4 py-2 text-sm font-semibold" style={{ color }}>Create buyer account</Link>
-            <FollowStoreButton storeId={store.id} initialFollowing={Boolean(follow)} color={color} />
+            <FollowStoreButton storeId={store.id} initialFollowing={Boolean(follow)} color={color} returnTo={`/s/${store.slug}`} />
           </div>
         </div>
       </header>
