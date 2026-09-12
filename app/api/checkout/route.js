@@ -12,18 +12,28 @@ export async function POST(request) {
 
     const body = await request.json();
     const { storeId, items, customer, fulfilmentMethod = "delivery", paymentMethod = "transfer" } = body;
-    if (!storeId || !Array.isArray(items) || !items.length || !customer?.name || !customer?.phone || !customer?.email) {
+    if (!storeId || !Array.isArray(items) || !items.length || !customer?.name || !customer?.phone || !customer?.whatsapp) {
       return NextResponse.json({ error: "Complete your contact details and add at least one item." }, { status: 400 });
     }
     if (fulfilmentMethod === "delivery" && !customer.address) {
       return NextResponse.json({ error: "Add a delivery address or choose pickup." }, { status: 400 });
     }
 
+    const { error: profileError } = await supabase.from("buyer_profiles").upsert({
+      user_id: user.id,
+      full_name: customer.name,
+      call_number: customer.phone,
+      whatsapp: customer.whatsapp,
+      delivery_address: customer.address || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    if (profileError) throw new Error(profileError.message);
+
     const { data: order, error } = await supabase.rpc("create_checkout_order", {
       p_store_id: storeId,
       p_buyer_id: user.id,
       p_items: items.map((item) => ({ productId: item.productId, quantity: Number(item.quantity) })),
-      p_customer: customer,
+      p_customer: { name: customer.name, phone: customer.phone, address: customer.address || null },
       p_fulfilment_method: fulfilmentMethod,
       p_payment_method: paymentMethod,
     });
@@ -32,11 +42,11 @@ export async function POST(request) {
     if (paymentMethod === "wallet") {
       const { error: walletError } = await supabase.rpc("pay_order_from_wallet", { p_order_id: order.id });
       if (walletError) throw new Error(walletError.message);
-      return NextResponse.json({ orderId: order.id, paid: true });
+      return NextResponse.json({ orderId: order.id, orderCode: order.order_code, paid: true });
     }
 
     if (!(await providerConfigured())) {
-      return NextResponse.json({ orderId: order.id, paid: false, providerConfigured: false });
+      return NextResponse.json({ orderId: order.id, orderCode: order.order_code, paid: false, providerConfigured: false });
     }
 
     const account = await createVirtualAccount({
@@ -59,6 +69,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       orderId: order.id,
+      orderCode: order.order_code,
       paid: false,
       account: {
         number: accountNumber,
