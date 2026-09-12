@@ -13,7 +13,7 @@ export default function ProductForm({ storeId, userId, product }) {
   const [form, setForm] = useState({
     name: product?.name ?? "",
     description: product?.description ?? "",
-    cost_price: product?.cost_price ?? 0,
+    cost_price: product?.cost_price ?? "",
     price: product?.price ?? "",
     compare_at_price: product?.compare_at_price ?? "",
     stock: product?.stock ?? 1,
@@ -55,7 +55,7 @@ export default function ProductForm({ storeId, userId, product }) {
       store_id: storeId,
       name: form.name.trim(),
       description: form.description.trim() || null,
-      cost_price: Number(form.cost_price || 0),
+      cost_price: form.cost_price === "" || form.cost_price === null ? null : Number(form.cost_price),
       price: Number(form.price),
       compare_at_price: form.compare_at_price === "" || form.compare_at_price === null ? null : Number(form.compare_at_price),
       stock: parseInt(form.stock || 0, 10),

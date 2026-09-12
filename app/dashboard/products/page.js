@@ -32,6 +32,7 @@ export default async function ProductsPage() {
       ) : (
         <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
           {products.map((p) => {
+            const costSet = p.cost_price !== null && p.cost_price !== undefined;
             const cost = Number(p.cost_price || 0);
             const price = Number(p.price || 0);
             const unitMargin = price - cost;
@@ -45,8 +46,8 @@ export default async function ProductsPage() {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{p.name}</p>
-                  <p className="text-sm text-muted">Sell {formatNaira(price)} · Cost {formatNaira(cost)}</p>
-                  <p className={`mt-1 text-xs font-bold ${unitMargin >= 0 ? "text-kola" : "text-danger"}`}>Expected margin {formatNaira(unitMargin)} · {marginPercent(price, cost)}%</p>
+                  <p className="text-sm text-muted">Sell {formatNaira(price)} · Cost {costSet ? formatNaira(cost) : "Not set"}</p>
+                  <p className={`mt-1 text-xs font-bold ${!costSet || unitMargin >= 0 ? "text-kola" : "text-danger"}`}>{costSet ? `Expected margin ${formatNaira(unitMargin)} · ${marginPercent(price, cost)}%` : "Add cost to calculate margin"}</p>
                 </div>
                 <div className="text-right text-sm">
                   <p className={p.stock <= 3 ? "font-semibold text-red-700" : "text-muted"}>
