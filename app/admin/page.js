@@ -26,14 +26,14 @@ function SectionTitle({ eyebrow, title, count }) { return <div className="flex f
 function Status({ value }) { const colour = value === "approved" || value === "sent" || value === "resolved" || value === "verified" || value === "paid" ? "text-success bg-green-50" : value === "rejected" || value === "refunded" ? "text-danger bg-red-50" : "text-warning bg-amber-50"; return <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ${colour}`}>{value || "pending"}</span>; }
 
 async function AdminContent() {
-  const { user, authorized, supabase: authSupabase } = await requireAdmin();
+  const { user, authorized } = await requireAdmin();
   if (!user) redirect("/login?next=/admin");
   if (!authorized) return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin access</p><h1 className="display mt-3 text-3xl">This account is not an admin</h1><p className="mt-4 text-sm leading-6 text-muted">You are signed in as <strong className="text-ink">{user.email}</strong>, but this email is not listed in the production <code>ADMIN_EMAILS</code> setting.</p><div className="mt-6 rounded-2xl bg-surface p-4 text-sm leading-6"><p className="font-extrabold">Vercel → Project → Settings → Environment Variables</p><p className="mt-2 text-muted">Add <code>ADMIN_EMAILS</code> with your exact login email, select <strong className="text-ink">Production</strong>, save it, then redeploy.</p></div><Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link></div></div>;
   let admin; let warning = "";
   try { admin = createAdminClient(); } catch (error) { warning = error.message || "Privileged database connection is not configured."; }
-  const source = admin || authSupabase;
+  const source = admin;
   const [storesResult, ordersResult, subscriptionsResult, withdrawalsResult, reportsResult, settingsResult, eventsResult, auditResult, walletsResult] = await Promise.all([
-    safe(source.from("stores").select(storeFields).order("created_at", { ascending: false }).limit(300)),
+    safe(source ? source.from("stores").select(storeFields).order("created_at", { ascending: false }).limit(300) : Promise.reject(new Error(warning || "SUPABASE_SERVICE_ROLE_KEY is not configured for Production"))),
     safe(admin ? admin.from("orders").select("id,total,commission,net_to_seller,status,payment_status,escrow_status,created_at,stores(name)").order("created_at", { ascending: false }).limit(1000) : Promise.resolve({ data: [], error: null })),
     safe(admin ? admin.from("subscriptions").select("id,store_id,plan,amount,status,paid_with,started_at,expires_at,stores(name)").order("started_at", { ascending: false }).limit(500) : Promise.resolve({ data: [], error: null })),
     safe(admin ? admin.from("withdrawals").select("id,store_id,amount,bank_name,account_number,account_name,status,note,created_at,processed_at,stores(name)").order("created_at", { ascending: false }).limit(200) : Promise.resolve({ data: [], error: null })),
