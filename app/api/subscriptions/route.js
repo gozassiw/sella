@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createVirtualAccount, providerConfigured } from "@/lib/payments/transactpay";
 import { storeIsOperational } from "@/lib/store";
 
-const plans = { quarterly: { amount: 5000, days: 90 }, biannual: { amount: 9000, days: 180 }, yearly: { amount: 15000, days: 365 } };
+const plans = { basic: { amount: 7500, days: 90 }, plus: { amount: 14000, days: 180 }, premium: { amount: 25000, days: 365 } };
 
 export async function POST(request) {
   const supabase = createClient();

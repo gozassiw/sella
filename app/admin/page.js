@@ -50,7 +50,7 @@ async function AdminContent() {
   const subscriptionRevenue = paidSubscriptions.reduce((sum, subscription) => sum + Number(subscription.amount || 0), 0);
   const grossRevenue = paidOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const orderCounts = orders.reduce((counts, order) => ({ ...counts, [order.store_id]: (counts[order.store_id] || 0) + 1 }), {});
-  const commission = settings.find((item) => item.key === "commission_rate")?.value?.rate || 5;
+  const commission = settings.find((item) => item.key === "commission_rate")?.value?.rate || 3;
 
   return <div className="min-h-screen bg-surface"><LiveWorkspaceRefresh scope="admin" userId={user.id} />
     <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-4 sm:px-8"><Link href="/" className="text-base font-extrabold tracking-tight text-kola">Sella<span className="text-mango">.</span> Admin</Link><div className="flex items-center gap-2 sm:gap-3"><span className="hidden text-xs text-muted sm:inline">{user.email}</span><Link href="/dashboard" className="btn-soft px-3 py-2 text-xs">Seller dashboard</Link><AdminMenu /></div></div></header>
