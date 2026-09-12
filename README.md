@@ -45,7 +45,9 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 
 TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for virtual-account generation. Configure the webhook URL in TransactPay under **Settings & Security → API & Webhooks** as:
 
-`https://sella.com.ng/api/payments/transactpay`
+`https://www.sella.com.ng/api/payments/transactpay`
+
+Use the direct `www` URL for TransactPay until the Vercel domain settings make the apex domain the primary domain. The apex currently redirects to `www`, and webhook providers should not be required to follow that redirect.
 
 Buyers register from the **Create buyer account** link shown on each storefront, cart, and checkout page. Seller onboarding remains available through the main signup flow. A seller link is a subdomain such as `https://adastore.sella.com.ng`—not `adastore/sella.com.ng`. Add both `sella.com.ng` and `*.sella.com.ng` to the Vercel project, then configure the apex A record and wildcard CNAME at the domain registrar.
 
