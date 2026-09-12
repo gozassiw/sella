@@ -1,14 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, ChevronRight, Search, Store, WalletCards } from "lucide-react";
+import { ArrowRight, ChevronRight, Search, Store } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { formatNaira } from "@/lib/utils";
 
 function ProductCard({ product, store }) {
   return (
     <Link href={`/s/${store.slug}/p/${product.id}`} className="group block min-w-0">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-white">
+      <div className="relative aspect-square overflow-hidden rounded-[22px] bg-white">
         {product.image_urls?.[0] ? <Image src={product.image_urls[0]} alt={product.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition duration-300 group-hover:scale-[1.035]" /> : <div className="grid h-full place-items-center text-xs font-semibold text-muted">Product photo</div>}
         <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-extrabold text-kola">NEW</span>
       </div>
@@ -21,9 +21,8 @@ function ProductCard({ product, store }) {
 export default async function AccountPage({ searchParams }) {
   const { supabase, user } = await getCurrentUser();
   const query = String(searchParams?.q || "").trim();
-  const [{ data: profile }, { data: wallet }, { data: orders }, { data: follows }, { data: discoverStores }] = await Promise.all([
+  const [{ data: profile }, { data: orders }, { data: follows }, { data: discoverStores }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle(),
-    supabase.from("buyer_wallets").select("balance").eq("user_id", user.id).maybeSingle(),
     supabase.from("orders").select("id,order_number,total,status,payment_status,created_at,stores(name,slug)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(4),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,category,logo_url,brand_color)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     supabase.from("stores").select("id,name,slug,category,logo_url,brand_color").eq("is_published", true).eq("approval_status", "approved").ilike("name", query ? `%${query}%` : "%").order("created_at", { ascending: false }).limit(24),
@@ -44,7 +43,6 @@ export default async function AccountPage({ searchParams }) {
     <div className="space-y-10">
       <section className="flex items-center justify-between gap-4">
         <div><p className="text-xs font-semibold text-muted">Welcome back</p><h1 className="display mt-1 text-2xl sm:text-3xl">Hi, {firstName}</h1></div>
-        <Link href="/account/wallet" className="flex items-center gap-3 rounded-2xl bg-kola px-4 py-3 text-white" style={{ boxShadow: "0 8px 22px rgba(19,122,82,.2)" }}><WalletCards size={19} /><div><p className="text-[10px] font-semibold text-white/70">Wallet</p><p className="text-sm font-extrabold">{formatNaira(wallet?.balance)}</p></div></Link>
       </section>
 
       <form action="/account" className="relative">

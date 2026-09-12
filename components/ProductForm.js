@@ -81,7 +81,7 @@ export default function ProductForm({ storeId, userId, product }) {
     <form onSubmit={save} className="space-y-5">
       <div className="panel space-y-4">
         <div>
-          <span className="label">Photos</span>
+          <div className="flex items-center justify-between gap-3"><span className="label">Product photos</span><span className="text-xs font-bold text-muted">{images.length}/{MAX_PHOTOS}</span></div>
           <div className="grid grid-cols-4 gap-3">
             {images.map((url) => (
               <div key={url} className="relative aspect-square overflow-hidden rounded-xl border border-line">
@@ -99,12 +99,12 @@ export default function ProductForm({ storeId, userId, product }) {
             {images.length < MAX_PHOTOS && (
               <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line text-xs text-muted hover:border-kola">
                 <ImagePlus size={20} />
-                {uploading ? "Uploading…" : "Add photo"}
+                {uploading ? "Uploading…" : images.length ? "Add another" : "Add photos"}
                 <input type="file" accept="image/*" multiple className="sr-only" onChange={onFiles} disabled={uploading} />
               </label>
             )}
           </div>
-          <p className="hint">Up to {MAX_PHOTOS} photos. The first one shows on your store.</p>
+          <p className="hint">Add more than one photo at once or add them one by one. The first photo is the main store image.</p>
         </div>
 
         <div>

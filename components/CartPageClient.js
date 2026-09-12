@@ -6,7 +6,7 @@ import { formatNaira } from "@/lib/utils";
 
 const CART_KEY = "sella-cart";
 
-export default function CartPageClient() {
+export default function CartPageClient({ homeHref = "/" }) {
   const [cart, setCart] = useState([]);
   useEffect(() => setCart(JSON.parse(window.localStorage.getItem(CART_KEY) || "[]")), []);
   const store = cart[0];
@@ -26,7 +26,7 @@ export default function CartPageClient() {
     <div className="mx-auto max-w-xl px-5 py-24 text-center">
       <h1 className="text-2xl font-bold">Your cart is empty</h1>
       <p className="mt-2 text-muted">Browse a store to add products before checkout.</p>
-      <Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link>
+      <Link href={homeHref} className="btn-primary mt-6 inline-flex">Back to Sella</Link>
     </div>
   );
 
