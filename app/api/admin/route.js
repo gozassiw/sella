@@ -18,11 +18,11 @@ export async function POST(request) {
       if (error) throw error;
       if (actionResult?.user_id && body.action === "account_hold") await notifyUser({ userId: actionResult.user_id, type: "account_hold", title: body.held === false ? "Account released" : "Account placed on hold", body: body.held === false ? "Your Sella account is active again." : (body.reason || "Sella Team has paused activity on this account."), link: body.held === false ? "/account" : "/account/profile", save: false });
       if (actionResult?.user_id && body.action === "store_approval") await notifyUser({ userId: actionResult.user_id, type: "verification", title: body.approvalStatus === "approved" ? "Store approved" : "Update requested for your store", body: body.approvalStatus === "approved" ? "Your store is live and your 10-day trial has started." : (body.reason || "Please update your seller details and resubmit for verification."), link: "/dashboard", save: false });
-      if (withdrawal?.stores?.owner_id && body.action === "withdrawal_status") {
+      if (body.action === "withdrawal_status") {
         const sent = body.status === "sent";
         const { error: withdrawalNotificationError } = await auth.rpc("notify_withdrawal_owner", { p_withdrawal_id: body.withdrawalId, p_status: body.status });
         if (withdrawalNotificationError) console.error("Withdrawal notification record failed", withdrawalNotificationError);
-        await notifyUser({ userId: withdrawal.stores.owner_id, type: "withdrawal", title: sent ? "Withdrawal processed" : "Withdrawal rejected", body: sent ? `Your ${Number(withdrawal.amount || 0).toLocaleString("en-NG", { style: "currency", currency: "NGN" })} withdrawal has been processed.` : "Your withdrawal request was rejected by Sella Team. Check your seller wallet for details.", link: "/dashboard/wallet", save: false });
+        if (withdrawal?.stores?.owner_id) await notifyUser({ userId: withdrawal.stores.owner_id, type: "withdrawal", title: sent ? "Withdrawal processed" : "Withdrawal rejected", body: sent ? `Your ${Number(withdrawal.amount || 0).toLocaleString("en-NG", { style: "currency", currency: "NGN" })} withdrawal has been processed.` : "Your withdrawal request was rejected by Sella Team. Check your seller wallet for details.", link: "/dashboard/wallet", save: false });
       }
     }
     return NextResponse.json({ success: true });
