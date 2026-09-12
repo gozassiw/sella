@@ -34,7 +34,7 @@ export async function POST(request) {
     const { error: recordError } = await supabase.rpc("create_notification", { p_user_id: user.id, p_type: "system", p_title: title, p_body: message, p_link: "/account/notifications" });
     if (recordError) return NextResponse.json({ error: recordError.message }, { status: 400 });
     const push = await notifyUser({ userId: user.id, type: "system", title, body: message, link: "/account/notifications", save: false });
-    return NextResponse.json({ success: true, pushed: push.pushed || 0, pushConfigured: pushConfigured() });
+    return NextResponse.json({ success: true, pushed: push.pushed || 0, pushError: push.pushError || null, pushConfigured: pushConfigured() });
   }
   if (!body.subscription?.endpoint) return NextResponse.json({ error: "A valid browser subscription is required." }, { status: 400 });
   const { error } = await supabase.from("push_subscriptions").upsert({ user_id: user.id, endpoint: body.subscription.endpoint, subscription: body.subscription, user_agent: request.headers.get("user-agent"), updated_at: new Date().toISOString() }, { onConflict: "endpoint" });

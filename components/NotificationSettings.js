@@ -54,7 +54,9 @@ export default function NotificationSettings() {
       const keyResponse = await fetch("/api/notifications/vapid-public-key", { cache: "no-store" });
       const { key } = await keyResponse.json();
       if (!key) throw new Error("Phone notifications are not configured yet. Sella Team needs to add the notification keys.");
-      const subscription = await registration.pushManager.getSubscription() || await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKeyToBytes(key) });
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) await existingSubscription.unsubscribe().catch(() => {});
+      const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKeyToBytes(key) });
       const response = await fetch("/api/notifications", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ subscription }) });
       if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || "Could not save notification settings.");
       setDeviceRegistered(true);
@@ -74,7 +76,7 @@ export default function NotificationSettings() {
     const data = await response.json().catch(() => ({}));
     setBusy(false);
     if (!response.ok) return setMessage(data.error || "The test notification could not be sent.");
-    setMessage(data.pushed > 0 ? `Test notification sent to ${data.pushed} phone device${data.pushed === 1 ? "" : "s"}.` : "Test notification saved in Sella, but no phone device received it. Check phone setup below.");
+    setMessage(data.pushed > 0 ? `Test notification sent to ${data.pushed} phone device${data.pushed === 1 ? "" : "s"}.` : data.pushError ? `Dashboard notification saved, but phone push failed: ${data.pushError}` : "Test notification saved in Sella, but no phone device received it. Check phone setup below.");
     load();
   }
 
