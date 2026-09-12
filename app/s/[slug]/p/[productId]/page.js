@@ -7,9 +7,10 @@ import AddToCartButton from "@/components/AddToCartButton";
 import ReportForm from "@/components/ReportForm";
 import PublicBottomNav from "@/components/PublicBottomNav";
 import SellaBrand from "@/components/SellaBrand";
+import LiveWorkspaceRefresh from "@/components/LiveWorkspaceRefresh";
 
-export const revalidate = 60;
-export const dynamic = "force-static";
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
 export default async function ProductPage({ params }) {
@@ -20,7 +21,7 @@ export default async function ProductPage({ params }) {
   const [main, ...rest] = product.image_urls || [];
   const soldOut = product.stock <= 0;
 
-  return <div className="min-h-screen bg-surface pb-28">
+  return <div className="min-h-screen bg-surface pb-28"><LiveWorkspaceRefresh scope="store" storeId={store.id} />
     <header className="sticky top-0 z-30 border-b border-line/80 bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1080px] items-center justify-between px-4 py-3.5 sm:px-6"><Link href={`/s/${store.slug}`} className="grid h-10 w-10 place-items-center rounded-full bg-surface"><ArrowLeft size={19} /></Link><SellaBrand href={`/s/${store.slug}`} compact /><Link href={`/s/${store.slug}`} className="rounded-xl bg-kola-light px-3 py-2 text-xs font-extrabold text-kola">{store.name}</Link></div></header>
     <main className="mx-auto grid max-w-[1080px] gap-7 px-4 py-5 sm:px-6 md:grid-cols-[1.08fr_.92fr] md:gap-10 md:py-10">
       <div className="space-y-3"><div className="relative h-[min(58vh,520px)] w-full max-w-[420px] overflow-hidden rounded-[26px] bg-white md:h-[460px]">{main ? <Image src={main} alt={product.name} fill priority sizes="(max-width: 768px) 92vw, 420px" className="object-cover" /> : <div className="grid h-full place-items-center text-sm font-semibold text-muted">Product photo</div>}{soldOut && <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-danger">SOLD OUT</span>}</div>{rest.length > 0 && <div className="flex gap-3 overflow-x-auto">{rest.map((url) => <div key={url} className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-2xl bg-white"><Image src={url} alt="" fill sizes="80px" className="object-cover" /></div>)}</div>}</div>

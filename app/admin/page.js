@@ -11,6 +11,7 @@ import AdminVerificationForm from "@/components/AdminVerificationForm";
 import AdminPaymentSettingsForm from "@/components/AdminPaymentSettingsForm";
 import AdminMenu from "@/components/AdminMenu";
 import AdminHoldForm from "@/components/AdminHoldForm";
+import LiveWorkspaceRefresh from "@/components/LiveWorkspaceRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,7 @@ async function AdminContent() {
   const orderCounts = orders.reduce((counts, order) => ({ ...counts, [order.store_id]: (counts[order.store_id] || 0) + 1 }), {});
   const commission = settings.find((item) => item.key === "commission_rate")?.value?.rate || 5;
 
-  return <div className="min-h-screen bg-surface">
+  return <div className="min-h-screen bg-surface"><LiveWorkspaceRefresh scope="admin" userId={user.id} />
     <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-4 sm:px-8"><Link href="/" className="text-base font-extrabold tracking-tight text-kola">Sella<span className="text-mango">.</span> Admin</Link><div className="flex items-center gap-2 sm:gap-3"><span className="hidden text-xs text-muted sm:inline">{user.email}</span><Link href="/dashboard" className="btn-soft px-3 py-2 text-xs">Seller dashboard</Link><AdminMenu /></div></div></header>
     <main className="mx-auto max-w-[1240px] space-y-10 px-5 py-8 sm:px-8 sm:py-12">
       <div><p className="eyebrow text-kola">Private workspace</p><h1 className="display mt-3 text-4xl sm:text-5xl">Platform control room</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-muted">Review sellers, protect buyers, manage trust, monitor money, and keep the marketplace moving.</p></div>
