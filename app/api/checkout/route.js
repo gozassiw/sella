@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createVirtualAccount, providerConfigured } from "@/lib/payments/transactpay";
+import { notifyUser } from "@/lib/notifications";
 
 export async function POST(request) {
   try {
@@ -33,11 +34,16 @@ export async function POST(request) {
       p_store_id: storeId,
       p_buyer_id: user.id,
       p_items: items.map((item) => ({ productId: item.productId, quantity: Number(item.quantity) })),
-      p_customer: { name: customer.name, phone: customer.phone, address: customer.address || null },
+      p_customer: { name: customer.name, phone: customer.phone, whatsapp: customer.whatsapp, address: customer.address || null },
       p_fulfilment_method: fulfilmentMethod,
       p_payment_method: paymentMethod,
     });
     if (error) throw new Error(error.message);
+
+    const { data: store } = await supabase.from("stores").select("owner_id,name").eq("id", storeId).maybeSingle();
+    const orderMessage = `New order #${order.order_code} from ${customer.name} at ${store?.name || "your store"}.`;
+    if (store?.owner_id) await notifyUser({ userId: store.owner_id, type: "order", title: "New order received", body: orderMessage, link: `/dashboard/orders?order=${order.id}` });
+    await notifyUser({ userId: user.id, type: "order", title: "Order placed", body: `Your order #${order.order_code} has been placed with ${store?.name || "the seller"}.`, link: `/account/orders/${order.id}` });
 
     if (paymentMethod === "wallet") {
       const { error: walletError } = await supabase.rpc("pay_order_from_wallet", { p_order_id: order.id });

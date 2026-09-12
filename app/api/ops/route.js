@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { storeIsOperational } from "@/lib/store";
+import { notifyUser } from "@/lib/notifications";
 
 async function requireOperationalStore(supabase, storeId, userId) {
   if (!storeId) return { error: NextResponse.json({ error: "Store is required." }, { status: 400 }) };
@@ -18,13 +19,18 @@ export async function POST(request) {
   const action = body.action;
   try {
     if (["release", "cancel"].includes(action)) {
-      const { data: order } = await supabase.from("orders").select("id,store_id").eq("id", body.orderId).maybeSingle();
+      const { data: order } = await supabase.from("orders").select("id,store_id,order_code,buyer_id,stores(owner_id,name)").eq("id", body.orderId).maybeSingle();
       const guard = await requireOperationalStore(supabase, order?.store_id, user.id);
       if (guard.error) return guard.error;
       const rpc = action === "release" ? "release_order_escrow" : "cancel_order_and_refund";
       const params = action === "release" ? { p_order_id: body.orderId, p_delivery_code: body.deliveryCode } : { p_order_id: body.orderId, p_reason: body.reason || null };
       const { data, error } = await supabase.rpc(rpc, params);
       if (error) throw error;
+      const completed = action === "release";
+      const title = completed ? "Delivery completed" : "Order cancelled";
+      const bodyText = completed ? `Order #${order.order_code} from ${order.stores?.name || "the seller"} was delivered and payment was released.` : `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
+      if (order.buyer_id) await notifyUser({ userId: order.buyer_id, type: "order", title, body: bodyText, link: `/account/orders/${order.id}` });
+      await notifyUser({ userId: user.id, type: "order", title, body: bodyText, link: `/dashboard/orders?order=${order.id}` });
       return NextResponse.json(data);
     }
     if (["withdraw", "offline_sale"].includes(action)) {
