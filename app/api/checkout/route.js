@@ -34,7 +34,7 @@ export async function POST(request) {
       return NextResponse.json({ orderId: order.id, paid: true });
     }
 
-    if (!providerConfigured()) {
+    if (!(await providerConfigured())) {
       return NextResponse.json({ orderId: order.id, paid: false, providerConfigured: false });
     }
 

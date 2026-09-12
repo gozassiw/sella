@@ -55,10 +55,16 @@ export async function POST(request) {
     const { data: order } = await orderQuery.maybeSingle();
     if (!order || order.payment_status === "paid") return NextResponse.json({ received: true, ignored: true });
 
-    const { data: store } = await admin.from("stores").select("trusted").eq("id", order.store_id).single();
-    const commission = Math.round(Number(order.total) * 0.05 * 100) / 100;
+    const [{ data: store }, { data: commissionSetting }, { data: thresholdSetting }] = await Promise.all([
+      admin.from("stores").select("trusted,completed_orders").eq("id", order.store_id).single(),
+      admin.from("app_settings").select("value").eq("key", "commission_rate").maybeSingle(),
+      admin.from("app_settings").select("value").eq("key", "trusted_order_threshold").maybeSingle(),
+    ]);
+    const commissionRate = Math.min(100, Math.max(0, Number(commissionSetting?.value?.rate ?? 5)));
+    const commission = Math.round(Number(order.total) * commissionRate / 100 * 100) / 100;
     const net = Number(order.total) - commission;
-    const trusted = Boolean(store?.trusted);
+    const threshold = Math.max(1, Number(thresholdSetting?.value?.count ?? 3));
+    const trusted = Boolean(store?.trusted) || Number(store?.completed_orders || 0) >= threshold;
     const { data: wallet } = await admin.from("wallets").select("id,available,held").eq("store_id", order.store_id).maybeSingle();
     const nextAvailable = Number(wallet?.available || 0) + (trusted ? net : 0);
     const nextHeld = Number(wallet?.held || 0) + (trusted ? 0 : net);
