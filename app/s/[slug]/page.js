@@ -57,7 +57,7 @@ export default async function StorePage({ params }) {
         {!products.length ? (
           <div className="app-card mt-6 flex flex-col items-center px-6 py-12 text-center"><span className="grid h-14 w-14 place-items-center rounded-[20px] bg-kola-light text-kola"><Package size={23} /></span><h3 className="mt-5 text-base font-extrabold">Products are coming</h3><p className="mt-2 max-w-sm text-sm text-muted">Follow {store.name} and check back when new products are added.</p></div>
         ) : (
-          <div className={`mt-6 grid gap-x-4 gap-y-9 ${singleProduct ? "grid-cols-1 max-w-sm" : "grid-cols-2"} md:grid-cols-3 lg:grid-cols-4`}>
+          <div className={`mt-6 grid gap-x-4 gap-y-9 ${singleProduct ? "w-full max-w-[300px] grid-cols-1" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
             {products.map((product, index) => (
               <article key={product.id} className="min-w-0">
                 <Link href={`/s/${store.slug}/p/${product.id}`} className="group block">
