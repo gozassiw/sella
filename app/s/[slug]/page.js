@@ -19,6 +19,7 @@ export async function generateMetadata({ params }) { const store = await getPubl
 export default async function StorePage({ params }) {
   const store = await getPublicStore(params.slug);
   if (!store) notFound();
+  if (store.approval_status !== "approved") return <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-10"><div className="app-card max-w-lg p-8 text-center sm:p-12"><div className="mx-auto grid h-16 w-16 place-items-center rounded-[22px] bg-kola-light text-kola"><ShieldCheck size={28} /></div><p className="eyebrow mt-6 text-kola">Sella verification</p><h1 className="display mt-3 text-3xl">This store is being verified</h1><p className="mt-4 text-sm leading-6 text-muted">{store.name} has submitted its details to Sella Team. The store will open to buyers after verification is complete.</p><p className="mt-6 text-xs font-bold text-muted">Please check back soon.</p></div></div>;
   const products = await getPublicProducts(store.id);
   const singleProduct = products.length === 1;
   return <div className="min-h-screen bg-surface pb-28">

@@ -8,6 +8,8 @@ export async function POST(request) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in before checking out." }, { status: 401 });
+    const { data: held } = await supabase.rpc("is_account_held", { p_user_id: user.id });
+    if (held) return NextResponse.json({ error: "Your account is on hold. Checkout is paused while Sella Team reviews it." }, { status: 403 });
 
     const body = await request.json();
     const { storeId, items, customer, fulfilmentMethod = "delivery", paymentMethod = "transfer" } = body;

@@ -7,6 +7,7 @@ const items = [
   ["overview", "Overview", BarChart3],
   ["approvals", "Seller approvals", CheckSquare],
   ["stores", "Stores & trust", Store],
+  ["accounts", "Buyer & seller accounts", Users],
   ["verification", "Verification", ShieldCheck],
   ["orders", "Orders & revenue", Banknote],
   ["withdrawals", "Withdrawals", WalletCards],

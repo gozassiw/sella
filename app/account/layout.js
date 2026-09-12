@@ -6,21 +6,9 @@ import BuyerBottomNav from "@/components/BuyerBottomNav";
 import SellaBrand from "@/components/SellaBrand";
 
 export default async function AccountLayout({ children }) {
-  const { user } = await getCurrentUser();
+  const { supabase, user } = await getCurrentUser();
   if (!user) redirect("/login?next=/account");
-  return (
-    <div className="min-h-screen bg-surface pb-28">
-      <header className="sticky top-0 z-30 border-b border-line/80 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1120px] items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-          <SellaBrand href="/account" />
-          <div className="flex items-center gap-1">
-            <Link href="/account#discover" aria-label="Search stores" className="grid h-10 w-10 place-items-center rounded-full text-muted hover:bg-surface hover:text-kola"><Search size={19} strokeWidth={1.8} /></Link>
-            <Link href="/cart" aria-label="Open cart" className="relative grid h-10 w-10 place-items-center rounded-full text-muted hover:bg-surface hover:text-kola"><ShoppingBag size={19} strokeWidth={1.8} /></Link>
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</main>
-      <BuyerBottomNav />
-    </div>
-  );
+  const { data: held } = await supabase.rpc("is_account_held", { p_user_id: user.id });
+  if (held) return <div className="min-h-screen bg-surface"><header className="border-b border-line bg-white"><div className="mx-auto flex max-w-[1120px] items-center justify-between px-4 py-4 sm:px-6"><SellaBrand compact /><span className="text-xs font-bold text-warning">Account on hold</span></div></header><main className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-10"><div className="app-card w-full p-7 text-center sm:p-10"><p className="eyebrow text-warning">Sella Team review</p><h1 className="display mt-3 text-3xl">Your buyer account is temporarily paused</h1><p className="mt-4 text-sm leading-6 text-muted">Shopping, wallet transfers, and orders are paused while Sella Team reviews this account. Contact Sella support if you believe this is a mistake.</p></div></main></div>;
+  return <div className="min-h-screen bg-surface pb-28"><header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1120px] items-center justify-between gap-4 px-4 py-3 sm:px-6"><SellaBrand href="/account" compact /><div className="flex items-center gap-2"><Link href="/account#discover" aria-label="Search stores" className="grid h-10 w-10 place-items-center rounded-full bg-surface text-ink"><Search size={18} /></Link><Link href="/cart" aria-label="Cart" className="grid h-10 w-10 place-items-center rounded-full bg-kola text-white"><ShoppingBag size={17} /></Link></div></div></header><main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 lg:px-8">{children}</main><BuyerBottomNav /></div>;
 }
