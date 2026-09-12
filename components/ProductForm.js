@@ -13,6 +13,7 @@ export default function ProductForm({ storeId, userId, product }) {
   const [form, setForm] = useState({
     name: product?.name ?? "",
     description: product?.description ?? "",
+    cost_price: product?.cost_price ?? 0,
     price: product?.price ?? "",
     compare_at_price: product?.compare_at_price ?? "",
     stock: product?.stock ?? 1,
@@ -45,7 +46,8 @@ export default function ProductForm({ storeId, userId, product }) {
 
   async function save(e) {
     e.preventDefault();
-    if (!form.name.trim() || form.price === "") return setError("Add a product name and price.");
+    if (!form.name.trim() || form.price === "") return setError("Add a product name and selling price.");
+    if (Number(form.cost_price || 0) > Number(form.price)) return setError("Cost price cannot be higher than selling price.");
     setSaving(true);
     setError("");
     const supabase = createClient();
@@ -53,6 +55,7 @@ export default function ProductForm({ storeId, userId, product }) {
       store_id: storeId,
       name: form.name.trim(),
       description: form.description.trim() || null,
+      cost_price: Number(form.cost_price || 0),
       price: Number(form.price),
       compare_at_price: form.compare_at_price === "" || form.compare_at_price === null ? null : Number(form.compare_at_price),
       stock: parseInt(form.stock || 0, 10),
@@ -118,9 +121,14 @@ export default function ProductForm({ storeId, userId, product }) {
         </div>
       </div>
 
-      <div className="panel grid gap-4 sm:grid-cols-3">
+      <div className="panel grid gap-4 sm:grid-cols-4">
         <div>
-          <label className="label" htmlFor="price">Price (₦)</label>
+          <label className="label" htmlFor="cost">Cost price (₦)</label>
+          <input id="cost" type="number" min="0" step="1" inputMode="numeric" className="input" value={form.cost_price} onChange={update("cost_price")} />
+          <p className="hint">What the item costs you.</p>
+        </div>
+        <div>
+          <label className="label" htmlFor="price">Selling price (₦)</label>
           <input id="price" type="number" min="0" step="1" inputMode="numeric" className="input" value={form.price} onChange={update("price")} />
         </div>
         <div>
