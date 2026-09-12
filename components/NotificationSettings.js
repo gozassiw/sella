@@ -76,7 +76,7 @@ export default function NotificationSettings() {
     const data = await response.json().catch(() => ({}));
     setBusy(false);
     if (!response.ok) return setMessage(data.error || "The test notification could not be sent.");
-    setMessage(data.pushed > 0 ? `Test notification sent to ${data.pushed} phone device${data.pushed === 1 ? "" : "s"}.` : data.pushError ? `Dashboard notification saved, but phone push failed: ${data.pushError}` : "Test notification saved in Sella, but no phone device received it. Check phone setup below.");
+    setMessage(data.pushed > 0 ? `Test notification sent to ${data.pushed} phone device${data.pushed === 1 ? "" : "s"}.` : data.pushError ? `Dashboard notification saved, but phone push failed: ${data.pushError}` : data.attempted === 0 ? "Dashboard notification saved, but Sella found no server-side phone subscription for this account." : `Sella attempted ${data.attempted} phone device${data.attempted === 1 ? "" : "s"}, but none accepted the notification.`);
     load();
   }
 
