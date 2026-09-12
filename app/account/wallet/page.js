@@ -1,13 +1,12 @@
 import { ArrowDownLeft, Landmark, WalletCards } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { ensureBuyerWallet } from "@/lib/buyer";
 import { formatNaira } from "@/lib/utils";
 import GenerateWalletAccountButton from "@/components/GenerateWalletAccountButton";
 import CopyButton from "@/components/CopyButton";
 
 export default async function WalletPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
   let wallet = null;
   try { wallet = await ensureBuyerWallet(user); } catch { wallet = null; }
   const { data: transactions } = wallet ? await supabase.from("buyer_wallet_transactions").select("id,amount,label,created_at").eq("buyer_wallet_id", wallet.id).order("created_at", { ascending: false }).limit(12) : { data: [] };

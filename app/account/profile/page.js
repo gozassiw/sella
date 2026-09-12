@@ -1,14 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Heart, UserRound } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import BuyerProfileForm from "@/components/BuyerProfileForm";
 import BuyerSignOutButton from "@/components/BuyerSignOutButton";
 import UnfollowStoreButton from "@/components/UnfollowStoreButton";
 
 export default async function BuyerProfilePage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
   const [{ data: profile }, { data: follows }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name,whatsapp").eq("user_id", user.id).maybeSingle(),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,logo_url,category)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),

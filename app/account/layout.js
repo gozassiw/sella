@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Search, ShoppingBag } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import BuyerBottomNav from "@/components/BuyerBottomNav";
 import SellaBrand from "@/components/SellaBrand";
 
 export default async function AccountLayout({ children }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
   if (!user) redirect("/login?next=/account");
+  const { data: profile } = await supabase.from("buyer_profiles").select("id").eq("user_id", user.id).maybeSingle();
+  if (!profile) redirect("/account/setup");
   return (
     <div className="min-h-screen bg-surface pb-28">
       <header className="sticky top-0 z-30 border-b border-line/80 bg-white/95 backdrop-blur">

@@ -9,9 +9,8 @@ export default function Home() {
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-5 py-4 lg:px-8">
           <SellaBrand />
           <nav className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login?next=%2Faccount" className="hidden rounded-xl px-4 py-2.5 text-sm font-bold text-ink hover:bg-surface sm:inline-flex">Buyer login</Link>
             <Link href="/login?next=%2Fdashboard" className="rounded-xl px-3 py-2.5 text-sm font-bold text-kola sm:px-4">Seller login</Link>
-            <Link href="/signup" className="btn-primary min-h-0 rounded-xl px-4 py-2.5">Get started</Link>
+            <Link href="/signup" className="btn-primary min-h-0 rounded-xl px-4 py-2.5">Create account</Link>
           </nav>
         </div>
       </header>
@@ -57,7 +56,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-line bg-white"><div className="mx-auto flex max-w-[1200px] flex-col gap-5 px-5 py-8 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"><SellaBrand /><div className="flex flex-wrap gap-5"><Link href="/login?next=%2Faccount">Buyer login</Link><Link href="/login?next=%2Fdashboard">Seller login</Link><Link href="/signup">Create account</Link></div><span>© {new Date().getFullYear()} Sella</span></div></footer>
+      <footer className="border-t border-line bg-white"><div className="mx-auto flex max-w-[1200px] flex-col gap-5 px-5 py-8 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"><SellaBrand /><div className="flex flex-wrap gap-5"><Link href="/login?next=%2Fdashboard">Seller login</Link><Link href="/signup">Create account</Link></div><span>© {new Date().getFullYear()} Sella</span></div></footer>
     </div>
   );
 }

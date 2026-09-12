@@ -3,25 +3,47 @@ import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request) {
   const path = request.nextUrl.pathname;
-  const isPrivate = path.startsWith("/dashboard") || path.startsWith("/onboarding") || path.startsWith("/account");
   const isAuthPage = path === "/login" || path === "/signup";
   const configuredDomain = String(process.env.NEXT_PUBLIC_STORE_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() || "";
   const baseHost = configuredDomain.toLowerCase();
   const subdomain = configuredDomain && host.endsWith(`.${baseHost}`) ? host.slice(0, -(baseHost.length + 1)) : "";
   const reservedSubdomains = new Set(["www", "app", "api"]);
+
   if (subdomain && !reservedSubdomains.has(subdomain) && !path.startsWith("/_next") && !path.startsWith("/api") && !path.startsWith("/auth") && !path.startsWith("/login") && !path.startsWith("/signup") && !path.startsWith("/account") && !path.startsWith("/dashboard") && !path.startsWith("/onboarding") && !path.startsWith("/s/")) {
     const url = request.nextUrl.clone();
     url.pathname = path === "/" ? `/s/${subdomain}` : `/s/${subdomain}${path}`;
     return NextResponse.rewrite(url);
   }
-  if (!isPrivate && !isAuthPage && !path.startsWith("/api") && !path.startsWith("/auth")) return NextResponse.next();
+
+  // Protected layouts and server pages own their auth checks. Keeping this
+  // middleware to auth-page redirects avoids an extra Supabase round trip on
+  // every buyer, seller, and admin navigation.
+  if (!isAuthPage) return NextResponse.next();
+
   let response = NextResponse.next({ request });
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, { cookies: { getAll() { return request.cookies.getAll(); }, setAll(cookiesToSet) { cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value)); response = NextResponse.next({ request }); cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options)); } } });
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() { return request.cookies.getAll(); },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    },
+  });
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user && isPrivate) { const url = request.nextUrl.clone(); url.pathname = "/login"; url.searchParams.set("next", path); return NextResponse.redirect(url); }
-  if (user && path.startsWith("/account") && !path.startsWith("/account/setup")) { const { data: profile } = await supabase.from("buyer_profiles").select("id").eq("user_id", user.id).maybeSingle(); if (!profile) { const url = request.nextUrl.clone(); url.pathname = "/account/setup"; url.search = ""; return NextResponse.redirect(url); } }
-  if (user && isAuthPage) { const url = request.nextUrl.clone(); const requestedNext = request.nextUrl.searchParams.get("next"); if (requestedNext && requestedNext.startsWith("/")) { url.pathname = requestedNext; url.search = ""; return NextResponse.redirect(url); } const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle(); url.pathname = store ? "/dashboard" : "/account"; url.search = ""; return NextResponse.redirect(url); }
+  if (user) {
+    const url = request.nextUrl.clone();
+    const requestedNext = request.nextUrl.searchParams.get("next");
+    if (requestedNext && requestedNext.startsWith("/")) url.pathname = requestedNext;
+    else {
+      const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle();
+      url.pathname = store ? "/dashboard" : "/account";
+    }
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
   return response;
 }
 

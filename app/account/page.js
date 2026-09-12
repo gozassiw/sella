@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronRight, Search, Store, WalletCards } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { formatNaira } from "@/lib/utils";
 
 function ProductCard({ product, store }) {
@@ -18,8 +18,7 @@ function ProductCard({ product, store }) {
 }
 
 export default async function AccountPage({ searchParams }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
   const query = String(searchParams?.q || "").trim();
   const [{ data: profile }, { data: wallet }, { data: orders }, { data: follows }, { data: discoverStores }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle(),
