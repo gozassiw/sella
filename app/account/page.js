@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, ChevronRight, Search, Store, WalletCards } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { formatNaira } from "@/lib/utils";
@@ -27,6 +28,7 @@ export default async function AccountPage({ searchParams }) {
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,category,logo_url,brand_color)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     supabase.from("stores").select("id,name,slug,category,logo_url,brand_color").eq("is_published", true).eq("approval_status", "approved").ilike("name", query ? `%${query}%` : "%").order("created_at", { ascending: false }).limit(24),
   ]);
+  if (!profile) redirect("/account/setup");
   const followedStores = (follows || []).map((item) => item.stores).filter(Boolean);
   const followedIds = new Set(followedStores.map((store) => store.id));
   const storesToDiscover = (discoverStores || []).filter((store) => !followedIds.has(store.id));
