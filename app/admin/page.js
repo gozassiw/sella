@@ -12,7 +12,13 @@ import AdminVerificationForm from "@/components/AdminVerificationForm";
 import AdminPaymentSettingsForm from "@/components/AdminPaymentSettingsForm";
 
 const storeFields = "id,owner_id,name,slug,category,address,legal_name,nin,nin_status,cac_number,cac_file_url,approval_status,rejection_reason,plan,trusted,verification_approved,completed_orders,created_at,is_published,trial_starts_at,trial_ends_at";
-const safe = (promise, fallback = { data: [], error: null }) => promise.catch((error) => ({ ...fallback, error }));
+const safe = async (query, fallback = { data: [], error: null }) => {
+  try {
+    return await query;
+  } catch (error) {
+    return { ...fallback, error };
+  }
+};
 const money = (value) => formatNaira(Number(value || 0));
 
 function Metric({ icon: Icon, label, value, detail, accent = false }) { return <div className={`app-card p-5 ${accent ? "border-kola/30 bg-kola-light" : ""}`}><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-muted">{label}</p><p className="mt-3 text-2xl font-extrabold">{value}</p>{detail && <p className="mt-1 text-[11px] text-muted">{detail}</p>}</div><span className={`grid h-10 w-10 place-items-center rounded-2xl ${accent ? "bg-kola text-white" : "bg-surface text-kola"}`}><Icon size={18} /></span></div></div>; }
