@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createVirtualAccount, providerConfigured } from "@/lib/payments/transactpay";
 
 export async function POST(request) {
@@ -48,13 +47,15 @@ export async function POST(request) {
     const accountNumber = account.accountNumber || account.data?.account_number || account.data?.accountNumber;
     if (!accountNumber) throw new Error("TransactPay did not return an account number");
 
-    const admin = createAdminClient();
-    await admin.from("orders").update({
-      payment_account_number: accountNumber,
-      payment_account_name: account.accountName || account.data?.account_name || account.data?.accountName || null,
-      payment_bank_name: account.bank || account.data?.bank_name || account.data?.bank || null,
-      payment_reference: account.accountReference || account.data?.accountReference || order.id,
-    }).eq("id", order.id);
+    const accountReference = account.accountReference || account.data?.accountReference || order.id;
+    const { error: accountSaveError } = await supabase.rpc("set_order_payment_account", {
+      p_order_id: order.id,
+      p_account_number: accountNumber,
+      p_account_name: account.accountName || account.data?.account_name || account.data?.accountName || null,
+      p_bank_name: account.bank || account.data?.bank_name || account.data?.bank || null,
+      p_payment_reference: accountReference,
+    });
+    if (accountSaveError) throw new Error(accountSaveError.message);
 
     return NextResponse.json({
       orderId: order.id,

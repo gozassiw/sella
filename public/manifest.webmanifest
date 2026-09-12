@@ -2,7 +2,7 @@
   "name": "Sella",
   "short_name": "Sella",
   "description": "Shop independent. Sell simply.",
-  "start_url": "/",
+  "start_url": "/open",
   "display": "standalone",
   "background_color": "#F4F8F5",
   "theme_color": "#137A52",

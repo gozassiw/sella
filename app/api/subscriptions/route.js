@@ -26,7 +26,7 @@ export async function POST(request) {
     const accountName = account.accountName || account.data?.account_name || account.data?.accountName || null;
     const bankName = account.bank || account.data?.bank_name || account.data?.bank || null;
     const reference = account.accountReference || account.data?.accountReference || subscription.id;
-    const { error: updateError } = await supabase.from("subscriptions").update({ payment_account_number: accountNumber, payment_account_name: accountName, payment_bank_name: bankName, payment_reference: reference }).eq("id", subscription.id).eq("store_id", store.id);
+    const { error: updateError } = await supabase.rpc("set_subscription_payment_account", { p_subscription_id: subscription.id, p_account_number: accountNumber, p_account_name: accountName, p_bank_name: bankName, p_payment_reference: reference });
     if (updateError) throw updateError;
     return NextResponse.json({ ...subscription, accountNumber, accountName, bankName, reference, message: "Transfer the exact amount to this one-time account. Your plan upgrades automatically after TransactPay confirms the payment." });
   } catch (paymentError) {
