@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, BellOff, CheckCheck, ExternalLink } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 function timeLabel(value) {
   try { return new Intl.DateTimeFormat("en-NG", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)); } catch { return ""; }
@@ -27,7 +28,20 @@ export default function NotificationSettings() {
     setPushReady(Boolean(data.pushConfigured));
     setDeviceRegistered(Boolean(data.deviceRegistered));
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let active = true;
+    let channel;
+    const supabase = createClient();
+    const connect = async () => {
+      await load();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!active || !user) return;
+      channel = supabase.channel(`sella-notifications-page-${user.id}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load);
+      channel.subscribe();
+    };
+    connect();
+    return () => { active = false; if (channel) supabase.removeChannel(channel); };
+  }, []);
 
   async function enablePush() {
     setBusy(true); setMessage("");
