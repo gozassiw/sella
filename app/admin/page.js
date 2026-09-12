@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Activity, BadgeCheck, Banknote, Building2, CheckCircle2, CircleDollarSign, FileCheck2, Flag, History, Landmark, ShieldCheck, Store, Users, WalletCards, XCircle } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/admin";
 import { formatNaira } from "@/lib/utils";
 import { paymentConfigStatus } from "@/lib/payments/transactpay";
@@ -11,14 +10,9 @@ import AdminSettingForm from "@/components/AdminSettingForm";
 import AdminVerificationForm from "@/components/AdminVerificationForm";
 import AdminPaymentSettingsForm from "@/components/AdminPaymentSettingsForm";
 
+export const dynamic = "force-dynamic";
+
 const storeFields = "id,owner_id,name,slug,category,address,legal_name,nin,nin_status,cac_number,cac_file_url,approval_status,rejection_reason,plan,trusted,verification_approved,completed_orders,created_at,is_published,trial_starts_at,trial_ends_at";
-const safe = async (query, fallback = { data: [], error: null }) => {
-  try {
-    return await query;
-  } catch (error) {
-    return { ...fallback, error };
-  }
-};
 const money = (value) => formatNaira(Number(value || 0));
 
 function Metric({ icon: Icon, label, value, detail, accent = false }) { return <div className={`app-card p-5 ${accent ? "border-kola/30 bg-kola-light" : ""}`}><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-muted">{label}</p><p className="mt-3 text-2xl font-extrabold">{value}</p>{detail && <p className="mt-1 text-[11px] text-muted">{detail}</p>}</div><span className={`grid h-10 w-10 place-items-center rounded-2xl ${accent ? "bg-kola text-white" : "bg-surface text-kola"}`}><Icon size={18} /></span></div></div>; }
@@ -26,36 +20,21 @@ function SectionTitle({ eyebrow, title, count }) { return <div className="flex f
 function Status({ value }) { const colour = value === "approved" || value === "sent" || value === "resolved" || value === "verified" || value === "paid" ? "text-success bg-green-50" : value === "rejected" || value === "refunded" ? "text-danger bg-red-50" : "text-warning bg-amber-50"; return <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ${colour}`}>{value || "pending"}</span>; }
 
 async function AdminContent() {
-  const { user, authorized } = await requireAdmin();
+  const { user, authorized, supabase } = await requireAdmin();
   if (!user) redirect("/login?next=/admin");
   if (!authorized) return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin access</p><h1 className="display mt-3 text-3xl">This account is not an admin</h1><p className="mt-4 text-sm leading-6 text-muted">You are signed in as <strong className="text-ink">{user.email}</strong>, but this email is not listed in the production <code>ADMIN_EMAILS</code> setting.</p><div className="mt-6 rounded-2xl bg-surface p-4 text-sm leading-6"><p className="font-extrabold">Vercel → Project → Settings → Environment Variables</p><p className="mt-2 text-muted">Add <code>ADMIN_EMAILS</code> with your exact login email, select <strong className="text-ink">Production</strong>, save it, then redeploy.</p></div><Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link></div></div>;
-  let admin; let warning = "";
-  try { admin = createAdminClient(); } catch (error) { warning = error.message || "Privileged database connection is not configured."; }
-  const source = admin;
-  const [storesResult, ordersResult, subscriptionsResult, withdrawalsResult, reportsResult, settingsResult, eventsResult, auditResult, walletsResult] = await Promise.all([
-    safe(source ? source.from("stores").select(storeFields).order("created_at", { ascending: false }).limit(300) : Promise.reject(new Error(warning || "SUPABASE_SERVICE_ROLE_KEY is not configured for Production"))),
-    safe(admin ? admin.from("orders").select("id,total,commission,net_to_seller,status,payment_status,escrow_status,created_at,stores(name)").order("created_at", { ascending: false }).limit(1000) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("subscriptions").select("id,store_id,plan,amount,status,paid_with,started_at,expires_at,stores(name)").order("started_at", { ascending: false }).limit(500) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("withdrawals").select("id,store_id,amount,bank_name,account_number,account_name,status,note,created_at,processed_at,stores(name)").order("created_at", { ascending: false }).limit(200) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("reports").select("id,type,reason,details,status,created_at,store_id,order_id,product_id,stores(name),orders(order_number,total),products(name)").order("created_at", { ascending: false }).limit(200) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("app_settings").select("key,value,updated_at").limit(100) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("payment_webhook_events").select("id,provider,event_key,received_at").order("received_at", { ascending: false }).limit(30) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("admin_audit_logs").select("id,action,entity,entity_id,details,created_at").order("created_at", { ascending: false }).limit(30) : Promise.resolve({ data: [], error: null })),
-    safe(admin ? admin.from("wallets").select("store_id,available,held,stores(name)").order("available", { ascending: false }).limit(200) : Promise.resolve({ data: [], error: null })),
-  ]);
-  if (storesResult.error) {
-    warning = storesResult.error.message;
-    if (String(warning).toLowerCase().includes("permission denied")) warning = `${warning}. The deployed SUPABASE_SERVICE_ROLE_KEY is not privileged for the configured Supabase project. Use the service_role secret from ${process.env.NEXT_PUBLIC_SUPABASE_URL || "the connected Supabase project"}, set it for Production, and redeploy.`;
-  }
-  const stores = storesResult.data || [];
-  const orders = ordersResult.data || [];
-  const subscriptions = subscriptionsResult.data || [];
-  const withdrawals = withdrawalsResult.data || [];
-  const reports = reportsResult.data || [];
-  const settings = settingsResult.data || [];
-  const events = eventsResult.data || [];
-  const auditLogs = auditResult.data || [];
-  const wallets = walletsResult.data || [];
+  const { data: snapshot, error: snapshotError } = await supabase.rpc("admin_dashboard_snapshot");
+  if (snapshotError) throw snapshotError;
+  const stores = snapshot?.stores || [];
+  const orders = snapshot?.orders || [];
+  const subscriptions = snapshot?.subscriptions || [];
+  const withdrawals = snapshot?.withdrawals || [];
+  const reports = snapshot?.reports || [];
+  const settings = snapshot?.settings || [];
+  const events = snapshot?.events || [];
+  const auditLogs = snapshot?.audit_logs || [];
+  const wallets = snapshot?.wallets || [];
+  const warning = "";
   const paymentStatus = await paymentConfigStatus();
   const pending = stores.filter((store) => store.approval_status === "pending" || (!store.approval_status && !store.is_published));
   const active = stores.filter((store) => store.approval_status === "approved" && store.is_published);
@@ -100,7 +79,7 @@ export default async function AdminPage() {
   try {
     return await AdminContent();
   } catch (error) {
-    if (String(error?.digest || "").startsWith("NEXT_REDIRECT")) throw error;
+    if (String(error?.digest || "").startsWith("NEXT_REDIRECT") || error?.digest === "DYNAMIC_SERVER_USAGE") throw error;
     console.error("Admin page error", error);
     return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin diagnostics</p><h1 className="display mt-3 text-3xl">Admin could not load</h1><p className="mt-4 text-sm leading-6 text-muted">The page reached Sella but the server could not load the Admin workspace. Confirm that <code>ADMIN_EMAILS</code> contains your exact login email and that <code>SUPABASE_SERVICE_ROLE_KEY</code> is the Supabase <strong className="text-ink">service_role secret</strong>, not the anon/publishable key.</p><div className="mt-5 rounded-2xl bg-surface p-4 text-xs leading-5 text-muted"><strong className="text-ink">Server message:</strong><br />{error?.message || "Unknown server exception"}</div><Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link></div></div>;
   }
