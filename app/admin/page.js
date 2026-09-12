@@ -19,7 +19,7 @@ function Metric({ icon: Icon, label, value, detail, accent = false }) { return <
 function SectionTitle({ eyebrow, title, count }) { return <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4"><div><p className="eyebrow text-kola">{eyebrow}</p><h2 className="display mt-2 text-2xl">{title}</h2></div>{count !== undefined && <span className="chip">{count}</span>}</div>; }
 function Status({ value }) { const colour = value === "approved" || value === "sent" || value === "resolved" || value === "verified" || value === "paid" ? "text-success bg-green-50" : value === "rejected" || value === "refunded" ? "text-danger bg-red-50" : "text-warning bg-amber-50"; return <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ${colour}`}>{value || "pending"}</span>; }
 
-export default async function AdminPage() {
+async function AdminContent() {
   const { user, authorized, supabase: authSupabase } = await requireAdmin();
   if (!user) redirect("/login?next=/admin");
   if (!authorized) return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin access</p><h1 className="display mt-3 text-3xl">This account is not an admin</h1><p className="mt-4 text-sm leading-6 text-muted">You are signed in as <strong className="text-ink">{user.email}</strong>, but this email is not listed in the production <code>ADMIN_EMAILS</code> setting.</p><div className="mt-6 rounded-2xl bg-surface p-4 text-sm leading-6"><p className="font-extrabold">Vercel → Project → Settings → Environment Variables</p><p className="mt-2 text-muted">Add <code>ADMIN_EMAILS</code> with your exact login email, select <strong className="text-ink">Production</strong>, save it, then redeploy.</p></div><Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link></div></div>;
@@ -85,4 +85,13 @@ export default async function AdminPage() {
       <section className="grid gap-8 xl:grid-cols-2"><div><SectionTitle eyebrow="Payment events" title="Webhook activity" count={`${events.length} recent`} /><div className="app-card mt-4 divide-y divide-line overflow-hidden">{events.length ? events.map((event) => <div key={event.id} className="flex items-center gap-3 p-4"><span className="grid h-9 w-9 place-items-center rounded-xl bg-kola-light text-kola"><Activity size={16} /></span><div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold">{event.event_key}</p><p className="mt-1 text-[11px] text-muted">{event.provider} · {new Date(event.received_at).toLocaleString()}</p></div><CheckCircle2 size={16} className="text-success" /></div>) : <p className="p-8 text-center text-sm text-muted">No webhook events received yet.</p>}</div></div><div><SectionTitle eyebrow="Audit" title="Admin activity" count={`${auditLogs.length} recent`} /><div className="app-card mt-4 divide-y divide-line overflow-hidden">{auditLogs.length ? auditLogs.map((log) => <div key={log.id} className="flex items-center gap-3 p-4"><span className="grid h-9 w-9 place-items-center rounded-xl bg-surface text-kola"><History size={16} /></span><div><p className="text-xs font-extrabold">{log.action}</p><p className="mt-1 text-[11px] text-muted">{new Date(log.created_at).toLocaleString()}</p></div></div>) : <p className="p-8 text-center text-sm text-muted">No admin actions recorded yet.</p>}</div></div></section>
     </main>
   </div>;
+}
+
+export default async function AdminPage() {
+  try {
+    return await AdminContent();
+  } catch (error) {
+    console.error("Admin page error", error);
+    return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin diagnostics</p><h1 className="display mt-3 text-3xl">Admin could not load</h1><p className="mt-4 text-sm leading-6 text-muted">The page reached Sella but the server could not load the Admin workspace. Confirm that <code>ADMIN_EMAILS</code> contains your exact login email and that <code>SUPABASE_SERVICE_ROLE_KEY</code> is the Supabase <strong className="text-ink">service_role secret</strong>, not the anon/publishable key.</p><div className="mt-5 rounded-2xl bg-surface p-4 text-xs leading-5 text-muted"><strong className="text-ink">Server message:</strong><br />{error?.message || "Unknown server exception"}</div><Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link></div></div>;
+  }
 }
