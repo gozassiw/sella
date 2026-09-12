@@ -91,6 +91,7 @@ export default async function AdminPage() {
   try {
     return await AdminContent();
   } catch (error) {
+    if (String(error?.digest || "").startsWith("NEXT_REDIRECT")) throw error;
     console.error("Admin page error", error);
     return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin diagnostics</p><h1 className="display mt-3 text-3xl">Admin could not load</h1><p className="mt-4 text-sm leading-6 text-muted">The page reached Sella but the server could not load the Admin workspace. Confirm that <code>ADMIN_EMAILS</code> contains your exact login email and that <code>SUPABASE_SERVICE_ROLE_KEY</code> is the Supabase <strong className="text-ink">service_role secret</strong>, not the anon/publishable key.</p><div className="mt-5 rounded-2xl bg-surface p-4 text-xs leading-5 text-muted"><strong className="text-ink">Server message:</strong><br />{error?.message || "Unknown server exception"}</div><Link href="/" className="btn-primary mt-6 inline-flex">Back to Sella</Link></div></div>;
   }
