@@ -50,7 +50,8 @@ export default function NotificationSettings() {
       const result = await Notification.requestPermission();
       setPermission(result);
       if (result !== "granted") throw new Error("Notifications were not enabled. Allow them in your browser settings and try again.");
-      const registration = await navigator.serviceWorker.register("/sw.js");
+      const registration = await navigator.serviceWorker.register("/sw.js?v=644b774", { updateViaCache: "none" });
+      await registration.update().catch(() => {});
       const keyResponse = await fetch("/api/notifications/vapid-public-key", { cache: "no-store" });
       const { key } = await keyResponse.json();
       if (!key) throw new Error("Phone notifications are not configured yet. Sella Team needs to add the notification keys.");
