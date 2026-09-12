@@ -9,6 +9,8 @@ import ReportForm from "@/components/ReportForm";
 import PublicBottomNav from "@/components/PublicBottomNav";
 import SellaBrand from "@/components/SellaBrand";
 
+export const revalidate = 60;
+
 export default async function ProductPage({ params }) {
   const store = await getPublicStore(params.slug);
   if (!store) return null;

@@ -9,6 +9,8 @@ import ReportForm from "@/components/ReportForm";
 import PublicBottomNav from "@/components/PublicBottomNav";
 import SellaBrand from "@/components/SellaBrand";
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }) { const store = await getPublicStore(params.slug); return store ? { title: `${store.name} on Sella`, description: store.description || `Shop ${store.name}` } : { title: "Store not found" }; }
 
 export default async function StorePage({ params }) {
