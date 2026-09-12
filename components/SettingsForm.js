@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { uploadImage } from "@/lib/upload";
 import { slugify, storeUrl } from "@/lib/utils";
 
-const COLOURS = ["#1B2A57", "#2B4C8A", "#7A1F5C", "#9A3412", "#111827", "#5B21B6"];
+const COLOURS = ["#137A52", "#0B8F6A", "#2563EB", "#7C3AED", "#C2410C", "#111827"];
 
 export default function SettingsForm({ store, userId, siteUrl }) {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function SettingsForm({ store, userId, siteUrl }) {
     whatsapp: store.whatsapp || "",
     phone: store.phone || "",
     address: store.address || "",
-    brand_color: store.brand_color || "#1B2A57",
+    brand_color: store.brand_color || "#137A52",
     logo_url: store.logo_url || "",
     is_published: store.is_published,
   });

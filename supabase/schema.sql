@@ -19,7 +19,7 @@ create table if not exists public.stores (
   phone text,
   address text,
   logo_url text,
-  brand_color text not null default '#1B2A57',
+  brand_color text not null default '#137A52',
   is_published boolean not null default true,
   plan text not null default 'trial',               -- trial | starter | pro (billing comes in a later stage)
   trial_ends_at timestamptz not null default (now() + interval '14 days'),

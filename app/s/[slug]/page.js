@@ -2,13 +2,80 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { ArrowUpRight, MapPin, Store as StoreIcon } from "lucide-react";
+import { ArrowLeft, MapPin, Package, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicStore, getPublicProducts } from "@/lib/storefront";
 import { formatNaira } from "@/lib/utils";
-import { BRAND } from "@/lib/config";
 import FollowStoreButton from "@/components/FollowStoreButton";
 import ReportForm from "@/components/ReportForm";
 import PublicBottomNav from "@/components/PublicBottomNav";
-export async function generateMetadata({ params }) { const store = await getPublicStore(params.slug); if (!store) return { title: "Store not found" }; return { title: store.name, description: store.description || `Shop from ${store.name}` }; }
-export default async function StorePage({ params }) { const store = await getPublicStore(params.slug); if (!store) notFound(); const products = await getPublicProducts(store.id); const hasSessionCookie = cookies().getAll().some(({ name }) => name.includes("-auth-token")); const supabase = hasSessionCookie ? createClient() : null; const { data: { user } = {} } = supabase ? await supabase.auth.getUser() : { data: {} }; const { data: follow } = user && supabase ? await supabase.from("buyer_store_follows").select("id").eq("user_id", user.id).eq("store_id", store.id).maybeSingle() : { data: null }; return <div className="min-h-screen bg-surface pb-20"><header className="border-b border-line bg-white"><div className="mx-auto max-w-[1120px] px-6 py-6"><div className="flex items-center justify-between"><Link href="/" className="text-[15px] font-semibold text-kola">{BRAND}<span className="ml-2 text-[13px] font-normal text-muted">/ store</span></Link><span className="text-[13px] text-muted">{store.category || "Independent seller"}</span></div><div className="mt-12 flex flex-wrap items-end justify-between gap-8 pb-4"><div>{store.logo_url ? <Image src={store.logo_url} alt={`${store.name} logo`} width={64} height={64} priority className="h-16 w-16 rounded-full object-cover" /> : <div className="flex h-16 w-16 items-center justify-center rounded-full bg-kola text-[20px] font-semibold text-white">{store.name.charAt(0).toUpperCase()}</div>}<h1 className="display mt-6 text-[40px] leading-[1.05]">{store.name}</h1><p className="mt-4 flex items-center gap-2 text-[15px] text-muted"><MapPin size={16} strokeWidth={1.5} /> {store.address || "Independent seller"}</p>{store.description && <p className="mt-4 max-w-xl text-[15px] leading-7 text-muted">{store.description}</p>}</div><FollowStoreButton storeId={store.id} initialFollowing={Boolean(follow)} color="#176B4D" returnTo={`/s/${store.slug}`} /></div></div></header><main className="mx-auto max-w-[1120px] px-6 py-16"><div className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-4"><div><p className="text-[13px] font-medium tracking-[0.02em] text-muted"><StoreIcon size={14} className="mr-2 inline" strokeWidth={1.5} />Catalogue</p><h2 className="display mt-3 text-2xl">Products from {store.name}</h2></div><ReportForm storeId={store.id} type="store" triggerLabel="Report store" /></div>{!products.length ? <div className="flex flex-col items-center gap-3 py-20 text-center"><StoreIcon size={24} className="text-muted" strokeWidth={1.5} /><p className="text-[15px] text-muted">This store is getting ready.</p></div> : <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">{products.map((product, index) => <article key={product.id}><Link href={`/s/${store.slug}/p/${product.id}`} className="group block"><div className="relative aspect-square overflow-hidden rounded-2xl bg-white">{product.image_urls?.[0] ? <Image src={product.image_urls[0]} alt={product.name} fill priority={index < 2} sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition duration-300 group-hover:scale-[1.02]" /> : <div className="flex h-full items-center justify-center text-[13px] text-muted">Product image</div>}{product.stock <= 0 && <span className="absolute left-3 top-3 rounded-lg bg-white px-2 py-1 text-[13px] font-medium text-muted">Sold out</span>}</div><div className="flex items-start justify-between gap-2 pt-4"><p className="text-[15px] font-medium">{product.name}</p><p className="shrink-0 text-[15px] font-semibold text-kola">{formatNaira(product.price)}</p></div></Link><div className="mt-2"><ReportForm storeId={store.id} productId={product.id} type="product" triggerLabel="Report product" /></div></article>)}</div>}</main><footer className="border-t border-line bg-white"><div className="mx-auto flex max-w-[1120px] flex-wrap justify-between gap-4 px-6 py-8 text-[13px] text-muted"><span className="font-medium text-ink">{store.name} · {BRAND}</span><Link href="/" className="flex items-center gap-1 text-kola">Create your store <ArrowUpRight size={14} strokeWidth={1.5} /></Link></div></footer><PublicBottomNav /></div>; }
+import SellaBrand from "@/components/SellaBrand";
+
+export async function generateMetadata({ params }) {
+  const store = await getPublicStore(params.slug);
+  return store ? { title: `${store.name} on Sella`, description: store.description || `Shop ${store.name}` } : { title: "Store not found" };
+}
+
+export default async function StorePage({ params }) {
+  const store = await getPublicStore(params.slug);
+  if (!store) notFound();
+  const products = await getPublicProducts(store.id);
+  const hasSessionCookie = cookies().getAll().some(({ name }) => name.includes("-auth-token"));
+  const supabase = hasSessionCookie ? createClient() : null;
+  const { data: { user } = {} } = supabase ? await supabase.auth.getUser() : { data: {} };
+  const { data: follow } = user && supabase ? await supabase.from("buyer_store_follows").select("id").eq("user_id", user.id).eq("store_id", store.id).maybeSingle() : { data: null };
+  const singleProduct = products.length === 1;
+
+  return (
+    <div className="min-h-screen bg-surface pb-28">
+      <header className="bg-white">
+        <div className="mx-auto max-w-[1120px] px-4 pb-8 pt-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <Link href="/" aria-label="Back to Sella" className="grid h-10 w-10 place-items-center rounded-full bg-surface text-ink"><ArrowLeft size={19} /></Link>
+            <SellaBrand compact />
+            <ReportForm storeId={store.id} type="store" triggerLabel="Report" />
+          </div>
+
+          <div className="mt-8 flex flex-col items-center text-center">
+            {store.logo_url ? <Image src={store.logo_url} alt={`${store.name} logo`} width={84} height={84} priority className="h-[84px] w-[84px] rounded-[26px] object-cover" /> : <div className="grid h-[84px] w-[84px] place-items-center rounded-[26px] bg-kola text-2xl font-extrabold text-white">{store.name.charAt(0).toUpperCase()}</div>}
+            <h1 className="display mt-5 text-3xl sm:text-4xl">{store.name}</h1>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-muted"><MapPin size={15} /> {store.address || store.category || "Independent store"}</p>
+            {store.description && <p className="mt-4 max-w-lg text-sm leading-6 text-muted">{store.description}</p>}
+            <div className="mt-5"><FollowStoreButton storeId={store.id} initialFollowing={Boolean(follow)} returnTo={`/s/${store.slug}`} /></div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-3 divide-x divide-line rounded-[22px] bg-kola-light px-3 py-4 text-center">
+            <div><p className="text-base font-extrabold text-kola">{products.length}</p><p className="mt-1 text-[10px] font-bold text-muted">PRODUCTS</p></div>
+            <div><p className="text-base font-extrabold text-kola">Open</p><p className="mt-1 text-[10px] font-bold text-muted">STORE</p></div>
+            <div><ShieldCheck size={18} className="mx-auto text-kola" /><p className="mt-1 text-[10px] font-bold text-muted">SELLA SHOP</p></div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-[1120px] px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-end justify-between gap-4"><div><p className="eyebrow text-kola">Shop</p><h2 className="display mt-2 text-2xl sm:text-3xl">All products</h2></div><span className="chip">{store.category || "Store"}</span></div>
+        {!products.length ? (
+          <div className="app-card mt-6 flex flex-col items-center px-6 py-12 text-center"><span className="grid h-14 w-14 place-items-center rounded-[20px] bg-kola-light text-kola"><Package size={23} /></span><h3 className="mt-5 text-base font-extrabold">Products are coming</h3><p className="mt-2 max-w-sm text-sm text-muted">Follow {store.name} and check back when new products are added.</p></div>
+        ) : (
+          <div className={`mt-6 grid gap-x-4 gap-y-9 ${singleProduct ? "grid-cols-1 max-w-sm" : "grid-cols-2"} md:grid-cols-3 lg:grid-cols-4`}>
+            {products.map((product, index) => (
+              <article key={product.id} className="min-w-0">
+                <Link href={`/s/${store.slug}/p/${product.id}`} className="group block">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-white">
+                    {product.image_urls?.[0] ? <Image src={product.image_urls[0]} alt={product.name} fill priority={index < 2} sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition duration-300 group-hover:scale-[1.035]" /> : <div className="grid h-full place-items-center text-xs font-semibold text-muted">Product photo</div>}
+                    {product.stock <= 0 && <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-danger">SOLD OUT</span>}
+                  </div>
+                  <div className="mt-3 flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-bold">{product.name}</p><p className="mt-1 text-xs text-muted">{product.stock > 0 ? `${product.stock} available` : "Unavailable"}</p></div><p className="shrink-0 text-sm font-extrabold text-kola">{formatNaira(product.price)}</p></div>
+                </Link>
+                <div className="mt-2"><ReportForm storeId={store.id} productId={product.id} type="product" triggerLabel="Report product" /></div>
+              </article>
+            ))}
+          </div>
+        )}
+      </main>
+
+      <footer className="mt-8 border-t border-line bg-white"><div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-8 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"><div><p className="font-bold text-ink">{store.name}</p><p className="mt-1">Powered by Sella</p></div><Link href="/signup" className="font-bold text-kola">Create your own store</Link></div></footer>
+      <PublicBottomNav />
+    </div>
+  );
+}

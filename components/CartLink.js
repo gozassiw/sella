@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function CartLink({ color = "#1B2A57" }) {
+export default function CartLink({ color = "#137A52" }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     const update = () => {
