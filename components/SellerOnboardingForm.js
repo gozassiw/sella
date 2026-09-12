@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { slugify, storeUrl } from "@/lib/utils";
 import { uploadDocument } from "@/lib/upload";
 import AuthShell from "@/components/AuthShell";
+import Link from "next/link";
 
 const CATEGORIES = ["Fashion & clothing", "Food & drinks", "Beauty & hair", "Phones & electronics", "Home & kitchen", "Health & wellness", "Kids & babies", "Other"];
 
@@ -32,6 +33,7 @@ export default function SellerOnboardingForm({ userId, siteUrl, initialStore = n
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [accepted, setAccepted] = useState(false);
 
   function update(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -64,6 +66,7 @@ export default function SellerOnboardingForm({ userId, siteUrl, initialStore = n
     if (!form.address.trim()) return setError("A store or pickup address is required.");
     if (nin.length !== 11) return setError("Enter an 11-digit NIN. Sella Team will validate it during review.");
     if (!form.bankName.trim() || !form.accountNumber.trim() || !form.accountName.trim()) return setError("Payout bank name, account number, and account name are required.");
+    if (!accepted) return setError("Please accept the Terms of Use and Privacy & Anti-Piracy Policy before submitting for verification.");
     setSaving(true);
     const supabase = createClient();
     const storePayload = {
@@ -102,6 +105,9 @@ export default function SellerOnboardingForm({ userId, siteUrl, initialStore = n
     const bankResult = await bankResponse.json().catch(() => ({}));
     setSaving(false);
     if (!bankResponse.ok) return setError(`Store saved, but payout details could not be saved: ${bankResult.error || "Please try again."}`);
+    const { error: consentError } = await supabase.from("account_consents").upsert({ user_id: userId, terms_version: "2026-09-12", privacy_version: "2026-09-12", source: "seller-verification", accepted_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    if (consentError) return setError(`Store saved, but your policy consent could not be recorded: ${consentError.message}`);
+    await supabase.rpc("notify_platform_admins", { p_type: "verification", p_title: "New seller submission", p_body: `${form.name.trim()} is waiting for Sella verification.`, p_link: "/admin#approvals" });
     router.push("/dashboard?submitted=1");
     router.refresh();
   }
@@ -119,6 +125,7 @@ export default function SellerOnboardingForm({ userId, siteUrl, initialStore = n
         <section className="space-y-4 border-t border-line pt-6"><div><p className="eyebrow text-kola">03 · Payout</p><h2 className="mt-1 text-xl font-extrabold">Where should approved payouts go?</h2><p className="mt-2 text-sm leading-6 text-muted">These details are saved for Sella Team review and withdrawal processing.</p></div><div className="grid gap-4 sm:grid-cols-2"><div><label className="label" htmlFor="bankName">Bank name *</label><input id="bankName" required className="input" value={form.bankName} onChange={(e) => update("bankName", e.target.value)} placeholder="e.g. GTBank" /></div><div><label className="label" htmlFor="accountNumber">Account number *</label><input id="accountNumber" required className="input" inputMode="numeric" value={form.accountNumber} onChange={(e) => update("accountNumber", e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10 digits" /></div><div className="sm:col-span-2"><label className="label" htmlFor="accountName">Account name *</label><input id="accountName" required className="input" value={form.accountName} onChange={(e) => update("accountName", e.target.value)} placeholder="Name on the bank account" /></div><div><label className="label" htmlFor="whatsapp">WhatsApp number</label><input id="whatsapp" type="tel" className="input" value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Optional customer contact" /></div><div><label className="label" htmlFor="phone">Phone number</label><input id="phone" type="tel" className="input" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="Optional" /></div></div></section>
         {error && <p className="error">{error}</p>}
         <div className="rounded-2xl bg-amber-50 p-4 text-sm leading-6 text-warning"><strong>What happens next?</strong><br />Submit these details and your store will remain private while Sella Team validates your NIN and reviews the business. You cannot receive orders or publish products until approval.</div>
+        <label className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-4 text-xs leading-5 text-muted"><input type="checkbox" className="mt-1 h-4 w-4 accent-kola" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required /><span>I agree to Sella&apos;s <Link href="/terms" target="_blank" className="font-bold text-kola underline">Terms of Use</Link> and <Link href="/privacy" target="_blank" className="font-bold text-kola underline">Privacy & Anti-Piracy Policy</Link>, including the seller responsibility and anti-piracy rules.</span></label>
         <button className="btn-primary w-full" disabled={saving || uploading}>{saving ? "Submitting for review…" : isResubmission ? "Resubmit for verification" : "Submit for Sella verification"}</button>
       </form>
     </AuthShell>

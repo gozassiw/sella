@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Banknote, BarChart3, CheckSquare, Flag, Landmark, Menu, Settings2, ShieldCheck, Store, Users, WalletCards, X } from "lucide-react";
+import { Activity, Banknote, BarChart3, Bell, CheckSquare, Flag, Landmark, Menu, Settings2, ShieldCheck, Store, Users, WalletCards, X } from "lucide-react";
 
 const items = [
   ["overview", "Overview", BarChart3],
@@ -16,6 +16,7 @@ const items = [
   ["settings", "Platform settings", Settings2],
   ["payments", "TransactPay", Landmark],
   ["activity", "Webhook & audit activity", Activity],
+  ["notifications", "Notifications", Bell],
 ];
 
 export default function AdminMenu() {

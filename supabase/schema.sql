@@ -22,7 +22,7 @@ create table if not exists public.stores (
   brand_color text not null default '#137A52',
   is_published boolean not null default true,
   plan text not null default 'trial',               -- trial | starter | pro (billing comes in a later stage)
-  trial_ends_at timestamptz not null default (now() + interval '14 days'),
+  trial_ends_at timestamptz not null default (now() + interval '10 days'),
   created_at timestamptz not null default now()
 );
 

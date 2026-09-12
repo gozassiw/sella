@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Package, ShoppingBag, UserRound, WalletCards } from "lucide-react";
+import { Bell, Home, Package, ShoppingBag, UserRound, WalletCards } from "lucide-react";
 
 const items = [
   { href: "/account", label: "Home", icon: Home },
@@ -9,12 +9,13 @@ const items = [
   { href: "/cart", label: "Cart", icon: ShoppingBag, primary: true },
   { href: "/account/wallet", label: "Wallet", icon: WalletCards },
   { href: "/account/profile", label: "Account", icon: UserRound },
+  { href: "/account/notifications", label: "Alerts", icon: Bell },
 ];
 
 export default function BuyerBottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-[520px] grid-cols-5 rounded-[22px] border border-line bg-white/95 p-1.5 backdrop-blur" style={{ boxShadow: "var(--shadow-float)" }}>
+    <nav className="fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-[640px] grid-cols-6 rounded-[22px] border border-line bg-white/95 p-1.5 backdrop-blur" style={{ boxShadow: "var(--shadow-float)" }}>
       {items.map(({ href, label, icon: Icon, primary }) => {
         const active = href === "/account" ? pathname === href : pathname.startsWith(href);
         return <Link key={href} href={href} className={`relative flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-bold transition ${active ? "bg-kola text-white" : "text-muted hover:bg-surface hover:text-ink"}`}><Icon size={19} strokeWidth={active ? 2.3 : 1.8} /><span>{label}</span></Link>;

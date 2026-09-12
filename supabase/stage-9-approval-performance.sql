@@ -12,7 +12,7 @@ update public.stores
 set approval_status = case when is_published then 'approved' else 'pending' end,
     approved_at = case when is_published then coalesce(approved_at, created_at) else approved_at end,
     trial_starts_at = case when is_published then coalesce(trial_starts_at, created_at) else trial_starts_at end,
-    trial_ends_at = case when is_published then greatest(trial_ends_at, coalesce(trial_starts_at, created_at) + interval '14 days') else trial_ends_at end;
+    trial_ends_at = case when is_published then greatest(trial_ends_at, coalesce(trial_starts_at, created_at) + interval '10 days') else trial_ends_at end;
 
 alter table public.stores alter column is_published set default false;
 

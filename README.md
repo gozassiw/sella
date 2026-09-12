@@ -41,6 +41,7 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 - `TRANSACTPAY_PUBLIC_KEY`
 - `TRANSACTPAY_SECRET_KEY` — server-only; reserved for protected provider operations
 - `TRANSACTPAY_ENCRYPTION_KEY`
+- `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` — server-only Web Push configuration for browser/phone notifications
 
 TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for virtual-account generation. Configure the webhook URL in TransactPay under **Settings & Security → API & Webhooks** as:
 
@@ -48,7 +49,7 @@ TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for vi
 
 Buyers register from the **Create buyer account** link shown on each storefront, cart, and checkout page. Seller onboarding remains available through the main signup flow. A seller link is a subdomain such as `https://adastore.sella.com.ng`—not `adastore/sella.com.ng`. Add both `sella.com.ng` and `*.sella.com.ng` to the Vercel project, then configure the apex A record and wildcard CNAME at the domain registrar.
 
-The provider must be configured with a real merchant account and test/live keys before account numbers or payment confirmations can be exercised. Confirm with TransactPay that the intended escrow/hold arrangement is permitted under its licensing before processing real transactions.
+The provider must be configured with a real merchant account and test/live keys before account numbers, wallet funding, or plan payment confirmations can be exercised. Seller plan payment creates a one-time TransactPay account number for the selected amount; the seller plan is upgraded only after the verified webhook confirms payment. Confirm with TransactPay that the intended escrow/hold arrangement is permitted under its licensing before processing real transactions.
 
 ## Run locally
 
@@ -72,6 +73,7 @@ npm run build
 - `/account` — buyer account
 - `/account/orders` — buyer order history
 - `/account/wallet` — buyer wallet and funding account
+- `/account/notifications` — buyer in-app and phone notification settings
 - `/dashboard/orders` — seller order management
 - `/dashboard/wallet` — seller wallet and withdrawals
 - `/dashboard/customers` — seller customer list
@@ -79,8 +81,10 @@ npm run build
 - `/dashboard/invoices` — invoices and receipts
 - `/dashboard/analytics` — sales, expense, and profit reports
 - `/dashboard/billing` — subscription plans
+- `/dashboard/notifications` — seller in-app and phone notification settings
 - `/dashboard/verification` — seller verification submissions
-- `/admin` — private admin controls for configured admin emails
+- `/admin` — private admin controls for platform admins
+- `/admin/notifications` — Admin in-app and phone notification settings
 
 Product creation includes a **Suggest description** action. It uses `OPENAI_API_KEY` when configured and falls back to a safe template when it is not.
 
@@ -88,7 +92,7 @@ Buyer accounts and the buyer dashboard work before TransactPay is configured. Th
 
 For buyer dedicated virtual accounts, the TransactPay endpoint requires the public API key and encryption key. The secret key remains configured server-side for other provider operations but is not required by the virtual-account generation request.
 
-Seller stores start in **Pending approval**. Sellers can continue adding products and completing settings while pending, but the store is not visible to buyers and cannot accept orders. Admin approval publishes the store and starts the 14-day free trial; the trial clock therefore begins at approval rather than sign-up.
+Seller stores start in **Pending approval**. Sellers must accept the Terms of Use and Privacy & Anti-Piracy Policy before submitting their details. While pending, the store is private and seller operations are blocked. Admin approval publishes the store and starts the **10-day free trial**; the trial clock therefore begins at approval rather than sign-up. Buyer registration also requires the same policy consent.
 
 The Supabase project runs in `eu-west-1`, which is the intended Europe region for this deployment and is substantially closer to Nigeria than US regions. The performance pass also added explicit column selection, parallel independent queries, public-data caching, optimized Next.js images, and indexes for store approval, product feeds, buyer orders, seller orders, and follows.
 - `/api/payments/transactpay` — TransactPay webhook receiver

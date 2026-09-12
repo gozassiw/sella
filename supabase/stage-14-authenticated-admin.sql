@@ -104,7 +104,7 @@ begin
       rejected_at = case when v_approved then null else v_now end,
       rejection_reason = case when v_approved then null else coalesce(nullif(p_payload->>'reason', ''), 'Please update your store details and resubmit for review.') end,
       trial_starts_at = case when v_approved then v_now else null end,
-      trial_ends_at = case when v_approved then v_now + interval '14 days' else trial_ends_at end
+      trial_ends_at = case when v_approved then v_now + interval '10 days' else trial_ends_at end
     where id = v_store_id;
   else
     raise exception 'Unknown admin action';
