@@ -49,6 +49,8 @@ TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for vi
 
 Use the direct `www` URL for TransactPay until the Vercel domain settings make the apex domain the primary domain. The apex currently redirects to `www`, and webhook providers should not be required to follow that redirect.
 
+For buyer wallet funding and checkout transfers, Sella deducts the TransactPay provider fee from the incoming payment before crediting the wallet or seller order balance: **1.5% of the gross amount, capped at NGN 2,000**. Subscription payments are confirmed against the gross plan amount and are not wallet credits.
+
 Buyers register from the **Create buyer account** link shown on each storefront, cart, and checkout page. Seller onboarding remains available through the main signup flow. A seller link is a subdomain such as `https://adastore.sella.com.ng`—not `adastore/sella.com.ng`. Add both `sella.com.ng` and `*.sella.com.ng` to the Vercel project, then configure the apex A record and wildcard CNAME at the domain registrar.
 
 The provider must be configured with a real merchant account and test/live keys before account numbers, wallet funding, or plan payment confirmations can be exercised. Seller plan payment creates a one-time TransactPay account number for the selected amount; the seller plan is upgraded only after the verified webhook confirms payment. Confirm with TransactPay that the intended escrow/hold arrangement is permitted under its licensing before processing real transactions.
