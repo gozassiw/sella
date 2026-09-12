@@ -43,7 +43,10 @@ async function AdminContent() {
     safe(admin ? admin.from("admin_audit_logs").select("id,action,entity,entity_id,details,created_at").order("created_at", { ascending: false }).limit(30) : Promise.resolve({ data: [], error: null })),
     safe(admin ? admin.from("wallets").select("store_id,available,held,stores(name)").order("available", { ascending: false }).limit(200) : Promise.resolve({ data: [], error: null })),
   ]);
-  if (storesResult.error) warning = storesResult.error.message;
+  if (storesResult.error) {
+    warning = storesResult.error.message;
+    if (String(warning).toLowerCase().includes("permission denied")) warning = `${warning}. The deployed SUPABASE_SERVICE_ROLE_KEY is not privileged for the configured Supabase project. Use the service_role secret from ${process.env.NEXT_PUBLIC_SUPABASE_URL || "the connected Supabase project"}, set it for Production, and redeploy.`;
+  }
   const stores = storesResult.data || [];
   const orders = ordersResult.data || [];
   const subscriptions = subscriptionsResult.data || [];
