@@ -1,8 +1,21 @@
 import Link from "next/link";
 import { ArrowRight, PackageCheck, Store, WalletCards } from "lucide-react";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import SellaBrand from "@/components/SellaBrand";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: admin, error: adminError } = await supabase.rpc("is_platform_admin");
+    if (!adminError && admin === true) redirect("/admin");
+    const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle();
+    if (store) redirect("/dashboard");
+    redirect("/account");
+  }
   return (
     <div className="min-h-screen bg-surface">
       <header className="sticky top-0 z-30 border-b border-line/80 bg-white/95 backdrop-blur">
