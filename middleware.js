@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 export async function middleware(request) {
   const path = request.nextUrl.pathname;
   const isAuthPage = path === "/login" || path === "/signup";
-  const configuredDomain = String(process.env.NEXT_PUBLIC_STORE_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  const configuredDomain = String(process.env.NEXT_PUBLIC_STORE_DOMAIN || (process.env.NODE_ENV === "production" ? "sella.com.ng" : "")).replace(/^https?:\/\//, "").replace(/\/+$/, "");
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() || "";
   const baseHost = configuredDomain.toLowerCase();
   const subdomain = configuredDomain && host.endsWith(`.${baseHost}`) ? host.slice(0, -(baseHost.length + 1)) : "";
