@@ -23,7 +23,7 @@ export default async function AccountPage({ searchParams }) {
   const query = String(searchParams?.q || "").trim();
   const [{ data: profile }, { data: orders }, { data: follows }, { data: discoverStores }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle(),
-    supabase.from("orders").select("id,order_number,total,status,payment_status,created_at,stores(name,slug)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(4),
+    supabase.from("orders").select("id,order_code,total,status,payment_status,created_at,stores(name,slug)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(4),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,category,logo_url,brand_color)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     supabase.from("stores").select("id,name,slug,category,logo_url,brand_color").eq("is_published", true).eq("approval_status", "approved").ilike("name", query ? `%${query}%` : "%").order("created_at", { ascending: false }).limit(24),
   ]);
@@ -65,7 +65,7 @@ export default async function AccountPage({ searchParams }) {
 
       <section>
         <div className="flex items-center justify-between"><h2 className="text-base font-extrabold">Recent orders</h2><Link href="/account/orders" className="text-xs font-bold text-kola">See all</Link></div>
-        <div className="app-card mt-4 divide-y divide-line overflow-hidden">{orders?.length ? orders.map((order) => <Link key={order.id} href={`/account/orders/${order.id}`} className="flex items-center justify-between gap-4 p-4"><div className="min-w-0"><p className="truncate text-sm font-bold">{order.stores?.name || "Store"}</p><p className="mt-1 text-xs capitalize text-muted">#{order.order_number} · {order.status}</p></div><div className="text-right"><p className="text-sm font-extrabold">{formatNaira(order.total)}</p><p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-kola">{order.payment_status}</p></div></Link>) : <p className="p-6 text-center text-sm text-muted">Your orders will show here after checkout.</p>}</div>
+        <div className="app-card mt-4 divide-y divide-line overflow-hidden">{orders?.length ? orders.map((order) => <Link key={order.id} href={`/account/orders/${order.id}`} className="flex items-center justify-between gap-4 p-4"><div className="min-w-0"><p className="truncate text-sm font-bold">{order.stores?.name || "Store"}</p><p className="mt-1 text-xs capitalize text-muted">#{order.order_code} · {order.status}</p></div><div className="text-right"><p className="text-sm font-extrabold">{formatNaira(order.total)}</p><p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-kola">{order.payment_status}</p></div></Link>) : <p className="p-6 text-center text-sm text-muted">Your orders will show here after checkout.</p>}</div>
       </section>
     </div>
   );

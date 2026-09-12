@@ -42,7 +42,7 @@ export async function POST(request) {
     const account = await createVirtualAccount({
       alias: `sella-order-${order.id}`,
       reference: order.id,
-      narration: `Sella order #${order.order_number}`,
+      narration: `Sella order #${order.order_code}`,
     });
     const accountNumber = account.accountNumber || account.data?.account_number || account.data?.accountNumber;
     if (!accountNumber) throw new Error("TransactPay did not return an account number");
