@@ -50,8 +50,8 @@ export async function POST(request) {
     }
     const { data: result, error } = await supabase.rpc("process_transactpay_webhook", { p_event_key: key, p_payload: payload, p_successful: successful, p_account_number: accountNumber, p_account_reference: accountReference, p_amount: amount, p_payment_reference: paymentReference, p_order_reference: orderReference });
     if (error) throw error;
-    if (result?.user_id && result?.credited === "buyer_wallet") await notifySafely({ userId: result.user_id, type: "wallet", title: "Wallet funded", body: `Your Sella wallet received ₦${Number(result.amount || amount).toLocaleString("en-NG")}.`, link: "/account/wallet" });
-    if (result?.user_id && result?.credited === "seller_wallet") await notifySafely({ userId: result.user_id, type: "order", title: "Payment received", body: "A buyer payment has been confirmed and added to your seller wallet.", link: "/dashboard/wallet" });
+    if (result?.user_id && result?.credited === "buyer_wallet") await notifySafely({ userId: result.user_id, type: "wallet", title: "Wallet funded", body: `Your Sella wallet received ₦${Number(result.amount || amount).toLocaleString("en-NG")}.`, link: "/account/wallet", save: false });
+    if (result?.user_id && result?.credited === "seller_wallet") await notifySafely({ userId: result.user_id, type: "order", title: "Payment received", body: "A buyer payment has been confirmed and added to your seller wallet.", link: "/dashboard/wallet", save: false });
     return NextResponse.json(result || { received: true });
   } catch (error) {
     console.error("TransactPay webhook error", error);

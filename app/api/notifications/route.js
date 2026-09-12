@@ -8,7 +8,8 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
   const { data, error } = await supabase.from("notifications").select("id,type,title,body,link,read_at,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-  return NextResponse.json({ notifications: data || [], pushConfigured: pushConfigured() });
+  const { count: subscriptionCount } = await supabase.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("user_id", user.id);
+  return NextResponse.json({ notifications: data || [], pushConfigured: pushConfigured(), deviceRegistered: Number(subscriptionCount || 0) > 0 });
 }
 
 export async function PATCH(request) {

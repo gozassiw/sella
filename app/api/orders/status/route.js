@@ -33,8 +33,14 @@ export async function POST(request) {
 
     const message = statusMessages[status];
     const bodyText = `${message.body} Order #${order.order_code} from ${order.stores.name}.`;
-    if (order.buyer_id) await notifyUser({ userId: order.buyer_id, type: "order", title: message.title, body: bodyText, link: `/account/orders/${order.id}` });
-    await notifyUser({ userId: user.id, type: "order", title: message.title, body: bodyText, link: `/dashboard/orders?order=${order.id}` });
+    if (order.buyer_id) {
+      const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: order.buyer_id, p_type: "order", p_title: message.title, p_body: bodyText, p_link: `/account/orders/${order.id}` });
+      if (buyerNotificationError) console.error("Buyer status notification record failed", buyerNotificationError);
+      await notifyUser({ userId: order.buyer_id, type: "order", title: message.title, body: bodyText, link: `/account/orders/${order.id}`, save: false });
+    }
+    const { error: sellerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: user.id, p_type: "order", p_title: message.title, p_body: bodyText, p_link: `/dashboard/orders?order=${order.id}` });
+    if (sellerNotificationError) console.error("Seller status notification record failed", sellerNotificationError);
+    await notifyUser({ userId: user.id, type: "order", title: message.title, body: bodyText, link: `/dashboard/orders?order=${order.id}`, save: false });
     return NextResponse.json({ success: true, status });
   } catch (error) {
     console.error("Order status update error", error);

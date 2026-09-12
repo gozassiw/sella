@@ -42,8 +42,15 @@ export async function POST(request) {
 
     const { data: store } = await supabase.from("stores").select("owner_id,name").eq("id", storeId).maybeSingle();
     const orderMessage = `New order #${order.order_code} from ${customer.name} at ${store?.name || "your store"}.`;
-    if (store?.owner_id) await notifyUser({ userId: store.owner_id, type: "order", title: "New order received", body: orderMessage, link: `/dashboard/orders?order=${order.id}` });
-    await notifyUser({ userId: user.id, type: "order", title: "Order placed", body: `Your order #${order.order_code} has been placed with ${store?.name || "the seller"}.`, link: `/account/orders/${order.id}` });
+    if (store?.owner_id) {
+      const { error: sellerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: store.owner_id, p_type: "order", p_title: "New order received", p_body: orderMessage, p_link: `/dashboard/orders?order=${order.id}` });
+      if (sellerNotificationError) console.error("Seller order notification record failed", sellerNotificationError);
+      await notifyUser({ userId: store.owner_id, type: "order", title: "New order received", body: orderMessage, link: `/dashboard/orders?order=${order.id}`, save: false });
+    }
+    const buyerMessage = `Your order #${order.order_code} has been placed with ${store?.name || "the seller"}.`;
+    const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: user.id, p_type: "order", p_title: "Order placed", p_body: buyerMessage, p_link: `/account/orders/${order.id}` });
+    if (buyerNotificationError) console.error("Buyer order notification record failed", buyerNotificationError);
+    await notifyUser({ userId: user.id, type: "order", title: "Order placed", body: buyerMessage, link: `/account/orders/${order.id}`, save: false });
 
     if (paymentMethod === "wallet") {
       const { error: walletError } = await supabase.rpc("pay_order_from_wallet", { p_order_id: order.id });

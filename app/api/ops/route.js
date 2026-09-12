@@ -29,8 +29,14 @@ export async function POST(request) {
       const completed = action === "release";
       const title = completed ? "Delivery completed" : "Order cancelled";
       const bodyText = completed ? `Order #${order.order_code} from ${order.stores?.name || "the seller"} was delivered and payment was released.` : `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
-      if (order.buyer_id) await notifyUser({ userId: order.buyer_id, type: "order", title, body: bodyText, link: `/account/orders/${order.id}` });
-      await notifyUser({ userId: user.id, type: "order", title, body: bodyText, link: `/dashboard/orders?order=${order.id}` });
+      if (order.buyer_id) {
+        const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: order.buyer_id, p_type: "order", p_title: title, p_body: bodyText, p_link: `/account/orders/${order.id}` });
+        if (buyerNotificationError) console.error("Buyer operations notification record failed", buyerNotificationError);
+        await notifyUser({ userId: order.buyer_id, type: "order", title, body: bodyText, link: `/account/orders/${order.id}`, save: false });
+      }
+      const { error: sellerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: user.id, p_type: "order", p_title: title, p_body: bodyText, p_link: `/dashboard/orders?order=${order.id}` });
+      if (sellerNotificationError) console.error("Seller operations notification record failed", sellerNotificationError);
+      await notifyUser({ userId: user.id, type: "order", title, body: bodyText, link: `/dashboard/orders?order=${order.id}`, save: false });
       return NextResponse.json(data);
     }
     if (["withdraw", "offline_sale"].includes(action)) {
