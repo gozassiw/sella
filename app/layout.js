@@ -13,7 +13,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata = {
   title: `${BRAND} — Shop independent. Sell simply.`,
   description: "Sell and buy with people you can trust, with store access, payments, fulfilment, and business tools in one simple app.",
-  icons: { icon: "/brand/sella-mark.png", apple: "/brand/sella-mark.png" },
+  icons: { icon: "/brand/sella-favicon.png", apple: "/brand/sella-favicon.png" },
   manifest: "/manifest.webmanifest",
 };
 

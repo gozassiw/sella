@@ -6,5 +6,5 @@
   "display": "standalone",
   "background_color": "#F4F8F5",
   "theme_color": "#137A52",
-  "icons": [{ "src": "/brand/sella-mark.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }]
+  "icons": [{ "src": "/brand/sella-favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }]
 }
