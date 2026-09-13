@@ -24,12 +24,7 @@ export default function AdminMenu() {
   const [open, setOpen] = useState(false);
   function jumpTo(id) {
     setOpen(false);
-    window.setTimeout(() => {
-      const section = document.getElementById(id);
-      if (!section) return;
-      window.history.replaceState(null, "", `#${id}`);
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 40);
+    window.location.assign(id === "overview" ? "/admin" : `/admin?section=${encodeURIComponent(id)}`);
   }
   return (
     <>

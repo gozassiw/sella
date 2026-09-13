@@ -25,5 +25,5 @@ export default function WithdrawalReceiptForm({ withdrawalId }) {
     window.location.reload();
   }
 
-  return <form onSubmit={submit} className="flex flex-wrap items-center gap-2"><input name="receipt" type="file" accept="image/*,.pdf" className="block max-w-[210px] text-[11px] text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-kola-light file:px-2.5 file:py-1.5 file:text-[11px] file:font-bold file:text-kola" required /><button className="btn-secondary px-3 py-2 text-xs" disabled={busy}>{busy ? "Uploading…" : "Upload receipt"}</button>{message && <span className="text-[11px] text-muted">{message}</span>}</form>;
+  return <form onSubmit={submit} className="flex flex-wrap items-center gap-2"><input name="receipt" type="file" accept="image/*,.pdf" className="block max-w-[210px] text-[11px] text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-kola-light file:px-2.5 file:py-1.5 file:text-[11px] file:font-bold file:text-kola" required /><button className="btn-secondary px-3 py-2 text-xs" disabled={busy}>{busy ? "Uploading…" : "Upload payment reference"}</button>{message && <span className="text-[11px] text-muted">{message}</span>}</form>;
 }
