@@ -325,23 +325,6 @@ end;
 $$;
 grant execute on function public.request_store_withdrawal(uuid, numeric, text, text, text) to authenticated;
 
-create or replace function public.release_order_escrow(p_order_id uuid, p_delivery_code text)
-returns jsonb
-language plpgsql
-security definer
-set search_path = public, auth
-as $$
-declare v_order public.orders%rowtype;
-begin
-  select o.* into v_order from public.orders o join public.stores s on s.id = o.store_id where o.id = p_order_id and s.owner_id = auth.uid() for update;
-  if not found then raise exception 'Order not found'; end if;
-  if v_order.payment_status <> 'paid' then raise exception 'Order is not paid'; end if;
-  update public.orders set status = 'delivered', escrow_status = 'released', delivered_at = now() where id = v_order.id;
-  return jsonb_build_object('success', true, 'message', 'Delivery marked complete. Payment was already available to the seller.');
-end;
-$$;
-grant execute on function public.release_order_escrow(uuid, text) to authenticated;
-
 create or replace function public.cancel_order_and_refund(p_order_id uuid, p_reason text default null)
 returns jsonb
 language plpgsql
