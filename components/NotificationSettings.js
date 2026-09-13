@@ -50,7 +50,7 @@ export default function NotificationSettings() {
       const result = await Notification.requestPermission();
       setPermission(result);
       if (result !== "granted") throw new Error("Notifications were not enabled. Allow them in your browser settings and try again.");
-      const registration = await navigator.serviceWorker.register("/sw.js?v=android-push-2", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("/sw.js?v=android-push-3", { updateViaCache: "none" });
       await registration.update().catch(() => {});
       const keyResponse = await fetch("/api/notifications/vapid-public-key", { cache: "no-store" });
       const { key } = await keyResponse.json();
