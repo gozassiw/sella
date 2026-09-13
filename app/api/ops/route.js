@@ -18,17 +18,14 @@ export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   const action = body.action;
   try {
-    if (["release", "cancel"].includes(action)) {
+    if (action === "cancel") {
       const { data: order } = await supabase.from("orders").select("id,store_id,order_code,buyer_id,stores(owner_id,name)").eq("id", body.orderId).maybeSingle();
       const guard = await requireOperationalStore(supabase, order?.store_id, user.id);
       if (guard.error) return guard.error;
-      const rpc = action === "release" ? "release_order_escrow" : "cancel_order_and_refund";
-      const params = action === "release" ? { p_order_id: body.orderId, p_delivery_code: body.deliveryCode } : { p_order_id: body.orderId, p_reason: body.reason || null };
-      const { data, error } = await supabase.rpc(rpc, params);
+      const { data, error } = await supabase.rpc("cancel_order_and_refund", { p_order_id: body.orderId, p_reason: body.reason || null });
       if (error) throw error;
-      const completed = action === "release";
-      const title = completed ? "Delivery completed" : "Order cancelled";
-      const bodyText = completed ? `Order #${order.order_code} from ${order.stores?.name || "the seller"} was delivered and payment was released.` : `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
+      const title = "Order cancelled";
+      const bodyText = `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
       if (order.buyer_id) {
         const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: order.buyer_id, p_type: "order", p_title: title, p_body: bodyText, p_link: `/account/orders/${order.id}` });
         if (buyerNotificationError) console.error("Buyer operations notification record failed", buyerNotificationError);

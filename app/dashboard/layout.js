@@ -12,5 +12,5 @@ function AccessNotice({ held, store }) {
 export default async function DashboardLayout({ children }) {
   const { store, held } = await getMyStore();
   const blocked = held || store.approval_status !== "approved";
-  return <div className="min-h-screen bg-surface md:flex"><LiveWorkspaceRefresh scope="seller" storeId={store.id} ownerId={store.owner_id} /><DashboardNav store={{ name: store.name, slug: store.slug, logo_url: store.logo_url, approval_status: store.approval_status }} /><main className="min-w-0 flex-1 pb-28 md:pb-0"><div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">{blocked ? <AccessNotice held={held} store={store} /> : children}</div></main></div>;
+  return <div className="min-h-screen bg-surface md:flex"><LiveWorkspaceRefresh scope="seller" storeId={store.id} ownerId={store.owner_id} /><DashboardNav store={{ name: store.name, slug: store.slug, seller_code: store.seller_code, logo_url: store.logo_url, approval_status: store.approval_status }} /><main className="min-w-0 flex-1 pb-28 md:pb-0"><div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">{blocked ? <AccessNotice held={held} store={store} /> : children}</div></main></div>;
 }

@@ -33,7 +33,7 @@ export default async function Home() {
           <div className="rounded-[32px] bg-kola-dark px-6 py-14 text-white sm:px-12 sm:py-20 lg:px-20 lg:py-24">
             <div className="mx-auto max-w-3xl text-center">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs font-bold text-white/85"><span className="h-2 w-2 rounded-full bg-mango" /> Built for everyday commerce</span>
-              <h1 className="display mt-7 text-[44px] leading-[1.02] sm:text-[64px]">Shop people you trust. Sell without the stress.</h1>
+              <h1 className="display mt-7 text-[44px] leading-[1.02] sm:text-[64px]">Sell and buy with people you can trust.</h1>
               <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-7 text-white/72 sm:text-base">Follow independent stores, discover products you love, pay from one wallet, and manage every order in one place.</p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link href="/signup?next=%2Faccount%2Fsetup" className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-mango px-5 py-3 text-sm font-extrabold text-kola-dark">Start shopping <ArrowRight size={17} /></Link>

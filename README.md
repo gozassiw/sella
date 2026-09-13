@@ -1,6 +1,6 @@
 # Sella — Nigerian commerce platform (Stage 2)
 
-Sella gives each small business seller their own online store, while buyers can browse products, build a cart, check out, and track orders across stores.
+Sella gives each small business seller their own online store, while buyers open stores with a seller-provided ID, trust the stores they choose, build a cart, check out, and track fulfilment.
 
 The platform name is set in `NEXT_PUBLIC_BRAND_NAME`.
 
@@ -8,13 +8,13 @@ The platform name is set in `NEXT_PUBLIC_BRAND_NAME`.
 
 - Seller signup, store setup, product management, stock quantities, and public storefronts.
 - Buyer cart with local persistence, quantity controls, stock limits, and single-store checkout.
-- Buyer accounts with private order history, order detail pages, fulfilment choice, and delivery-code protection.
+- Buyer accounts with private order history, order detail pages, trusted-store access, and delivery or pickup fulfilment.
 - Atomic server-side checkout that validates stock, creates the customer/order/items, and decrements stock in one database transaction.
-- Seller orders dashboard with buyer contact details, items, fulfilment details, payment state, escrow state, and status updates.
+- Seller orders dashboard with buyer contact details, items, fulfilment details, direct payment state, and status updates.
 - Buyer wallet foundation with a dedicated TransactPay virtual account when the provider is configured.
 - TransactPay server-side virtual-account creation for orders and wallet funding.
 - Idempotent TransactPay webhook endpoint at `/api/payments/transactpay` for order payments and buyer-wallet funding.
-- Server-side money movement only: wallet debits, seller wallet credits, held escrow, and provider callbacks never use the browser's public database key.
+- Server-side money movement only: wallet debits, seller wallet credits, withdrawals, and provider callbacks never use the browser's public database key.
 
 ## Supabase setup
 
@@ -51,9 +51,9 @@ Use the direct `www` URL for TransactPay until the Vercel domain settings make t
 
 For buyer wallet funding and checkout transfers, Sella deducts the TransactPay provider fee from the incoming payment before crediting the wallet or seller order balance: **1.5% of the gross amount, capped at NGN 2,000**. Subscription payments are confirmed against the gross plan amount and are not wallet credits.
 
-Buyers register from the **Create buyer account** link shown on each storefront, cart, and checkout page. Seller onboarding remains available through the main signup flow. A seller link is a subdomain such as `https://adastore.sella.com.ng`—not `adastore/sella.com.ng`. Add both `sella.com.ng` and `*.sella.com.ng` to the Vercel project, then configure the apex A record and wildcard CNAME at the domain registrar.
+Buyers register from the **Create buyer account** link shown on each storefront, cart, and checkout page. After registration, they enter the seller’s unique 8-character store ID on `/account`, trust the store, and can then order from it. Seller onboarding remains available through the main signup flow. A seller link is a subdomain such as `https://adastore.sella.com.ng`—not `adastore/sella.com.ng`. Add both `sella.com.ng` and `*.sella.com.ng` to the Vercel project, then configure the apex A record and wildcard CNAME at the domain registrar.
 
-The provider must be configured with a real merchant account and test/live keys before account numbers, wallet funding, or plan payment confirmations can be exercised. Seller plan payment creates a one-time TransactPay account number for the selected amount; the seller plan is upgraded only after the verified webhook confirms payment. Confirm with TransactPay that the intended escrow/hold arrangement is permitted under its licensing before processing real transactions.
+The provider must be configured with a real merchant account and test/live keys before account numbers, wallet funding, or plan payment confirmations can be exercised. Seller plan payment creates a one-time TransactPay account number for the selected amount; the seller plan is upgraded only after the verified webhook confirms payment.
 
 ## Run locally
 
@@ -96,7 +96,7 @@ Buyer accounts and the buyer dashboard work before TransactPay is configured. Th
 
 For buyer dedicated virtual accounts, the TransactPay endpoint requires the public API key and encryption key. The secret key remains configured server-side for other provider operations but is not required by the virtual-account generation request.
 
-Seller stores start in **Pending approval**. Sellers must accept the Terms of Use and Privacy & Anti-Piracy Policy before submitting their details. While pending, the store is private and seller operations are blocked. Admin approval publishes the store and starts the **10-day free trial**; the trial clock therefore begins at approval rather than sign-up. Buyer registration also requires the same policy consent.
+Seller stores start in **Pending approval**. Sellers must accept the numbered Terms of Use and Privacy & Anti-Piracy Policy before submitting their details. While pending, the store is private and seller operations are blocked. Admin approval publishes the store and starts the **10-day free trial with up to 15 products**; the trial clock therefore begins at approval rather than sign-up. Buyer registration also requires the same policy consent.
 
 The Supabase project runs in `eu-west-1`, which is the intended Europe region for this deployment and is substantially closer to Nigeria than US regions. The performance pass also added explicit column selection, parallel independent queries, public-data caching, optimized Next.js images, and indexes for store approval, product feeds, buyer orders, seller orders, and follows.
 - `/api/payments/transactpay` — TransactPay webhook receiver
@@ -107,6 +107,6 @@ The Supabase project runs in `eu-west-1`, which is the intended Europe region fo
 2. ~~Cart, checkout, orders, stock updates, wallet and payment foundation~~
 3. ~~Offline sales, customers list, analytics, profit reporting, and expenses~~
 4. ~~Plans, billing, referrals, and platform admin panel foundation~~
-5. ~~Verification, reports, withdrawals, and escrow release workflows~~
+5. ~~Verification, reports, withdrawals, direct seller balances, and order status workflows~~
 6. Custom domains and wildcard subdomains after a root domain is connected
 7. AI store setup and product descriptions after an AI provider key is configured
