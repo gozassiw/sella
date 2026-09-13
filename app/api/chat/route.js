@@ -25,16 +25,12 @@ async function currentUser() {
   return { supabase, user };
 }
 
-async function buyerNames(threads) {
-  const ids = [...new Set((threads || []).map((thread) => thread.buyer_id).filter(Boolean))];
-  if (!ids.length) return new Map();
-  try {
-    const admin = createAdminClient();
-    const { data } = await admin.from("buyer_profiles").select("user_id,full_name").in("user_id", ids);
-    return new Map((data || []).map((profile) => [profile.user_id, profile.full_name]));
-  } catch {
-    return new Map();
-  }
+async function participantNames(supabase, threads) {
+  const entries = await Promise.all((threads || []).map(async (thread) => {
+    const { data, error } = await supabase.rpc("get_chat_participant_name", { p_conversation_id: thread.id });
+    return [thread.id, error ? null : data];
+  }));
+  return new Map(entries);
 }
 
 function addInboxFields(threads, messages, user, names) {
@@ -52,7 +48,7 @@ function addInboxFields(threads, messages, user, names) {
     const unreadCount = list.filter((message) => message.kind !== "system" && message.sender_id !== user.id && (!readAt || new Date(message.created_at) > new Date(readAt))).length;
     return {
       ...thread,
-      participant_name: isSeller ? (names.get(thread.buyer_id) || "Buyer") : (thread.stores?.name || "Store"),
+      participant_name: names.get(thread.id) || (isSeller ? "Sella user" : (thread.stores?.name || "Store")),
       last_message_preview: latest?.body || (latest?.kind === "image" ? "Sent an image." : latest ? "Order update" : "No messages yet"),
       unread_count: unreadCount,
     };
@@ -70,7 +66,8 @@ export async function GET(request) {
     if (!conversation) return NextResponse.json({ error: "Conversation not found." }, { status: 404 });
     const { data: messages, error } = await supabase.from("chat_messages").select("id,conversation_id,sender_id,kind,body,image_path,order_id,system_event,created_at").eq("conversation_id", conversationId).order("created_at", { ascending: true }).limit(300);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    return NextResponse.json({ conversation, messages: await signedMessageRows(messages) });
+    const { data: participantName } = await supabase.rpc("get_chat_participant_name", { p_conversation_id: conversationId });
+    return NextResponse.json({ conversation: { ...conversation, participant_name: participantName || null }, messages: await signedMessageRows(messages) });
   }
   const { data: threads, error } = await supabase.from("chat_conversations").select("id,store_id,buyer_id,created_at,last_message_at,buyer_last_read_at,seller_last_read_at,stores(id,name,slug,logo_url,owner_id)").order("last_message_at", { ascending: false }).limit(100);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
@@ -81,7 +78,7 @@ export async function GET(request) {
     if (result.error) return NextResponse.json({ error: result.error.message }, { status: 400 });
     messages = result.data || [];
   }
-  return NextResponse.json({ threads: addInboxFields(threads, messages, user, await buyerNames(threads)) });
+  return NextResponse.json({ threads: addInboxFields(threads, messages, user, await participantNames(supabase, threads)) });
 }
 
 export async function POST(request) {
@@ -134,6 +131,11 @@ export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   if (body.action === "start" && body.storeId) {
     const { data, error } = await supabase.rpc("get_or_create_chat_conversation", { p_store_id: body.storeId });
+    if (error) return NextResponse.json({ error: error.message }, { status: 403 });
+    return NextResponse.json({ conversation: data });
+  }
+  if (body.action === "startForSeller" && body.storeId && body.buyerId) {
+    const { data, error } = await supabase.rpc("get_or_create_chat_conversation_for_seller", { p_store_id: body.storeId, p_buyer_id: body.buyerId });
     if (error) return NextResponse.json({ error: error.message }, { status: 403 });
     return NextResponse.json({ conversation: data });
   }
