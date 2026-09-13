@@ -37,7 +37,7 @@ export async function POST(request) {
     return NextResponse.json({ success: true, pushed: push.pushed || 0, attempted: push.attempted || 0, pushEnabled: Boolean(push.pushEnabled), pushError: push.pushError || null, pushConfigured: pushConfigured() });
   }
   if (!body.subscription?.endpoint) return NextResponse.json({ error: "A valid browser subscription is required." }, { status: 400 });
-  const { error } = await supabase.from("push_subscriptions").upsert({ user_id: user.id, endpoint: body.subscription.endpoint, subscription: body.subscription, p256dh_key: body.subscription.keys?.p256dh || null, auth_key: body.subscription.keys?.auth || null, user_agent: request.headers.get("user-agent"), disabled_at: null, updated_at: new Date().toISOString() }, { onConflict: "endpoint" });
+  const { error } = await supabase.rpc("save_push_subscription", { p_endpoint: body.subscription.endpoint, p_subscription: body.subscription, p_user_agent: request.headers.get("user-agent"), p_p256dh_key: body.subscription.keys?.p256dh || null, p_auth_key: body.subscription.keys?.auth || null });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ success: true });
 }
