@@ -18,14 +18,14 @@ function readSavedDetails(initialProfile) {
     whatsapp,
     address: saved.address || initialProfile?.delivery_address || "",
     fulfilmentMethod: saved.fulfilmentMethod || "delivery",
-    paymentMethod: "transfer",
+    paymentMethod: "wallet",
     sameAsWhatsapp: saved.sameAsWhatsapp ?? (!!callNumber && callNumber === whatsapp),
   };
 }
 
 export default function CheckoutForm({ initialProfile = null, paymentSettings = null }) {
   const [cart, setCart] = useState([]);
-  const [form, setForm] = useState({ name: "", callNumber: "", whatsapp: "", address: "", fulfilmentMethod: "delivery", paymentMethod: "transfer", sameAsWhatsapp: false });
+  const [form, setForm] = useState({ name: "", callNumber: "", whatsapp: "", address: "", fulfilmentMethod: "delivery", paymentMethod: "wallet", sameAsWhatsapp: false });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);

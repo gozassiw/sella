@@ -24,10 +24,10 @@ export async function POST(request) {
     if (!(file.type.startsWith("image/") || file.type === "application/pdf")) return NextResponse.json({ error: "Upload an image or PDF receipt." }, { status: 400 });
 
     const admin = createAdminClient();
-    const { data: withdrawal, error: withdrawalError } = await admin.from("withdrawals").select("id,status,store_id,stores(owner_id,name)").eq("id", withdrawalId).maybeSingle();
+    const { data: withdrawal, error: withdrawalError } = await auth.rpc("admin_get_withdrawal_receipt_target", { p_withdrawal_id: withdrawalId });
     if (withdrawalError) throw withdrawalError;
     if (!withdrawal) return NextResponse.json({ error: "Withdrawal request not found." }, { status: 404 });
-    if (!["paid", "sent"].includes(withdrawal.status)) return NextResponse.json({ error: "Mark the withdrawal paid before uploading a receipt." }, { status: 400 });
+    if (!["pending", "processing", "paid", "sent"].includes(withdrawal.status)) return NextResponse.json({ error: "This withdrawal cannot accept a receipt in its current status." }, { status: 400 });
 
     const path = `${withdrawalId}/${crypto.randomUUID()}-${safeName(file.name)}`;
     const { error: uploadError } = await admin.storage.from("withdrawal-receipts").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type, cacheControl: "3600", upsert: false });
@@ -36,8 +36,8 @@ export async function POST(request) {
     const { error: attachError } = await auth.rpc("admin_attach_withdrawal_receipt", { p_withdrawal_id: withdrawalId, p_receipt_path: path, p_receipt_name: file.name });
     if (attachError) throw attachError;
 
-    if (withdrawal.stores?.owner_id) {
-      await notifyUser({ userId: withdrawal.stores.owner_id, type: "withdrawal", title: "Withdrawal receipt available", body: "Sella has uploaded the payment receipt for your withdrawal.", link: `/dashboard/wallet/withdrawals/${withdrawalId}`, save: false });
+    if (withdrawal.owner_id) {
+      await notifyUser({ userId: withdrawal.owner_id, type: "withdrawal", title: "Withdrawal receipt available", body: "Sella has uploaded the payment receipt for your withdrawal.", link: `/dashboard/wallet/withdrawals/${withdrawalId}`, save: false });
     }
     return NextResponse.json({ success: true });
   } catch (error) {
