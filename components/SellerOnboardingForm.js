@@ -109,7 +109,7 @@ export default function SellerOnboardingForm({ userId, siteUrl, initialStore = n
     if (!bankResponse.ok) return setError(`Store saved, but payout details could not be saved: ${bankResult.error || "Please try again."}`);
     const { error: consentError } = await supabase.from("account_consents").upsert({ user_id: userId, terms_version: SELLER_TERMS_VERSION, privacy_version: SELLER_PRIVACY_VERSION, source: "seller-verification", accepted_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "user_id" });
     if (consentError) return setError(`Store saved, but your policy consent could not be recorded: ${consentError.message}`);
-    await supabase.rpc("notify_platform_admins", { p_type: "verification", p_title: "New seller submission", p_body: `${form.name.trim()} is waiting for Sella verification.`, p_link: "/admin#approvals" });
+    await fetch("/api/ops", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "verification_notification", storeId }) });
     router.push("/dashboard?submitted=1");
     router.refresh();
   }

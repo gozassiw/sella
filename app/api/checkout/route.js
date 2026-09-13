@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createVirtualAccount, providerConfigured } from "@/lib/payments/transactpay";
-import { notifyUser } from "@/lib/notifications";
+import { notifyPlatformAdmins, notifyUser } from "@/lib/notifications";
 
 export async function POST(request) {
   try {
@@ -43,6 +43,10 @@ export async function POST(request) {
     const { data: store } = await supabase.from("stores").select("owner_id,name").eq("id", storeId).maybeSingle();
     const orderMessage = `New order #${order.order_code} from ${customer.name} at ${store?.name || "your store"}.`;
     const buyerMessage = `Your order #${order.order_code} has been placed with ${store?.name || "the seller"}.`;
+    const adminOrderMessage = `New order #${order.order_code} from ${customer.name} at ${store?.name || "a Sella store"}. Payment: ${paymentMethod === "wallet" ? "wallet" : "awaiting bank transfer"}.`;
+    const { error: adminNotificationError } = await supabase.rpc("notify_platform_admins", { p_type: "order", p_title: "New order received", p_body: adminOrderMessage, p_link: "/admin#orders" });
+    if (adminNotificationError) console.error("Admin order notification record failed", adminNotificationError);
+    await notifyPlatformAdmins({ type: "order", title: "New order received", body: adminOrderMessage, link: "/admin#orders" });
     const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: user.id, p_type: "order", p_title: "Order placed", p_body: buyerMessage, p_link: `/account/orders/${order.id}` });
     if (buyerNotificationError) console.error("Buyer order notification record failed", buyerNotificationError);
     await notifyUser({ userId: user.id, type: "order", title: "Order placed", body: buyerMessage, link: `/account/orders/${order.id}`, save: false });

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { storeIsOperational } from "@/lib/store";
-import { notifyUser } from "@/lib/notifications";
+import { notifyPlatformAdmins, notifyUser } from "@/lib/notifications";
 
 async function requireOperationalStore(supabase, storeId, userId) {
   if (!storeId) return { error: NextResponse.json({ error: "Store is required." }, { status: 400 }) };
-  const { data: store } = await supabase.from("stores").select("id").eq("id", storeId).eq("owner_id", userId).maybeSingle();
+  const { data: store } = await supabase.from("stores").select("id,name").eq("id", storeId).eq("owner_id", userId).maybeSingle();
   if (!store) return { error: NextResponse.json({ error: "Store not found." }, { status: 404 }) };
   if (!(await storeIsOperational(supabase, storeId))) return { error: NextResponse.json({ error: "Your store is awaiting Sella verification. This action is available after approval." }, { status: 403 }) };
   return { store };
@@ -42,6 +42,10 @@ export async function POST(request) {
       if (action === "withdraw") {
         const { data, error } = await supabase.rpc("request_store_withdrawal", { p_store_id: body.storeId, p_amount: Number(body.amount), p_bank_name: body.bankName, p_account_number: body.accountNumber, p_account_name: body.accountName || null });
         if (error) throw error;
+        const withdrawalMessage = `${guard.store.name || "A seller"} requested a withdrawal of ₦${Number(body.amount).toLocaleString("en-NG")}.`;
+        const { error: adminNotificationError } = await supabase.rpc("notify_platform_admins", { p_type: "withdrawal", p_title: "New withdrawal request", p_body: withdrawalMessage, p_link: "/admin#withdrawals" });
+        if (adminNotificationError) console.error("Admin withdrawal notification record failed", adminNotificationError);
+        await notifyPlatformAdmins({ type: "withdrawal", title: "New withdrawal request", body: withdrawalMessage, link: "/admin#withdrawals" });
         return NextResponse.json(data);
       }
       const { data, error } = await supabase.from("offline_sales").insert({ store_id: body.storeId, amount: Number(body.amount), payment_method: body.paymentMethod || "cash", notes: body.notes || null, sold_at: body.soldAt || new Date().toISOString() }).select("id").single();
@@ -54,6 +58,15 @@ export async function POST(request) {
       const { data, error } = await supabase.from("store_bank_accounts").upsert({ store_id: store.id, bank_name: body.bankName, account_number: body.accountNumber, account_name: body.accountName, updated_at: new Date().toISOString() }, { onConflict: "store_id" }).select("id").single();
       if (error) throw error;
       return NextResponse.json(data);
+    }
+    if (action === "verification_notification") {
+      const { data: store } = await supabase.from("stores").select("id,name").eq("id", body.storeId).eq("owner_id", user.id).maybeSingle();
+      if (!store) return NextResponse.json({ error: "Store not found." }, { status: 404 });
+      const verificationMessage = `${store.name || "A seller"} submitted seller details and is waiting for Sella verification.`;
+      const { error: adminNotificationError } = await supabase.rpc("notify_platform_admins", { p_type: "verification", p_title: "New seller submission", p_body: verificationMessage, p_link: "/admin#approvals" });
+      if (adminNotificationError) console.error("Admin verification notification record failed", adminNotificationError);
+      await notifyPlatformAdmins({ type: "verification", title: "New seller submission", body: verificationMessage, link: "/admin#approvals" });
+      return NextResponse.json({ success: true });
     }
     if (action === "verification") {
       const nin = String(body.nin || "").replace(/\D/g, "");
