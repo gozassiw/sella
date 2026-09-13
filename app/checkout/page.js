@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import CheckoutForm from "@/components/CheckoutForm";
 import BuyerBottomNav from "@/components/BuyerBottomNav";
+import SellaBrand from "@/components/SellaBrand";
 
 export default async function CheckoutPage() {
   const { supabase, user } = await getCurrentUser();
@@ -10,5 +11,5 @@ export default async function CheckoutPage() {
     : { data: null };
   const { data: paymentSettings } = await supabase.rpc("get_public_payment_settings");
   const homeHref = user ? "/account" : "/";
-  return <div className="min-h-screen bg-surface pb-28"><header className="border-b border-line bg-white"><div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-5"><Link href={homeHref} className="font-bold text-kola">Sella</Link><Link href="/cart" className="text-sm font-semibold text-kola">Back to cart</Link></div></header><main className="px-5 py-10"><CheckoutForm initialProfile={profile} paymentSettings={paymentSettings} /></main>{user && <BuyerBottomNav />}</div>;
+  return <div className="min-h-screen bg-surface pb-28"><header className="border-b border-line bg-white"><div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-5"><SellaBrand href={homeHref} compact /><Link href="/cart" className="text-sm font-semibold text-kola">Back to cart</Link></div></header><main className="px-5 py-10"><CheckoutForm initialProfile={profile} paymentSettings={paymentSettings} /></main>{user && <BuyerBottomNav />}</div>;
 }

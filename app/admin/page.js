@@ -12,6 +12,7 @@ import AdminPaymentSettingsForm from "@/components/AdminPaymentSettingsForm";
 import AdminMenu from "@/components/AdminMenu";
 import AdminHoldForm from "@/components/AdminHoldForm";
 import LiveWorkspaceRefresh from "@/components/LiveWorkspaceRefresh";
+import SellaBrand from "@/components/SellaBrand";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ async function AdminContent() {
   const withdrawalFee = settingNumber("withdrawal_fee", "amount", 120);
 
   return <div className="min-h-screen bg-surface"><LiveWorkspaceRefresh scope="admin" userId={user.id} />
-    <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-4 sm:px-8"><Link href="/" className="text-base font-extrabold tracking-tight text-kola">Sella<span className="text-mango">.</span> Admin</Link><div className="flex items-center gap-2 sm:gap-3"><span className="hidden text-xs text-muted sm:inline">{user.email}</span><Link href="/dashboard" className="btn-soft px-3 py-2 text-xs">Seller dashboard</Link><AdminMenu /></div></div></header>
+    <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-4 sm:px-8"><div className="flex items-center gap-2"><SellaBrand href="/admin" /><span className="text-sm font-extrabold text-kola">Admin</span></div><div className="flex items-center gap-2 sm:gap-3"><span className="hidden text-xs text-muted sm:inline">{user.email}</span><Link href="/dashboard" className="btn-soft px-3 py-2 text-xs">Seller dashboard</Link><AdminMenu /></div></div></header>
     <main className="mx-auto max-w-[1240px] space-y-10 px-5 py-8 sm:px-8 sm:py-12">
       <div><p className="eyebrow text-kola">Private workspace</p><h1 className="display mt-3 text-4xl sm:text-5xl">Platform control room</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-muted">Review sellers, protect buyers, manage trust, monitor money, and keep the marketplace moving.</p></div>
       {warning && <div className="rounded-[22px] border border-warning/30 bg-amber-50 p-5 text-sm text-warning"><div className="flex items-start gap-3"><Activity size={19} className="mt-0.5 shrink-0" /><div><strong>Privileged database attention needed.</strong><p className="mt-1 leading-6">{warning}. Add the production SUPABASE_SERVICE_ROLE_KEY in Vercel to enable full queues and actions.</p></div></div></div>}
