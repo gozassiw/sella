@@ -7,7 +7,8 @@ self.addEventListener("push", (event) => {
     badge: data.badge || "/brand/sella-mark.png",
     tag: data.tag || `sella-${Date.now()}`,
     data: { url: data.url || data.link || "/account" },
-    renotify: Boolean(data.renotify),
+    vibrate: Array.isArray(data.vibrate) ? data.vibrate : [180, 80, 180],
+    renotify: data.renotify !== false,
   }));
 });
 
