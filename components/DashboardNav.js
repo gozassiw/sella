@@ -2,14 +2,16 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, Bell, Home, LogOut, MoreHorizontal, Package, Receipt, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
+import { BarChart3, Bell, Home, LogOut, MessageCircle, MoreHorizontal, Package, Receipt, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
 import SellaBrand from "@/components/SellaBrand";
 import NotificationBell from "@/components/NotificationBell";
+import ChatBadge from "@/components/ChatBadge";
 
 const primary = [
   { href: "/dashboard", label: "Overview", icon: Home },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
   { href: "/dashboard/products", label: "Products", icon: Package },
+  { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
   { href: "/dashboard/wallet", label: "Wallet", icon: WalletCards },
 ];
 const tools = [
@@ -31,7 +33,7 @@ export default function DashboardNav({ store }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const active = (href) => href === "/dashboard" ? pathname === href : pathname.startsWith(href);
   async function signOut() { const { createClient } = await import("@/lib/supabase/client"); await createClient().auth.signOut(); router.push("/login"); router.refresh(); }
-  const desktopItem = (item) => { const Icon = item.icon; const selected = active(item.href); const link = <Link key={item.href} href={item.href} prefetch className={`flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-bold transition ${selected ? "bg-mango text-kola-dark" : "text-white/70 hover:bg-white/10 hover:text-white"}`}><Icon size={18} strokeWidth={selected ? 2.3 : 1.8} />{item.label}</Link>; return item.href === "/dashboard/notifications" ? <NotificationBell key={item.href}>{link}</NotificationBell> : link; };
+  const desktopItem = (item) => { const Icon = item.icon; const selected = active(item.href); const link = <Link key={item.href} href={item.href} prefetch className={`flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-bold transition ${selected ? "bg-mango text-kola-dark" : "text-white/70 hover:bg-white/10 hover:text-white"}`}><Icon size={18} strokeWidth={selected ? 2.3 : 1.8} />{item.label}</Link>; return item.href === "/dashboard/notifications" ? <NotificationBell key={item.href}>{link}</NotificationBell> : item.href === "/dashboard/messages" ? <ChatBadge key={item.href}>{link}</ChatBadge> : link; };
 
   return <>
     <aside className="sticky top-0 hidden h-screen w-[264px] shrink-0 flex-col bg-kola-dark px-4 py-5 text-white md:flex">

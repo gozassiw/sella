@@ -18,7 +18,8 @@ export async function PATCH(request) {
   if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
   const body = await request.json().catch(() => ({}));
   const query = supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", user.id);
-  const { error } = body.id ? await query.eq("id", body.id) : await query.is("read_at", null);
+  const scoped = body.type ? query.eq("type", body.type) : query;
+  const { error } = body.id ? await scoped.eq("id", body.id) : await scoped.is("read_at", null);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ success: true });
 }
