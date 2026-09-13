@@ -1,15 +1,30 @@
 self.addEventListener("push", (event) => {
-  let data = {};
-  try { data = event.data?.json() || {}; } catch { data = { body: event.data?.text() || "" }; }
-  event.waitUntil(self.registration.showNotification(data.title || "Sella", {
-    body: data.body || "You have a new Sella update.",
-    icon: data.icon || "/brand/sella-mark.png",
-    badge: data.badge || "/brand/sella-mark.png",
-    tag: data.tag || `sella-${Date.now()}`,
-    data: { url: data.url || data.link || "/account" },
-    vibrate: Array.isArray(data.vibrate) ? data.vibrate : [180, 80, 180],
-    renotify: data.renotify !== false,
-  }));
+  event.waitUntil((async () => {
+    let data;
+    try {
+      const raw = event.data ? event.data.text() : "{}";
+      data = raw ? JSON.parse(raw) : {};
+      if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Push payload must be a JSON object");
+    } catch (error) {
+      console.error("Sella push payload could not be parsed", error);
+      data = { title: "Sella", body: "You have a new Sella update." };
+    }
+    const options = {
+      body: data.body || "You have a new Sella update.",
+      icon: data.icon || "/brand/sella-mark.png",
+      badge: data.badge || "/brand/sella-mark.png",
+      tag: data.tag || `sella-${Date.now()}`,
+      data: { url: data.url || data.link || "/account" },
+      vibrate: Array.isArray(data.vibrate) ? data.vibrate : [180, 80, 180],
+      renotify: data.renotify !== false,
+      requireInteraction: data.requireInteraction !== false,
+    };
+    try {
+      await self.registration.showNotification(data.title || "Sella", options);
+    } catch (error) {
+      console.error("Sella showNotification failed", { name: error?.name, message: error?.message, options });
+    }
+  })());
 });
 
 self.addEventListener("notificationclick", (event) => {
@@ -32,8 +47,8 @@ self.addEventListener("pushsubscriptionchange", (event) => {
       const applicationServerKey = Uint8Array.from(atob(normalized), (character) => character.charCodeAt(0));
       const subscription = await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
       await fetch("/api/notifications", { method: "POST", credentials: "include", headers: { "content-type": "application/json" }, body: JSON.stringify({ subscription }) });
-    } catch (_) {
-      // The next explicit refresh from the Notifications screen can repair the device.
+    } catch (error) {
+      console.error("Sella push subscription change failed", error);
     }
   })());
 });
