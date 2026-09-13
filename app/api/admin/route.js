@@ -10,6 +10,19 @@ export async function POST(request) {
   if (!user || authorized !== true) return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   const body = await request.json().catch(() => ({}));
   try {
+    if (body.action === "setting") {
+      const definitions = {
+        deposit_fee_rate: { field: "rate", max: 100 },
+        bank_transfer_fee_rate: { field: "rate", max: 100 },
+        commission_rate: { field: "rate", max: 100 },
+        withdrawal_fee: { field: "amount", max: 1000000 },
+      };
+      const definition = definitions[body.key];
+      const field = definition?.field;
+      const numeric = field ? Number(body.value?.[field]) : NaN;
+      if (!definition || !Number.isFinite(numeric) || numeric < 0 || numeric > definition.max) return NextResponse.json({ error: "Enter a valid fee value." }, { status: 400 });
+      body.value = { [field]: numeric };
+    }
     if (body.action === "payment_config") {
       await saveTransactPayConfig({ baseUrl: body.baseUrl, publicKey: body.publicKey, secretKey: body.secretKey, encryptionKey: body.encryptionKey });
     } else {

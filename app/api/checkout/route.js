@@ -42,11 +42,6 @@ export async function POST(request) {
 
     const { data: store } = await supabase.from("stores").select("owner_id,name").eq("id", storeId).maybeSingle();
     const orderMessage = `New order #${order.order_code} from ${customer.name} at ${store?.name || "your store"}.`;
-    if (store?.owner_id) {
-      const { error: sellerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: store.owner_id, p_type: "order", p_title: "New order received", p_body: orderMessage, p_link: `/dashboard/orders?order=${order.id}` });
-      if (sellerNotificationError) console.error("Seller order notification record failed", sellerNotificationError);
-      await notifyUser({ userId: store.owner_id, type: "order", title: "New order received", body: orderMessage, link: `/dashboard/orders?order=${order.id}`, save: false });
-    }
     const buyerMessage = `Your order #${order.order_code} has been placed with ${store?.name || "the seller"}.`;
     const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: user.id, p_type: "order", p_title: "Order placed", p_body: buyerMessage, p_link: `/account/orders/${order.id}` });
     if (buyerNotificationError) console.error("Buyer order notification record failed", buyerNotificationError);
@@ -55,6 +50,11 @@ export async function POST(request) {
     if (paymentMethod === "wallet") {
       const { error: walletError } = await supabase.rpc("pay_order_from_wallet", { p_order_id: order.id });
       if (walletError) throw new Error(walletError.message);
+      if (store?.owner_id) {
+        const { error: sellerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: store.owner_id, p_type: "order", p_title: "New order received", p_body: orderMessage, p_link: `/dashboard/orders?order=${order.id}` });
+        if (sellerNotificationError) console.error("Seller order notification record failed", sellerNotificationError);
+        await notifyUser({ userId: store.owner_id, type: "order", title: "New order received", body: orderMessage, link: `/dashboard/orders?order=${order.id}`, save: false });
+      }
       return NextResponse.json({ orderId: order.id, orderCode: order.order_code, paid: true });
     }
 
@@ -71,12 +71,14 @@ export async function POST(request) {
     if (!accountNumber) throw new Error("TransactPay did not return an account number");
 
     const accountReference = account.accountReference || account.data?.accountReference || order.id;
-    const { error: accountSaveError } = await supabase.rpc("set_order_payment_account", {
+    const paymentSessionId = account.sessionId || account.sessionID || account.data?.sessionId || account.data?.sessionID || null;
+    const { data: savedOrder, error: accountSaveError } = await supabase.rpc("set_order_payment_account", {
       p_order_id: order.id,
       p_account_number: accountNumber,
       p_account_name: account.accountName || account.data?.account_name || account.data?.accountName || null,
       p_bank_name: account.bank || account.data?.bank_name || account.data?.bank || null,
       p_payment_reference: accountReference,
+      p_payment_session_id: paymentSessionId,
     });
     if (accountSaveError) throw new Error(accountSaveError.message);
 
@@ -84,6 +86,10 @@ export async function POST(request) {
       orderId: order.id,
       orderCode: order.order_code,
       paid: false,
+      paymentTotal: Number(order.payment_total || order.total),
+      bankTransferFee: Number(order.bank_transfer_fee || 0),
+      paymentExpiresAt: savedOrder?.payment_expires_at || null,
+      paymentSessionId,
       account: {
         number: accountNumber,
         name: account.accountName || account.data?.account_name || account.data?.accountName || null,
