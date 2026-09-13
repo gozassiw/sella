@@ -37,6 +37,7 @@ Copy `.env.example` to `.env.local` for local development. In Vercel, add:
 - `NEXT_PUBLIC_BRAND_NAME`
 - `ADMIN_EMAILS` — comma-separated email addresses allowed to open `/admin`
 - `SUPABASE_SERVICE_ROLE_KEY` — server-only; never expose it to the browser
+- `TRANSACTPAY_WEBHOOK_SECRET` — server-only HMAC secret when provided/configured for the TransactPay webhook; otherwise successful events are verified against TransactPay transaction details before any balance can change
 - `TRANSACTPAY_BASE_URL` — use `https://payment-api-service.transactpay.ai` for the current sandbox/API base
 - `TRANSACTPAY_PUBLIC_KEY`
 - `TRANSACTPAY_SECRET_KEY` — server-only; reserved for protected provider operations
@@ -48,6 +49,8 @@ TransactPay currently requires RSA PKCS#1 v1.5 encrypted request payloads for vi
 `https://www.sella.com.ng/api/payments/transactpay`
 
 Use the direct `www` URL for TransactPay until the Vercel domain settings make the apex domain the primary domain. The apex currently redirects to `www`, and webhook providers should not be required to follow that redirect.
+
+Successful payment events are fail-closed: Sella requires a valid webhook signature or a matching TransactPay transaction-details lookup with a positive amount and provider identity. Wallet/order credit functions are callable only by the server role; browser and anonymous Supabase keys cannot invoke them or write wallet tables directly.
 
 For buyer wallet funding and checkout transfers, Sella deducts the TransactPay provider fee from the incoming payment before crediting the wallet or seller order balance: **1.5% of the gross amount, capped at NGN 2,000**. Subscription payments are confirmed against the gross plan amount and are not wallet credits.
 
