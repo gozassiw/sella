@@ -123,14 +123,10 @@ export async function POST(request) {
     const preview = body || "Sent an image.";
     const { error: notificationError } = await supabase.rpc("notify_chat_recipient", { p_conversation_id: conversationId, p_recipient_id: recipientId, p_body: preview, p_link: link });
     if (notificationError) console.error("Chat notification record failed", notificationError);
-    let senderName = conversation.stores?.name || "Seller";
-    if (conversation.buyer_id === user.id) {
-      try {
-        const admin = createAdminClient();
-        const { data: profile } = await admin.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle();
-        senderName = profile?.full_name?.trim() || "Buyer";
-      } catch {}
-    }
+    const { data: resolvedSenderName, error: senderNameError } = await supabase.rpc("get_chat_sender_name", { p_conversation_id: conversationId });
+    const metadataName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0];
+    const senderName = resolvedSenderName?.trim() || metadataName?.trim() || (conversation.buyer_id === user.id ? "Buyer" : conversation.stores?.name || "Seller");
+    if (senderNameError) console.error("Chat sender name lookup failed", senderNameError);
     await notifyUser({ userId: recipientId, type: "chat", title: `New message from ${senderName}`, body: preview, link, save: false });
     const [signed] = await signedMessageRows([row]);
     return NextResponse.json({ message: signed });
