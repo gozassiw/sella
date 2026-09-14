@@ -20,6 +20,7 @@ export default function AdminSellerReview({ store }) {
           <button type="button" aria-label="Close seller details" onClick={() => setOpen(false)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface text-muted"><X size={19} /></button>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl bg-surface p-3 sm:col-span-2"><p className="text-[10px] font-extrabold uppercase tracking-wide text-muted">Passport photograph</p>{store.passport_photo_url ? <a href={store.passport_photo_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-start gap-3"><img src={store.passport_photo_url} alt={`Passport photograph for ${store.name}`} className="h-32 w-24 rounded-xl border border-line object-cover" /><span className="self-center text-xs font-bold text-kola underline">Open full size</span></a> : <p className="mt-2 text-sm text-danger">Not submitted — approval is blocked until one is uploaded.</p>}</div>
           <Detail label="Store link" value={`/${store.slug}`} />
           <Detail label="Category" value={store.category} />
           <Detail label="Seller email" value={store.seller_email} />
