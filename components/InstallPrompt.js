@@ -22,12 +22,14 @@ function detectDevice() {
   const isAppleMobile = /iPhone|iPad|iPod/i.test(ua) || (window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
   const isAndroid = /Android/i.test(ua);
   const isInAppBrowser = /FBAN|FBAV|Instagram|WhatsApp|Line\/|Snapchat/i.test(ua);
-  const isIosChromeOrOther = /CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
-  const isIosSafari = isAppleMobile && !isInAppBrowser && !isIosChromeOrOther && /Safari/i.test(ua);
+  const isIosChrome = /CriOS/i.test(ua);
+  const isIosOtherBrowser = /FxiOS|EdgiOS|OPiOS/i.test(ua);
+  const isIosSafari = isAppleMobile && !isInAppBrowser && !isIosChrome && !isIosOtherBrowser && /Safari/i.test(ua);
 
   if (isAndroid) return "android";
   if (isAppleMobile && isInAppBrowser) return "ios-in-app";
-  if (isAppleMobile && !isIosSafari) return "ios-other";
+  if (isAppleMobile && isIosChrome) return "ios-chrome";
+  if (isAppleMobile && (isIosOtherBrowser || !isIosSafari)) return "ios-other";
   if (isIosSafari) return "ios-safari";
   return "other";
 }
@@ -64,10 +66,11 @@ export default function InstallPrompt() {
     }
 
     if (detectedPlatform !== "android" || readStorage(ANDROID_DISMISSED)) return;
-    setVisible(true);
+    const fallbackTimer = window.setTimeout(() => setVisible(true), 1500);
 
     function handleBeforeInstallPrompt(event) {
       event.preventDefault();
+      window.clearTimeout(fallbackTimer);
       setDeferredPrompt(event);
       setVisible(true);
     }
@@ -81,6 +84,7 @@ export default function InstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
     return () => {
+      window.clearTimeout(fallbackTimer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -105,13 +109,16 @@ export default function InstallPrompt() {
 
   const isAndroid = platform === "android";
   const isNativeAndroidPrompt = isAndroid && Boolean(deferredPrompt);
+  const isIosChrome = platform === "ios-chrome";
   const isSafari = platform === "ios-safari";
   const isIosOther = platform === "ios-in-app" || platform === "ios-other";
-  const title = isNativeAndroidPrompt ? "Install Sella" : isAndroid ? "Add Sella to your phone" : isSafari ? "Install Sella on iPhone" : "Open Sella in Safari";
+  const title = isNativeAndroidPrompt ? "Install Sella" : isAndroid ? "Install Sella on Android Device As An App" : isIosChrome || isSafari ? "Install Sella on iPhone As An App" : "Open Sella in Safari";
   const message = isNativeAndroidPrompt
     ? "Install Sella for faster access from your phone."
-    : isAndroid || isSafari
-      ? "Tap the Share icon, tap View More, then 'Add to Home Screen.'"
+    : isAndroid
+      ? "Tap the Share button, scroll down and choose Install and create shortcut or Add to Home screen, then wait 1 minute; it will be installed automatically."
+      : isIosChrome || isSafari
+        ? "Tap the Share icon, tap View More, then click 'Add to Home Screen.'"
       : isIosOther
         ? "To install Sella, open this page in Safari. Then tap the Share icon, tap View More, then 'Add to Home Screen.'"
         : "";
