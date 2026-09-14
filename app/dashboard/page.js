@@ -4,6 +4,7 @@ import { getMyStore } from "@/lib/store";
 import { formatNaira, storeUrl } from "@/lib/utils";
 import { SITE_URL } from "@/lib/config";
 import ShareStore from "@/components/ShareStore";
+import CopyStoreLink from "@/components/CopyStoreLink";
 
 function StatusPill({ status }) {
   const tone = status === "delivered" ? "bg-green-50 text-success" : status === "cancelled" ? "bg-red-50 text-danger" : "bg-amber-50 text-warning";
@@ -33,7 +34,7 @@ export default async function DashboardHome() {
         <div className="flex items-start justify-between"><div><p className="text-xs font-bold text-white/60">AVAILABLE TO WITHDRAW</p><p className="display mt-3 text-4xl sm:text-[42px]">{formatNaira(wallet?.available)}</p><p className="mt-2 text-xs text-white/65">Paid orders are available directly.</p></div><span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 text-mango"><WalletCards size={21} /></span></div>
         <div className="mt-9 flex items-center justify-between"><span className="text-sm font-bold text-mango">Open wallet</span><ArrowRight size={18} /></div>
       </Link>
-      <div className="app-card p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="eyebrow text-kola">Store access</p><h2 className="mt-2 text-base font-extrabold">Share your store ID</h2></div><span className="grid h-10 w-10 place-items-center rounded-2xl bg-kola-light text-kola"><ShieldCheck size={20} /></span></div><p className="mt-3 text-xs leading-5 text-muted">Buyers enter this ID in their Sella account to open your store, trust it, and shop.</p><p className="mt-4 rounded-xl bg-kola-light px-4 py-3 text-center text-xl font-extrabold tracking-[.2em] text-kola">{store.seller_code || "Generating…"}</p>{trialDays !== null && <p className="mt-4 text-[11px] font-bold text-kola">{trialDays} days left in your 10-day trial · up to 15 products · <Link href="/dashboard/billing" className="underline">View plans</Link></p>}</div>
+      <div className="app-card p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="eyebrow text-kola">Store access</p><h2 className="mt-2 text-base font-extrabold">Share your store ID</h2></div><span className="grid h-10 w-10 place-items-center rounded-2xl bg-kola-light text-kola"><ShieldCheck size={20} /></span></div><p className="mt-3 text-xs leading-5 text-muted">Buyers enter this ID in their Sella account to open your store, trust it, and shop.</p><p className="mt-4 rounded-xl bg-kola-light px-4 py-3 text-center text-xl font-extrabold tracking-[.2em] text-kola">{store.seller_code || "Generating…"}</p><CopyStoreLink url={storeUrl(SITE_URL, store.slug)} />{trialDays !== null && <p className="mt-4 text-[11px] font-bold text-kola">{trialDays} days left in your 10-day trial · up to 15 products · <Link href="/dashboard/billing" className="underline">View plans</Link></p>}</div>
     </section>
 
     <section className="grid grid-cols-3 gap-3">
