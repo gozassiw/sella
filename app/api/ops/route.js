@@ -43,9 +43,7 @@ export async function POST(request) {
         const { data, error } = await supabase.rpc("request_store_withdrawal", { p_store_id: body.storeId, p_amount: Number(body.amount), p_bank_name: body.bankName, p_account_number: body.accountNumber, p_account_name: body.accountName || null });
         if (error) throw error;
         const withdrawalMessage = `${guard.store.name || "A seller"} requested a withdrawal of ₦${Number(body.amount).toLocaleString("en-NG")}.`;
-        const { error: adminNotificationError } = await supabase.rpc("notify_platform_admins", { p_type: "withdrawal", p_title: "New withdrawal request", p_body: withdrawalMessage, p_link: "/admin#withdrawals" });
-        if (adminNotificationError) console.error("Admin withdrawal notification record failed", adminNotificationError);
-        await notifyPlatformAdmins({ type: "withdrawal", title: "New withdrawal request", body: withdrawalMessage, link: "/admin#withdrawals" });
+        await notifyPlatformAdmins({ type: "withdrawal", title: "New withdrawal request", body: withdrawalMessage, link: "/admin?section=withdrawals" });
         return NextResponse.json(data);
       }
       const { data, error } = await supabase.from("offline_sales").insert({ store_id: body.storeId, amount: Number(body.amount), payment_method: body.paymentMethod || "cash", notes: body.notes || null, sold_at: body.soldAt || new Date().toISOString() }).select("id").single();
