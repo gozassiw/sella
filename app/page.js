@@ -3,6 +3,7 @@ import { ArrowRight, PackageCheck, Store, WalletCards } from "lucide-react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SellaBrand from "@/components/SellaBrand";
+import InstallPrompt from "@/components/InstallPrompt";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function Home() {
     redirect("/account");
   }
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface"><InstallPrompt />
       <header className="sticky top-0 z-30 border-b border-line/80 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-5 py-4 lg:px-8">
           <SellaBrand />
