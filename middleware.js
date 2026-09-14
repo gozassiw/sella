@@ -11,9 +11,11 @@ export async function middleware(request) {
   const reservedSubdomains = new Set(["www", "app", "api"]);
   const isAppAsset = path === "/sw.js" || path === "/manifest.webmanifest" || path === "/robots.txt" || path.startsWith("/brand/");
 
-  if (subdomain && !reservedSubdomains.has(subdomain) && !isAppAsset && !path.startsWith("/_next") && !path.startsWith("/api") && !path.startsWith("/auth") && !path.startsWith("/login") && !path.startsWith("/signup") && !path.startsWith("/account") && !path.startsWith("/dashboard") && !path.startsWith("/onboarding") && !path.startsWith("/s/")) {
+  const internalStorePath = `/s/${subdomain}`;
+  const isMatchingInternalStorePath = path === internalStorePath || path.startsWith(`${internalStorePath}/`);
+  if (subdomain && !reservedSubdomains.has(subdomain) && !isAppAsset && !path.startsWith("/_next") && !path.startsWith("/api") && !path.startsWith("/auth") && !path.startsWith("/login") && !path.startsWith("/signup") && !path.startsWith("/account") && !path.startsWith("/dashboard") && !path.startsWith("/onboarding") && (!path.startsWith("/s/") || isMatchingInternalStorePath)) {
     const url = request.nextUrl.clone();
-    url.pathname = path === "/" ? `/s/${subdomain}` : `/s/${subdomain}${path}`;
+    url.pathname = path === "/" ? `/s/${subdomain}` : isMatchingInternalStorePath ? path : `/s/${subdomain}${path}`;
     return NextResponse.rewrite(url);
   }
 
