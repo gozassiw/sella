@@ -11,8 +11,8 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: `${BRAND} — Shop independent. Sell simply.`,
-  description: "Sell and buy with people you can trust, with store access, payments, fulfilment, and business tools in one simple app.",
+  title: `${BRAND} — Your business, clear enough to run from your phone.`,
+  description: "No more scattered chats and screenshots. See your storefront, orders, stock, and money in one simple place.",
   icons: { icon: "/brand/sella-favicon.png", apple: "/brand/sella-favicon.png" },
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: BRAND, statusBarStyle: "default" },
