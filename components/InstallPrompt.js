@@ -1,6 +1,5 @@
 "use client";
 
-import { Download, Share, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const ANDROID_DISMISSED = "sella-install-prompt-android-dismissed";
@@ -33,6 +32,18 @@ function detectDevice() {
   return "other";
 }
 
+function CloseIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" d="m6 6 12 12M18 6 6 18" /></svg>;
+}
+
+function ShareIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></svg>;
+}
+
+function InstallIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2" /></svg>;
+}
+
 export default function InstallPrompt() {
   const [platform, setPlatform] = useState("other");
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -52,15 +63,17 @@ export default function InstallPrompt() {
       return;
     }
 
+    if (detectedPlatform !== "android" || readStorage(ANDROID_DISMISSED)) return;
+    setVisible(true);
+
     function handleBeforeInstallPrompt(event) {
       event.preventDefault();
-      if (!readStorage(ANDROID_DISMISSED)) {
-        setDeferredPrompt(event);
-        setVisible(true);
-      }
+      setDeferredPrompt(event);
+      setVisible(true);
     }
 
     function handleAppInstalled() {
+      writeStorage(ANDROID_DISMISSED);
       setDeferredPrompt(null);
       setVisible(false);
     }
@@ -79,41 +92,42 @@ export default function InstallPrompt() {
   }
 
   async function installAndroid() {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) return dismiss();
     deferredPrompt.prompt();
     const result = await deferredPrompt.userChoice.catch(() => ({ outcome: "dismissed" }));
     setDeferredPrompt(null);
-    if (result.outcome === "accepted") writeStorage(ANDROID_DISMISSED);
-    else writeStorage(ANDROID_DISMISSED);
+    writeStorage(ANDROID_DISMISSED);
     setVisible(false);
+    return result;
   }
 
   if (!visible) return null;
 
-  const isAndroidPrompt = platform === "android" && deferredPrompt;
+  const isAndroid = platform === "android";
+  const isNativeAndroidPrompt = isAndroid && Boolean(deferredPrompt);
   const isSafari = platform === "ios-safari";
-  const title = isAndroidPrompt ? "Install Sella" : isSafari ? "Install Sella on iPhone" : "Open Sella in Safari";
-  const message = isAndroidPrompt
+  const isIosOther = platform === "ios-in-app" || platform === "ios-other";
+  const title = isNativeAndroidPrompt ? "Install Sella" : isAndroid ? "Add Sella to your phone" : isSafari ? "Install Sella on iPhone" : "Open Sella in Safari";
+  const message = isNativeAndroidPrompt
     ? "Install Sella for faster access from your phone."
-    : isSafari
-      ? "Tap the Share icon, then 'Add to Home Screen.'"
-      : "To install Sella, tap the ••• menu and choose 'Open in Safari,' then follow the install steps from there.";
+    : isAndroid || isSafari
+      ? "Tap the Share icon, tap View More, then 'Add to Home Screen.'"
+      : isIosOther
+        ? "To install Sella, open this page in Safari. Then tap the Share icon, tap View More, then 'Add to Home Screen.'"
+        : "";
 
   return (
-    <aside className="fixed inset-x-4 bottom-4 z-[70] mx-auto max-w-lg rounded-2xl border border-line bg-white p-4 shadow-[var(--shadow-float)]" role="status" aria-live="polite">
-      <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-kola-light text-kola">
-          {isAndroidPrompt ? <Download size={19} /> : isSafari ? <Share size={19} /> : <Download size={19} />}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-extrabold text-ink">{title}</p>
-            <button type="button" onClick={dismiss} className="-mr-1 -mt-1 rounded-lg p-1 text-muted hover:bg-surface hover:text-ink" aria-label="Dismiss install message"><X size={17} /></button>
-          </div>
-          <p className="mt-1 text-xs leading-5 text-muted">{message}</p>
-          {isAndroidPrompt && <button type="button" onClick={installAndroid} className="btn-primary mt-3 min-h-10 px-4 py-2 text-xs">Install Sella</button>}
+    <div className="fixed inset-0 z-[70] grid place-items-center bg-ink/35 px-5 py-6" role="presentation">
+      <aside className="w-full max-w-sm rounded-[26px] border border-line bg-white p-6 shadow-[var(--shadow-float)]" role="dialog" aria-modal="true" aria-labelledby="sella-install-title">
+        <div className="flex items-start justify-between gap-4">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-kola-light text-kola">{isNativeAndroidPrompt ? <InstallIcon /> : <ShareIcon />}</span>
+          <button type="button" onClick={dismiss} className="rounded-xl p-2 text-muted hover:bg-surface hover:text-ink" aria-label="Dismiss install instructions"><CloseIcon /></button>
         </div>
-      </div>
-    </aside>
+        <h2 id="sella-install-title" className="display mt-5 text-xl">{title}</h2>
+        <p className="mt-3 text-sm leading-6 text-muted">{message}</p>
+        {isNativeAndroidPrompt && <button type="button" onClick={installAndroid} className="btn-primary mt-5 w-full">Install Sella</button>}
+        {!isNativeAndroidPrompt && <button type="button" onClick={dismiss} className="btn-secondary mt-5 w-full">Got it</button>}
+      </aside>
+    </div>
   );
 }
