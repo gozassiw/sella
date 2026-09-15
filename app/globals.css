@@ -97,6 +97,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .seller-homepage .seller-body-text { font-size: 16px; color: var(--seller-muted); max-width: 48ch; line-height: 1.6; }
 .seller-homepage .seller-hero { padding-top: 64px; }
 .seller-homepage .seller-hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+.seller-homepage .seller-hero-demo-grid { grid-template-columns: minmax(0, 760px); justify-content: center; }
 .seller-homepage .seller-hero h1 { margin: 14px 0 18px; }
 .seller-homepage .seller-hero-ctas { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
 .seller-homepage .seller-mock { background: var(--seller-white); border: 1px solid var(--seller-line); border-radius: 20px; padding: 22px; box-shadow: 0 1px 2px var(--seller-shadow); }

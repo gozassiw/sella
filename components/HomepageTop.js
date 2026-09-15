@@ -39,7 +39,7 @@ export default function HomepageTop({ signupHref = "/signup" }) {
           </div>
       </div>}
       <section className="seller-hero">
-        <div className="seller-wrap seller-hero-grid">
+        <div className={`seller-wrap seller-hero-grid ${demoSelected ? "seller-hero-demo-grid" : ""}`}>
           <div>
             <div className="seller-eyebrow">{demoSelected ? "See Sella in person" : "For sellers"}</div>
             <h1>{demoSelected ? "Not confident with technology? We can show you." : "Your business, clear enough to run from your phone."}</h1>
@@ -48,14 +48,14 @@ export default function HomepageTop({ signupHref = "/signup" }) {
               {demoSelected ? <><Link className="seller-button seller-button-primary" href={signupHref}>Try Sella <ArrowRight size={17} /></Link><Link className="seller-button seller-button-outline" href="/book-a-demo">Book a Demo <ArrowRight size={17} /></Link></> : <Link className="seller-button seller-button-primary" href={signupHref}>Create your store <ArrowRight size={17} /></Link>}
             </div>
           </div>
-          <div className="seller-wallet-card">
+          {!demoSelected && <div className="seller-wallet-card">
             <div className="seller-wallet-label">Available balance</div>
             <div className="seller-wallet-amount">₦186,400</div>
             <div style={{ marginTop: 18 }}>
               <div className="seller-row"><div><div className="seller-name">Order #5AD8</div><div className="seller-sub">Delivered · Chioma O.</div></div><div className="seller-amt">+₦18,500</div></div>
               <div className="seller-row"><div><div className="seller-name">Withdrawal</div><div className="seller-sub">Sent to GTBank ••4521</div></div><div className="seller-amt">−₦40,000</div></div>
             </div>
-          </div>
+          </div>}
         </div>
       </section>
     </>
