@@ -34,12 +34,13 @@ export default async function Home() {
       <InstallPrompt />
       <header className="seller-site-header">
         <div className="seller-wrap seller-nav">
-          <div className="seller-brand-group"><SellaBrand /><p className="seller-company-header">Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</p></div>
+          <SellaBrand />
           <nav className="seller-navlinks" aria-label="Main navigation">
             <Link className="seller-plain-link" href={loginHref}>Login</Link>
             <Link className="seller-button seller-button-primary seller-button-sm" href={signupHref}>Create account</Link>
           </nav>
         </div>
+        <div className="seller-company-bar"><p>Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</p></div>
       </header>
 
       <main>
