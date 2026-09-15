@@ -23,13 +23,13 @@ export async function POST(request) {
 
   try {
     const admin = createAdminClient();
-    const { data: requestRow, error } = await admin.from("demo_requests").insert({ name, whatsapp, requested_day: requestedDay, time_slot: timeSlot }).select("id").single();
+    const { data: requestId, error } = await admin.rpc("create_demo_request", { p_name: name, p_whatsapp: whatsapp, p_requested_day: requestedDay, p_time_slot: timeSlot });
     if (error) throw error;
     const message = `${name} requested a WhatsApp demo for ${requestedDay} (${timeSlot}). WhatsApp: ${whatsapp}`;
     const { error: inAppError } = await admin.rpc("notify_platform_admins", { p_type: "demo", p_title: "New demo request", p_body: message, p_link: "/admin?section=demos" });
     if (inAppError) console.error("Demo request admin notification record failed", inAppError);
     await notifyPlatformAdmins({ type: "demo", title: "New demo request", body: message, link: "/admin?section=demos" });
-    return NextResponse.json({ success: true, id: requestRow.id });
+    return NextResponse.json({ success: true, id: requestId });
   } catch (error) {
     console.error("Demo request failed", error);
     return NextResponse.json({ error: "We could not save your demo request right now. Please try again." }, { status: 500 });

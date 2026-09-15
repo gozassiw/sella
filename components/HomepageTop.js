@@ -4,18 +4,19 @@ import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import SellaBrand from "@/components/SellaBrand";
+import { useHomepageMode } from "@/components/HomepageMode";
 
 export default function HomepageTop({ signupHref = "/signup" }) {
-  const [tab, setTab] = useState("home");
+  const { mode, setMode } = useHomepageMode();
   const [menuOpen, setMenuOpen] = useState(false);
-  const demoSelected = tab === "demo";
+  const demoSelected = mode === "demo";
 
   return (
     <>
       <header className="seller-site-header">
         <div className="seller-header-tabs" role="tablist" aria-label="Homepage sections">
-          <button type="button" role="tab" aria-selected={!demoSelected} className={!demoSelected ? "is-active" : ""} onClick={() => setTab("home")}>Home</button>
-          <button type="button" role="tab" aria-selected={demoSelected} className={demoSelected ? "is-active" : ""} onClick={() => setTab("demo")}>Book a Demo</button>
+          <button type="button" role="tab" aria-selected={!demoSelected} className={!demoSelected ? "is-active" : ""} onClick={() => setMode("home")}>Home</button>
+          <button type="button" role="tab" aria-selected={demoSelected} className={demoSelected ? "is-active" : ""} onClick={() => setMode("demo")}>Book a Demo</button>
         </div>
         <div className="seller-wrap seller-nav">
           <SellaBrand />
@@ -25,8 +26,9 @@ export default function HomepageTop({ signupHref = "/signup" }) {
             <button type="button" className="seller-menu-button" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-expanded={menuOpen}><Menu size={22} /></button>
           </nav>
         </div>
-        <div className="seller-company-bar"><p>Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</p></div>
-        {menuOpen && <div className="seller-menu-popover" role="dialog" aria-modal="true" aria-label="Sella menu">
+        <div className="seller-company-bar"><p>Sella is owned and operated by Jojokev Digital - BN9832074</p></div>
+      </header>
+      {menuOpen && <div className="seller-menu-popover" role="dialog" aria-modal="true" aria-label="Sella menu">
           <div className="seller-menu-inner">
             <div className="seller-menu-head"><div><p className="seller-eyebrow">Explore Sella</p><p className="seller-menu-title">A clearer way to run your store.</p></div><button type="button" className="seller-menu-button" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X size={22} /></button></div>
             <nav className="seller-menu-links" aria-label="Information pages">
@@ -35,8 +37,7 @@ export default function HomepageTop({ signupHref = "/signup" }) {
               <Link href="/faq" onClick={() => setMenuOpen(false)}>FAQ <ArrowRight size={17} /></Link>
             </nav>
           </div>
-        </div>}
-      </header>
+      </div>}
       <section className="seller-hero">
         <div className="seller-wrap seller-hero-grid">
           <div>

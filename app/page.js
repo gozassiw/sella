@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import SellaBrand from "@/components/SellaBrand";
 import InstallPrompt from "@/components/InstallPrompt";
 import HomepageTop from "@/components/HomepageTop";
+import { HomepageModeContent, HomepageModeProvider } from "@/components/HomepageMode";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +33,11 @@ export default async function Home() {
 
   return (
     <div className="seller-homepage">
-      <InstallPrompt />
-      <HomepageTop signupHref={signupHref} />
-      <main>
+      <HomepageModeProvider>
+        <InstallPrompt />
+        <HomepageTop signupHref={signupHref} />
+        <HomepageModeContent>
+          <main>
         <section>
           <div className="seller-wrap">
             <div className="seller-problem">
@@ -183,9 +186,9 @@ export default async function Home() {
             </div>
           </div>
         </section>
-      </main>
+          </main>
 
-      <footer className="seller-site-footer">
+          <footer className="seller-site-footer">
         <div className="seller-wrap">
           <div className="seller-foot-row">
             <SellaBrand />
@@ -193,7 +196,9 @@ export default async function Home() {
           </div>
           <div className="seller-copyright">© 2026 Jojokev Concepts · sella.com.ng</div>
         </div>
-      </footer>
+          </footer>
+        </HomepageModeContent>
+      </HomepageModeProvider>
     </div>
   );
 }

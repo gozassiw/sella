@@ -81,8 +81,8 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .seller-homepage .seller-button-sm { padding: 10px 16px; font-size: 14px; }
 .seller-homepage .seller-menu-button { display: inline-grid; height: 40px; width: 40px; place-items: center; border: 0; border-radius: 12px; background: transparent; color: var(--seller-kola-dark); cursor: pointer; }
 .seller-homepage .seller-menu-button:hover { background: var(--seller-kola-light); }
-.seller-homepage .seller-menu-popover { position: fixed; inset: 0; z-index: 80; background: var(--seller-bg); overflow-y: auto; }
-.seller-homepage .seller-menu-inner { max-width: 1120px; margin: 0 auto; padding: 26px 24px 40px; }
+.seller-homepage .seller-menu-popover { position: fixed; inset: 0; z-index: 80; min-height: 100dvh; background: var(--seller-bg); overflow-y: auto; }
+.seller-homepage .seller-menu-inner { min-height: 100dvh; max-width: 1120px; margin: 0 auto; padding: 30px 24px 40px; }
 .seller-homepage .seller-menu-head { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid var(--seller-line); padding-bottom: 22px; }
 .seller-homepage .seller-menu-title { font-size: 20px; font-weight: 800; }
 .seller-homepage .seller-menu-links { display: grid; gap: 10px; margin-top: 24px; max-width: 520px; }
