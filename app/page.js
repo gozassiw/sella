@@ -34,7 +34,7 @@ export default async function Home() {
       <InstallPrompt />
       <header className="seller-site-header">
         <div className="seller-wrap seller-nav">
-          <SellaBrand />
+          <div className="seller-brand-group"><SellaBrand /><p className="seller-company-header">Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</p></div>
           <nav className="seller-navlinks" aria-label="Main navigation">
             <Link className="seller-plain-link" href={loginHref}>Login</Link>
             <Link className="seller-button seller-button-primary seller-button-sm" href={signupHref}>Create account</Link>
@@ -226,7 +226,7 @@ export default async function Home() {
             <SellaBrand />
             <div className="seller-foot-links"><Link href={loginHref}>Login</Link><Link href={signupHref}>Create account</Link></div>
           </div>
-          <div className="seller-copyright"><div>© 2026 Jojokev Concepts · sella.com.ng</div><div className="seller-company-note">Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</div></div>
+          <div className="seller-copyright">© 2026 Jojokev Concepts · sella.com.ng</div>
         </div>
       </footer>
     </div>
