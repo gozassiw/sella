@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SellaBrand from "@/components/SellaBrand";
 import InstallPrompt from "@/components/InstallPrompt";
+import HomepageTop from "@/components/HomepageTop";
 
 export const dynamic = "force-dynamic";
 
@@ -32,45 +33,8 @@ export default async function Home() {
   return (
     <div className="seller-homepage">
       <InstallPrompt />
-      <header className="seller-site-header">
-        <div className="seller-wrap seller-nav">
-          <SellaBrand />
-          <nav className="seller-navlinks" aria-label="Main navigation">
-            <Link className="seller-plain-link" href={loginHref}>Login</Link>
-            <Link className="seller-button seller-button-primary seller-button-sm" href={signupHref}>Create account</Link>
-          </nav>
-        </div>
-        <div className="seller-company-bar"><p>Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</p></div>
-      </header>
-
+      <HomepageTop signupHref={signupHref} />
       <main>
-        <section className="seller-hero">
-          <div className="seller-wrap seller-hero-grid">
-            <div>
-              <div className="seller-eyebrow">For sellers</div>
-              <h1>Your business, clear enough to run from your phone.</h1>
-              <p className="seller-lede">No more scattered chats and screenshots. See your storefront, orders, stock, and money in one simple place.</p>
-              <div className="seller-hero-ctas">
-                <Link className="seller-button seller-button-primary" href={signupHref}>Create your store <ArrowRight size={17} /></Link>
-              </div>
-            </div>
-            <div className="seller-wallet-card">
-              <div className="seller-wallet-label">Available balance</div>
-              <div className="seller-wallet-amount">₦186,400</div>
-              <div style={{ marginTop: 18 }}>
-                <div className="seller-row">
-                  <div><div className="seller-name">Order #5AD8</div><div className="seller-sub">Delivered · Chioma O.</div></div>
-                  <div className="seller-amt">+₦18,500</div>
-                </div>
-                <div className="seller-row">
-                  <div><div className="seller-name">Withdrawal</div><div className="seller-sub">Sent to GTBank ••4521</div></div>
-                  <div className="seller-amt">−₦40,000</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section>
           <div className="seller-wrap">
             <div className="seller-problem">
@@ -225,7 +189,7 @@ export default async function Home() {
         <div className="seller-wrap">
           <div className="seller-foot-row">
             <SellaBrand />
-            <div className="seller-foot-links"><Link href={loginHref}>Login</Link><Link href={signupHref}>Create account</Link></div>
+            <div className="seller-foot-links"><Link href={loginHref}>Login</Link><Link href={signupHref}>Create account</Link><Link href="/terms">Terms of Use</Link><Link href="/privacy">Privacy Policy</Link></div>
           </div>
           <div className="seller-copyright">© 2026 Jojokev Concepts · sella.com.ng</div>
         </div>

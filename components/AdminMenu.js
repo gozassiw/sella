@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Banknote, BarChart3, Bell, CheckSquare, Flag, Landmark, Menu, Settings2, ShieldCheck, Store, Users, WalletCards, X } from "lucide-react";
+import { Activity, Banknote, BarChart3, Bell, CalendarDays, CheckSquare, Flag, Landmark, Menu, Settings2, ShieldCheck, Store, Users, WalletCards, X } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 
 const items = [
@@ -13,6 +13,7 @@ const items = [
   ["orders", "Orders & revenue", Banknote],
   ["withdrawals", "Withdrawals", WalletCards],
   ["reports", "Reports & safety", Flag],
+  ["demos", "Demo requests", CalendarDays],
   ["subscriptions", "Seller plans", Users],
   ["settings", "Platform settings", Settings2],
   ["payments", "TransactPay", Landmark],
