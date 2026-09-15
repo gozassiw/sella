@@ -33,6 +33,8 @@ async function AdminContent({ activeSection = "overview" }) {
   if (!authorized) return <div className="min-h-screen bg-surface px-5 py-12"><div className="mx-auto max-w-xl app-card p-7 sm:p-10"><p className="eyebrow text-kola">Admin access</p><h1 className="display mt-3 text-3xl">This account is not an admin</h1><p className="mt-4 text-sm leading-6 text-muted">You are signed in as <strong className="text-ink">{user.email}</strong>, but this email is not in Sella&apos;s platform admin registry.</p><div className="mt-6 rounded-2xl bg-surface p-4 text-sm leading-6"><p className="font-extrabold">Add the exact email to public.platform_admins</p><p className="mt-2 text-muted">An existing platform admin can add it in Supabase, then sign out and sign in again before opening /admin.</p></div><Link href="/dashboard" className="btn-primary mt-6 inline-flex">Seller dashboard</Link></div></div>;
   const { data: snapshot, error: snapshotError } = await supabase.rpc("admin_dashboard_snapshot");
   if (snapshotError) throw snapshotError;
+  const { data: badgeSnapshot, error: badgeSnapshotError } = await supabase.rpc("admin_paid_verification_snapshot");
+  if (badgeSnapshotError) throw badgeSnapshotError;
   const stores = snapshot?.stores || [];
   const orders = snapshot?.orders || [];
   const subscriptions = snapshot?.subscriptions || [];
@@ -44,7 +46,7 @@ async function AdminContent({ activeSection = "overview" }) {
   const wallets = snapshot?.wallets || [];
   const accounts = snapshot?.accounts || [];
   const demoRequests = snapshot?.demo_requests || [];
-  const verificationPurchases = snapshot?.verification_purchases || [];
+  const verificationPurchases = badgeSnapshot || [];
   const warning = "";
   const paymentStatus = await paymentConfigStatus();
   const pending = stores.filter((store) => store.approval_status === "pending" || (!store.approval_status && !store.is_published));
