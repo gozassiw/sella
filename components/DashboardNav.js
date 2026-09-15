@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, Bell, Home, LogOut, Menu, MessageCircle, Package, Receipt, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
+import { BarChart3, BadgeCheck, Bell, Home, LogOut, Menu, MessageCircle, Package, Receipt, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
 import SellaBrand from "@/components/SellaBrand";
 import NotificationBell from "@/components/NotificationBell";
 import ChatBadge from "@/components/ChatBadge";
@@ -23,7 +23,8 @@ const tools = [
   { href: "/dashboard/referrals", label: "Referrals", icon: Users },
   { href: "/dashboard/billing", label: "Plans & billing", icon: WalletCards },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/verification", label: "Verification", icon: Settings },
+  { href: "/dashboard/verification", label: "Seller verification", icon: Settings },
+  { href: "/dashboard/verification-badge", label: "Blue checkmark", icon: BadgeCheck },
   { href: "/dashboard/settings", label: "Store settings", icon: Settings },
 ];
 

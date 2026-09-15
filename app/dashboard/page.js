@@ -13,15 +13,17 @@ function StatusPill({ status }) {
 
 export default async function DashboardHome() {
   const { supabase, store } = await getMyStore();
-  const [{ count: productCount }, { count: lowStockCount }, { count: openOrderCount }, { data: recentOrders }, { data: wallet }] = await Promise.all([
+  const [{ count: productCount }, { count: lowStockCount }, { count: openOrderCount }, { data: recentOrders }, { data: wallet }, { data: activeSubscription }] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id),
     supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).lte("stock", 3),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("store_id", store.id).in("status", ["pending", "processing", "shipped"]),
     supabase.from("orders").select("id,order_code,total,status,payment_status,created_at,customers(name)").eq("store_id", store.id).order("created_at", { ascending: false }).limit(5),
     supabase.from("wallets").select("available").eq("store_id", store.id).maybeSingle(),
+    supabase.from("subscriptions").select("plan,expires_at,status").eq("store_id", store.id).in("status", ["paid", "active"]).gt("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
   const completedOrders = Number(store.completed_orders || 0);
-  const trialDays = store.trial_starts_at ? Math.max(0, Math.ceil((new Date(store.trial_ends_at) - new Date()) / 86400000)) : null;
+  const trialDays = !activeSubscription && store.trial_starts_at ? Math.max(0, Math.ceil((new Date(store.trial_ends_at) - new Date()) / 86400000)) : null;
+  const planName = { basic: "Basic", plus: "Plus", premium: "Premium", quarterly: "Basic", biannual: "Plus", yearly: "Premium" }[activeSubscription?.plan] || activeSubscription?.plan;
 
   return <div className="space-y-8">
     <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold text-muted">Your business today</p><h1 className="display mt-1 text-2xl sm:text-3xl">Welcome back, {store.name}</h1></div><Link href="/dashboard/products/new" className="btn-primary">Add product <ArrowRight size={16} /></Link></header>
@@ -34,7 +36,7 @@ export default async function DashboardHome() {
         <div className="flex items-start justify-between"><div><p className="text-xs font-bold text-white/60">AVAILABLE TO WITHDRAW</p><p className="display mt-3 text-4xl sm:text-[42px]">{formatNaira(wallet?.available)}</p><p className="mt-2 text-xs text-white/65">Paid orders are available directly.</p></div><span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 text-mango"><WalletCards size={21} /></span></div>
         <div className="mt-9 flex items-center justify-between"><span className="text-sm font-bold text-mango">Open wallet</span><ArrowRight size={18} /></div>
       </Link>
-      <div className="app-card p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="eyebrow text-kola">Store access</p><h2 className="mt-2 text-base font-extrabold">Share your store ID</h2></div><span className="grid h-10 w-10 place-items-center rounded-2xl bg-kola-light text-kola"><ShieldCheck size={20} /></span></div><p className="mt-3 text-xs leading-5 text-muted">Buyers enter this ID in their Sella account to open your store, trust it, and shop.</p><p className="mt-4 rounded-xl bg-kola-light px-4 py-3 text-center text-xl font-extrabold tracking-[.2em] text-kola">{store.seller_code || "Generating…"}</p><CopyStoreLink url={storeUrl(SITE_URL, store.slug)} />{trialDays !== null && <p className="mt-4 text-[11px] font-bold text-kola">{trialDays} days left in your 10-day trial · up to 15 products · <Link href="/dashboard/billing" className="underline">View plans</Link></p>}</div>
+      <div className="app-card p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="eyebrow text-kola">Store access</p><h2 className="mt-2 text-base font-extrabold">Share your store ID</h2></div><span className="grid h-10 w-10 place-items-center rounded-2xl bg-kola-light text-kola"><ShieldCheck size={20} /></span></div><p className="mt-3 text-xs leading-5 text-muted">Buyers enter this ID in their Sella account to open your store, trust it, and shop.</p><p className="mt-4 rounded-xl bg-kola-light px-4 py-3 text-center text-xl font-extrabold tracking-[.2em] text-kola">{store.seller_code || "Generating…"}</p><CopyStoreLink url={storeUrl(SITE_URL, store.slug)} />{activeSubscription ? <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-xs font-extrabold text-success">{planName} plan active until {new Date(activeSubscription.expires_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p> : trialDays !== null && <p className="mt-4 text-[11px] font-bold text-kola">{trialDays} days left in your 10-day trial · up to 15 products · <Link href="/dashboard/billing" className="underline">View plans</Link></p>}</div>
     </section>
 
     <section className="grid grid-cols-3 gap-3">

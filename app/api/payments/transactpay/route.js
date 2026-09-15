@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { notifyUser } from "@/lib/notifications";
+import { notifyPlatformAdmins, notifyUser } from "@/lib/notifications";
 import { getPaymentTransactionDetails } from "@/lib/payments/transactpay";
 
 async function notifySafely(input) {
@@ -109,6 +109,14 @@ export async function POST(request) {
     if (subscriptionResult.data?.handled) {
       if (subscriptionResult.data.user_id && subscriptionResult.data.paid) await notifySafely({ userId: subscriptionResult.data.user_id, type: "subscription", title: "Plan upgraded", body: "Your Sella plan payment was confirmed and your store plan is now active.", link: "/dashboard/billing", save: false });
       return NextResponse.json(subscriptionResult.data);
+    }
+
+    const verificationResult = await supabase.rpc("process_store_verification_webhook", { p_event_key: key, p_payload: payload, p_successful: successful, p_account_number: fields.accountNumber, p_account_reference: fields.accountReference, p_amount: fields.amount, p_payment_reference: fields.paymentReference, p_order_reference: fields.orderReference });
+    if (verificationResult.error) throw verificationResult.error;
+    if (verificationResult.data?.handled) {
+      if (verificationResult.data.user_id && verificationResult.data.paid) await notifySafely({ userId: verificationResult.data.user_id, type: "verification", title: "Verification payment received", body: "Your blue checkmark review payment was received. Sella Team will review your store.", link: "/dashboard/verification-badge", save: false });
+      if (verificationResult.data.paid) await notifyPlatformAdmins({ type: "verification", title: "Paid verification review requested", body: "A seller paid for a blue checkmark review.", link: "/admin?section=badge_reviews" });
+      return NextResponse.json(verificationResult.data);
     }
 
     const { data: result, error } = await supabase.rpc("process_transactpay_webhook", { p_event_key: key, p_payload: payload, p_successful: successful, p_account_number: fields.accountNumber, p_account_reference: fields.accountReference, p_amount: fields.amount, p_payment_reference: fields.paymentReference, p_order_reference: fields.orderReference });

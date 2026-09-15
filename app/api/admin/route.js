@@ -13,6 +13,7 @@ export async function POST(request) {
     if (body.action === "setting") {
       const definitions = {
         withdrawal_fee: { field: "amount", max: 1000000 },
+        paid_verification_fee: { field: "amount", max: 1000000 },
       };
       const definition = definitions[body.key];
       const field = definition?.field;
@@ -20,7 +21,11 @@ export async function POST(request) {
       if (!definition || !Number.isFinite(numeric) || numeric < 0 || numeric > definition.max) return NextResponse.json({ error: "Enter a valid fee value." }, { status: 400 });
       body.value = { [field]: numeric };
     }
-    if (body.action === "payment_config") {
+    if (body.action === "paid_verification") {
+      const { data: review, error: reviewError } = await auth.rpc("admin_review_paid_verification", { p_purchase_id: body.purchaseId, p_approved: Boolean(body.approved), p_note: body.note || null });
+      if (reviewError) throw reviewError;
+      if (review?.user_id) await notifyUser({ userId: review.user_id, type: "verification", title: body.approved ? "Blue checkmark approved" : "Blue checkmark review update", body: body.approved ? "Your Sella blue checkmark is now active." : (body.note || "Your blue checkmark review was not approved."), link: "/dashboard/verification-badge", save: false });
+    } else if (body.action === "payment_config") {
       await saveTransactPayConfig({ baseUrl: body.baseUrl, publicKey: body.publicKey, secretKey: body.secretKey, encryptionKey: body.encryptionKey });
     } else {
       const withdrawal = body.action === "withdrawal_status" ? (await auth.from("withdrawals").select("amount,store_id,stores(owner_id,name)").eq("id", body.withdrawalId).maybeSingle()).data : null;
