@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function AdminSettingForm({ initialValue, initialRate, settingKey = "commission_rate", label = "Save", valueField = "rate", inputLabel = "Rate %", min = 0, max = 100, step = 0.01 }) {
+export default function AdminSettingForm({ initialValue, initialRate, settingKey = "withdrawal_fee", label = "Save", valueField = "rate", inputLabel = "Rate %", min = 0, max = 100, step = 0.01 }) {
   const [value, setValue] = useState(initialValue ?? initialRate ?? 0);
   const [message, setMessage] = useState("");
   async function submit(event) {

@@ -91,7 +91,6 @@ export async function POST(request) {
       orderCode: order.order_code,
       paid: false,
       paymentTotal: Number(order.payment_total || order.total),
-      bankTransferFee: Number(order.bank_transfer_fee || 0),
       paymentExpiresAt: savedOrder?.payment_expires_at || null,
       paymentSessionId,
       account: {

@@ -22,7 +22,7 @@ export default function FAQPage() {
       },
       {
         heading: "What does Sella cost?",
-        body: "Every new store gets a 10-day free trial with up to 15 products, no card required. After that, choose a plan: Basic (3 months, ₦7,500), Plus (6 months, ₦14,000), or Premium (12 months, ₦25,000) — every plan has the same features. Sella also takes a 3% commission on each paid order. There are no fees charged to your buyers."
+        body: "Every new store gets a 10-day free trial with up to 15 products, no card required. After that, choose a plan: Basic (3 months, ₦7,500, 3% commission), Plus (6 months, ₦14,000, 2.8% commission), or Premium (12 months, ₦25,000, 2.5% commission)."
       },
       {
         heading: "Who handles delivery?",
@@ -30,11 +30,11 @@ export default function FAQPage() {
       },
       {
         heading: "How and when do I get paid?",
-        body: "Payments land in your Sella wallet as soon as they're confirmed. You can withdraw to your bank account at any time; a small fee applies and is deducted from the amount withdrawn, and it's usually sent within 30 minutes to an hour."
+        body: "Payments land in your Sella wallet as soon as they're confirmed. You can withdraw to your bank account at any time; a small payout charge applies and is deducted from the amount withdrawn, and it is usually sent within 30 minutes to an hour."
       },
       {
         heading: "Do I need to verify my identity to sell on Sella?",
-        body: "No — verifying your NIN or CAC-registered business is optional. It's there for sellers who want to build extra trust with buyers, not a requirement to open a store."
+        body: "Yes. Seller verification is part of opening and operating a Sella store. Submit the requested identity and business information so the Sella Team can review your store before it goes live."
       }
     ]}
   />;

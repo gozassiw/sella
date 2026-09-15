@@ -11,7 +11,7 @@ function countdown(milliseconds) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-export default function BankTransferPaymentPanel({ orderId, orderCode, account, paymentTotal, orderTotal, bankTransferFee = 0, paymentExpiresAt, onPaid }) {
+export default function BankTransferPaymentPanel({ orderId, orderCode, account, paymentTotal, orderTotal, paymentExpiresAt, onPaid }) {
   const [now, setNow] = useState(() => Date.now());
   const [checking, setChecking] = useState(false);
   const [expired, setExpired] = useState(false);
@@ -20,7 +20,6 @@ export default function BankTransferPaymentPanel({ orderId, orderCode, account, 
   const expiry = paymentExpiresAt ? new Date(paymentExpiresAt).getTime() : null;
   const remaining = expiry ? Math.max(0, expiry - now) : null;
   const exactAmount = Number(paymentTotal || orderTotal || 0);
-  const fee = Number(bankTransferFee || 0);
   const expiredText = useMemo(() => "This 30-minute payment window has expired. Your items have been restocked. Check out again to create a new payment order.", []);
 
   useEffect(() => {
@@ -69,7 +68,6 @@ export default function BankTransferPaymentPanel({ orderId, orderCode, account, 
     <div className="flex items-start gap-3"><Clock3 size={20} className="mt-0.5 shrink-0 text-kola" /><div><h2 className="font-semibold">Complete your bank transfer</h2>{remaining !== null && <p className="mt-1 text-sm font-bold text-kola">Time remaining: {countdown(remaining)}</p>}</div></div>
     <p className="mt-4 text-sm leading-6">Send exactly <strong>{formatNaira(exactAmount)}</strong> to <strong>{account?.bank || "the assigned bank"}</strong> account <strong>{account?.number}</strong>.</p>
     {account?.name && <p className="mt-1 text-sm text-muted">Account name: {account.name}</p>}
-    {fee > 0 && <p className="mt-3 text-xs text-muted">Order total {formatNaira(orderTotal)} + bank-transfer fee {formatNaira(fee)} = amount to send {formatNaira(exactAmount)}.</p>}
     <p className="mt-4 rounded-xl bg-white/70 p-3 text-xs font-semibold leading-5 text-danger">Send the exact amount shown below. If you send a different amount, it may not be matched to your order automatically.</p>
     <button type="button" onClick={checkPayment} disabled={checking} className="btn-primary mt-4 inline-flex items-center gap-2">{checking ? "Checking your payment..." : <><RefreshCw size={16} />Transfer done</>}</button>
     {message && <p className="mt-3 text-sm text-muted">{message}</p>}

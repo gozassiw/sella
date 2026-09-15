@@ -12,9 +12,6 @@ export async function POST(request) {
   try {
     if (body.action === "setting") {
       const definitions = {
-        deposit_fee_rate: { field: "rate", max: 100 },
-        bank_transfer_fee_rate: { field: "rate", max: 100 },
-        commission_rate: { field: "rate", max: 100 },
         withdrawal_fee: { field: "amount", max: 1000000 },
       };
       const definition = definitions[body.key];
