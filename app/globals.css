@@ -159,6 +159,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .seller-homepage .seller-foot-links { display: flex; gap: 20px; font-size: 14px; color: var(--seller-muted); }
 .seller-homepage .seller-foot-links a { text-decoration: none; }
 .seller-homepage .seller-copyright { font-size: 13px; color: var(--seller-muted); margin-top: 22px; }
+.seller-homepage .seller-company-note { margin-top: 6px; font-size: 12px; color: var(--seller-muted); }
 .seller-homepage a:focus-visible, .seller-homepage button:focus-visible { outline: 3px solid var(--seller-kola); outline-offset: 2px; }
 @media (prefers-color-scheme: dark) {
   .seller-homepage {

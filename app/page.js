@@ -226,7 +226,7 @@ export default async function Home() {
             <SellaBrand />
             <div className="seller-foot-links"><Link href={loginHref}>Login</Link><Link href={signupHref}>Create account</Link></div>
           </div>
-          <div className="seller-copyright">© 2026 Sella · sella.com.ng</div>
+          <div className="seller-copyright"><div>© 2026 Jojokev Concepts · sella.com.ng</div><div className="seller-company-note">Sella is a product of Jojokev Digital · CAC Registration No. BN9832074</div></div>
         </div>
       </footer>
     </div>
