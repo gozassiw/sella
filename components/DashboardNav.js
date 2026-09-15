@@ -24,7 +24,7 @@ const tools = [
   { href: "/dashboard/billing", label: "Plans & billing", icon: WalletCards },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   { href: "/dashboard/verification", label: "Seller verification", icon: Settings },
-  { href: "/dashboard/verification-badge", label: "Blue checkmark", icon: BadgeCheck },
+  { href: "/dashboard/verification-badge", label: "Verification checkmark", icon: BadgeCheck },
   { href: "/dashboard/settings", label: "Store settings", icon: Settings },
 ];
 

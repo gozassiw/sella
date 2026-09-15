@@ -21,14 +21,16 @@ function ProductCard({ product, store }) {
 
 export default async function AccountPage() {
   const { supabase, user } = await getCurrentUser();
-  const [{ data: profile }, { data: orders }, { data: follows }, { data: discoveryStores }] = await Promise.all([
+  const [{ data: profile }, { data: orders }, { data: follows }, { data: verifiedRows }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle(),
     supabase.from("orders").select("id,order_code,total,status,payment_status,created_at,stores(name,slug)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(4),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,category,logo_url,brand_color,paid_verification_approved)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
-    supabase.from("stores").select("id,name,slug,category,logo_url,brand_color,paid_verification_approved").eq("approval_status", "approved").eq("is_published", true).eq("paid_verification_approved", true).order("approved_at", { ascending: false }).limit(8),
+    supabase.rpc("get_public_verified_store_ids"),
   ]);
   if (!profile) redirect("/account/setup");
-  const trustedStores = (follows || []).map((item) => item.stores).filter(Boolean);
+  const verifiedIds = (verifiedRows || []).map((row) => row.store_id).filter(Boolean);
+  const { data: discoveryStores } = verifiedIds.length ? await supabase.from("stores").select("id,name,slug,category,logo_url,brand_color,paid_verification_approved").eq("approval_status", "approved").eq("is_published", true).in("id", verifiedIds).order("approved_at", { ascending: false }).limit(8) : { data: [] };
+  const trustedStores = (follows || []).map((item) => item.stores ? { ...item.stores, paid_verification_approved: verifiedIds.includes(item.stores.id) } : null).filter(Boolean);
   const discovery = (discoveryStores || []).filter((store) => !trustedStores.some((trusted) => trusted.id === store.id));
   const allStores = [...trustedStores, ...discovery];
   const storeMap = new Map(allStores.map((store) => [store.id, store]));
