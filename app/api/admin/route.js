@@ -21,7 +21,12 @@ export async function POST(request) {
       if (!definition || !Number.isFinite(numeric) || numeric < 0 || numeric > definition.max) return NextResponse.json({ error: "Enter a valid fee value." }, { status: 400 });
       body.value = { [field]: numeric };
     }
-    if (body.action === "paid_verification") {
+    if (body.action === "launch_settings") {
+      const launchAt = body.launchAt == null || body.launchAt === "" ? null : new Date(body.launchAt);
+      if (launchAt && Number.isNaN(launchAt.getTime())) return NextResponse.json({ error: "Enter a valid launch date and time." }, { status: 400 });
+      const { error } = await auth.rpc("admin_apply_action", { p_action: "setting", p_payload: { key: "launch_mode", value: { enabled: Boolean(body.enabled), launch_at: launchAt ? launchAt.toISOString() : null } } });
+      if (error) throw error;
+    } else if (body.action === "paid_verification") {
       const { data: review, error: reviewError } = await auth.rpc("admin_review_paid_verification", { p_purchase_id: body.purchaseId, p_approved: Boolean(body.approved), p_note: body.note || null });
       if (reviewError) throw reviewError;
       if (review?.user_id) await notifyUser({ userId: review.user_id, type: "verification", title: body.approved ? "Blue checkmark approved" : "Blue checkmark review update", body: body.approved ? "Your Sella blue checkmark is now active." : (body.note || "Your blue checkmark review was not approved."), link: "/dashboard/verification-badge", save: false });

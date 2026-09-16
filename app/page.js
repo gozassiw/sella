@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import SellaBrand from "@/components/SellaBrand";
 import InstallPrompt from "@/components/InstallPrompt";
@@ -23,6 +24,11 @@ const signupHref = "/signup";
 export default async function Home() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    const { data: launchSettings } = await supabase.rpc("get_public_launch_settings");
+    const previewEnabled = cookies().get("sella_preview")?.value === "1";
+    if (launchSettings?.enabled === true && !previewEnabled) redirect("/waiting");
+  }
   if (user) {
     const { data: admin, error: adminError } = await supabase.rpc("is_platform_admin");
     if (!adminError && admin === true) redirect("/admin");
