@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function POST() {
+export async function POST(request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
+  const body = await request.json().catch(() => ({}));
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  if (!reason) return NextResponse.json({ error: "Please choose a reason before closing your account." }, { status: 400 });
 
-  const { data, error } = await supabase.rpc("close_my_account");
+  const { data, error } = await supabase.rpc("close_my_account", { p_reason: reason });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
   try {

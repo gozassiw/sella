@@ -7,6 +7,7 @@ create table if not exists public.account_closures (
   user_id uuid primary key references auth.users(id) on delete cascade,
   role text not null check (role in ('buyer', 'seller', 'both')),
   closed_at timestamptz not null default now(),
+  closure_reason text not null,
   retention_note text not null default 'Limited order, payment, fraud, legal, and audit records retained for reconciliation and legal obligations.'
 );
 
@@ -15,7 +16,8 @@ drop policy if exists account_closures_owner_read on public.account_closures;
 create policy account_closures_owner_read on public.account_closures
 for select to authenticated using (user_id = auth.uid());
 
-create or replace function public.close_my_account()
+drop function if exists public.close_my_account();
+create or replace function public.close_my_account(p_reason text)
 returns jsonb
 language plpgsql
 security definer
@@ -30,6 +32,7 @@ declare
   v_now timestamptz := now();
 begin
   if v_user_id is null then raise exception 'You must be signed in to close your account.'; end if;
+  if nullif(trim(p_reason), '') is null then raise exception 'Please choose a reason before closing your account.'; end if;
   if exists (select 1 from public.account_closures where user_id = v_user_id) then
     return jsonb_build_object('closed', true, 'already_closed', true);
   end if;
@@ -50,7 +53,7 @@ begin
   end if;
 
   insert into public.account_closures(user_id, role, closed_at)
-  values (v_user_id, v_role, v_now);
+  values (v_user_id, v_role, v_now, trim(p_reason));
 
   -- Remove personal buyer profile, follows, notifications, consent copy,
   -- subscriptions, and chat media/message content owned by this account.
@@ -100,7 +103,7 @@ begin
     where id = v_store.id;
   end if;
 
-  return jsonb_build_object('closed', true, 'role', v_role, 'closed_at', v_now);
+  return jsonb_build_object('closed', true, 'role', v_role, 'reason', trim(p_reason), 'closed_at', v_now);
 end;
 $$;
 
