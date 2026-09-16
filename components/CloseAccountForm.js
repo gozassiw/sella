@@ -9,11 +9,17 @@ export default function CloseAccountForm({ role = "account" }) {
   const [error, setError] = useState("");
   const [reason, setReason] = useState("");
 
-  const reasons = [
-    "I no longer need Sella",
-    "Sella is not right for me or my business",
-    "I had a problem using Sella",
-  ];
+  const reasons = role === "seller"
+    ? [
+        "I am no longer selling online",
+        "Sella is not right for my business",
+        "I had a problem managing my store",
+      ]
+    : [
+        "I am no longer buying through Sella",
+        "I could not find what I needed",
+        "I had a problem placing or receiving an order",
+      ];
 
   async function closeAccount() {
     if (!reason) return setError("Please choose a reason first.");
