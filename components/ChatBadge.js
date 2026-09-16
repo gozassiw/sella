@@ -17,5 +17,5 @@ export default function ChatBadge({ children }) {
     (async () => { const { data: { user } } = await supabase.auth.getUser(); if (!user) return; channel = supabase.channel(`sella-chat-badge-${user.id}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe(); await load(); })();
     return () => { active = false; if (channel) supabase.removeChannel(channel); };
   }, []);
-  return <span className="relative inline-flex">{children}{unread > 0 && <span aria-label={`${unread} unread messages`} className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-mango px-1 text-[9px] font-extrabold leading-none text-kola-dark">{unread > 9 ? "9+" : unread}</span>}</span>;
+  return <span className="relative flex w-full min-w-0">{children}{unread > 0 && <span aria-label={`${unread} unread messages`} className="absolute -right-1 -top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-mango px-1 text-[9px] font-extrabold leading-none text-kola-dark">{unread > 9 ? "9+" : unread}</span>}</span>;
 }
