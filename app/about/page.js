@@ -6,7 +6,7 @@ export default function AboutPage() {
   return <InfoPage
     eyebrow="ABOUT SELLA"
     title="A clearer way to run your store."
-    intro="Sella is built by Jojokev Digital, a Nigerian company, for the sellers already running real businesses through WhatsApp, Instagram, and word of mouth — just without the tools to match."
+    intro="Sella is a commerce and business-management platform that connects independent sellers with their customers. Sellers manage their own stores, products, orders and deliveries, while Sella provides the technology for storefronts, payments and business management."
     sections={[
       {
         heading: "Who we are",
@@ -14,7 +14,7 @@ export default function AboutPage() {
       },
       {
         heading: "What we believe",
-        body: "We believe a seller shouldn't need a big budget or technical skill to look professional online. We believe trust matters more than reach — which is why Sella stores aren't open for anyone to stumble onto; buyers only find a store through a link or ID the seller shares themselves. And we believe in being upfront: what a buyer sees at checkout is exactly what they pay, and what a seller signs up for is exactly what they're charged. No hidden steps, no surprises."
+        body: "Sella supports business-to-consumer transactions without a public marketplace discovery feed. Buyers choose independent stores using a shared store link or Store ID and the Trust Store feature. Sellers are responsible for their products, descriptions, fulfilment, deliveries and applicable refunds. Sella remains responsible for its platform, its payment-related processes and complaints within its responsibilities."
       }
     ]}
   />;

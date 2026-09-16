@@ -1,0 +1,13 @@
+{
+  "scope": "Isolated real component tests with mocked API; not live signed-in transactions",
+  "passed": [
+    "Signup completes mocked auth flow with existing fields and no store trust; real email delivery not tested",
+    "Correct store identity; unchecked confirmation disabled; cancel made no trust write",
+    "Acknowledged confirmation submitted with notice nonce and success message",
+    "Existing trust does not auto-open modal",
+    "Existing order ReportForm submits case and shows case reference without JS reset errors",
+    "First-purchase information is inline; returning customer reminder omitted",
+    "Manual bank settlement confirmation needs checkbox and exact-channel details before sending",
+    "No browser runtime errors; no horizontal overflow at 390px"
+  ]
+}

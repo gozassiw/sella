@@ -35,12 +35,12 @@ export async function POST(request) {
     } else {
       const withdrawal = body.action === "withdrawal_status" ? (await auth.from("withdrawals").select("amount,store_id,stores(owner_id,name)").eq("id", body.withdrawalId).maybeSingle()).data : null;
       const { data: actionResult, error } = body.action === "withdrawal_status"
-        ? await auth.rpc("admin_process_withdrawal", { p_withdrawal_id: body.withdrawalId, p_status: body.status, p_note: body.note || null })
+        ? await auth.rpc("admin_review_withdrawal", { p_withdrawal_id: body.withdrawalId, p_status: body.status, p_confirmation: body.confirmation || {}, p_note: body.note || null })
         : await auth.rpc("admin_apply_action", { p_action: body.action, p_payload: body });
       if (error) throw error;
       if (actionResult?.user_id && body.action === "account_hold") await notifyUser({ userId: actionResult.user_id, type: "account_hold", title: body.held === false ? "Account released" : "Account placed on hold", body: body.held === false ? "Your Sella account is active again." : (body.reason || "Sella Team has paused activity on this account."), link: body.held === false ? "/account" : "/account/profile", save: false });
       if (actionResult?.user_id && body.action === "store_approval") await notifyUser({ userId: actionResult.user_id, type: "verification", title: body.approvalStatus === "approved" ? "Store approved" : "Update requested for your store", body: body.approvalStatus === "approved" ? "Your store is live on the free Starter plan with up to 40 active product listings." : (body.reason || "Please update your seller details and resubmit for verification."), link: "/dashboard", save: false });
-      if (body.action === "withdrawal_status") {
+      if (body.action === "withdrawal_status" && actionResult?.changed !== false) {
         const sent = body.status === "paid" || body.status === "sent";
         const { error: withdrawalNotificationError } = await auth.rpc("notify_withdrawal_owner", { p_withdrawal_id: body.withdrawalId, p_status: body.status });
         if (withdrawalNotificationError) console.error("Withdrawal notification record failed", withdrawalNotificationError);

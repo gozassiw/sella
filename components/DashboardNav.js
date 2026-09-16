@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, BadgeCheck, Bell, Home, LogOut, Menu, MessageCircle, Package, Receipt, Search, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
+import { ShieldCheck, BarChart3, BadgeCheck, Bell, Home, LogOut, Menu, MessageCircle, Package, Receipt, Search, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
 import SellaBrand from "@/components/SellaBrand";
 import NotificationBell from "@/components/NotificationBell";
 import ChatBadge from "@/components/ChatBadge";
@@ -11,7 +11,7 @@ const primary = [
   { href: "/dashboard", label: "Overview", icon: Home }, { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag }, { href: "/dashboard/products", label: "Products", icon: Package }, { href: "/dashboard/messages", label: "Messages", icon: MessageCircle }, { href: "/dashboard/wallet", label: "Wallet", icon: WalletCards },
 ];
 const tools = [
-  { href: "/dashboard/customers", label: "Customers", icon: Users }, { href: "/dashboard/offline-sales", label: "Offline sales", icon: Receipt }, { href: "/dashboard/invoices", label: "Invoices", icon: Receipt }, { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 }, { href: "/dashboard/expenses", label: "Expenses", icon: Receipt }, { href: "/dashboard/referrals", label: "Referrals", icon: Users }, { href: "/dashboard/billing", label: "Plans & billing", icon: WalletCards }, { href: "/dashboard/notifications", label: "Notifications", icon: Bell }, { href: "/dashboard/verification", label: "Seller verification", icon: Settings }, { href: "/dashboard/verification-badge", label: "Verification checkmark", icon: BadgeCheck }, { href: "/dashboard/settings", label: "Store settings", icon: Settings },
+  { href: "/dashboard/customers", label: "Customers", icon: Users }, { href: "/dashboard/offline-sales", label: "Offline sales", icon: Receipt }, { href: "/dashboard/invoices", label: "Invoices", icon: Receipt }, { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 }, { href: "/dashboard/expenses", label: "Expenses", icon: Receipt }, { href: "/dashboard/referrals", label: "Referrals", icon: Users }, { href: "/dashboard/billing", label: "Plans & billing", icon: WalletCards }, { href: "/dashboard/reports", label: "Reports & Safety", icon: ShieldCheck }, { href: "/dashboard/notifications", label: "Notifications", icon: Bell }, { href: "/dashboard/verification", label: "Seller verification", icon: Settings }, { href: "/dashboard/verification-badge", label: "Verification checkmark", icon: BadgeCheck }, { href: "/dashboard/settings", label: "Store settings", icon: Settings },
 ];
 
 export default function DashboardNav({ store }) {
