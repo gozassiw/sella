@@ -260,3 +260,27 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .seller-homepage .demo-section-heading { display: block; }
   .seller-homepage .demo-month-controls { justify-content: space-between; margin-top: 20px; }
 }
+
+/* Admin workspace mobile layout */
+.admin-workspace, .admin-workspace main, .admin-workspace section, .admin-workspace .app-card { min-width: 0; }
+.admin-workspace .admin-main { overflow-x: hidden; }
+.admin-workspace .admin-header-inner { min-height: 64px; }
+.admin-workspace .admin-header-actions a { white-space: nowrap; }
+@media (max-width: 640px) {
+  .admin-workspace .admin-header-inner { padding-left: 16px; padding-right: 16px; }
+  .admin-workspace .admin-header-actions { gap: 6px; }
+  .admin-workspace .admin-alerts-link, .admin-workspace .admin-dashboard-link { padding: 9px 10px; font-size: 11px; }
+  .admin-workspace .admin-main { padding-left: 16px; padding-right: 16px; }
+  .admin-workspace .admin-intro h1 { line-height: 1.05; }
+  .admin-workspace .app-card { border-radius: 18px; }
+  .admin-workspace .app-card.p-6 { padding: 20px; }
+  .admin-workspace [class*="min-w-[210px]"], .admin-workspace [class*="min-w-[220px]"] { min-width: 0; width: 100%; }
+  .admin-workspace .chip { max-width: 100%; white-space: normal; text-align: right; }
+  .admin-workspace input, .admin-workspace select, .admin-workspace textarea { max-width: 100%; }
+}
+@media (max-width: 380px) {
+  .admin-workspace .admin-header-inner { padding-left: 12px; padding-right: 12px; }
+  .admin-workspace .admin-header-actions { gap: 4px; }
+  .admin-workspace .admin-alerts-link, .admin-workspace .admin-dashboard-link { padding-left: 7px; padding-right: 7px; font-size: 10px; }
+  .admin-workspace .admin-header-inner > div:first-child > span { font-size: 12px; }
+}
