@@ -8,7 +8,7 @@ import AIProductDescriptionButton from "@/components/AIProductDescriptionButton"
 
 const MAX_PHOTOS = 4;
 
-export default function ProductForm({ storeId, userId, product, trialProductLimitReached = false }) {
+export default function ProductForm({ storeId, userId, product, productLimit = null, activeProductCount = 0, planName = "Starter", trialProductLimitReached = false }) {
   const router = useRouter();
   const [form, setForm] = useState({
     name: product?.name ?? "",
@@ -46,7 +46,8 @@ export default function ProductForm({ storeId, userId, product, trialProductLimi
 
   async function save(e) {
     e.preventDefault();
-    if (!product && trialProductLimitReached) return setError("Your 10-day trial allows up to 15 products. Choose a paid plan to keep growing your catalog.");
+    const listingLimitReached = productLimit !== null && Number(activeProductCount) >= Number(productLimit) && form.is_active && (!product || product.is_active === false);
+    if ((!product || product.is_active === false) && (trialProductLimitReached || listingLimitReached)) return setError(`Your ${planName} plan allows up to ${productLimit || 40} active product listings. Choose a higher plan to add more.`);
     if (!form.name.trim() || form.price === "") return setError("Add a product name and selling price.");
     if (Number(form.cost_price || 0) > Number(form.price)) return setError("Cost price cannot be higher than selling price.");
     setSaving(true);
@@ -151,12 +152,12 @@ export default function ProductForm({ storeId, userId, product, trialProductLimi
         <input type="checkbox" className="h-5 w-5 accent-kola" checked={form.is_active} onChange={update("is_active")} />
       </label>
 
-      {!product && trialProductLimitReached && <p className="rounded-xl bg-amber-50 p-3 text-sm leading-6 text-warning">Your 10-day trial allows up to 15 products. Choose a paid plan to add more.</p>}
+      {productLimit !== null && Number(activeProductCount) >= Number(productLimit) && (!product || product.is_active === false) && <p className="rounded-xl bg-amber-50 p-3 text-sm leading-6 text-warning">Your {planName} plan allows up to {productLimit} active product listings. Choose a higher plan to add more.</p>}
 
       {error && <p className="error">{error}</p>}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button className="btn-primary" disabled={saving || uploading || (!product && trialProductLimitReached)}>{saving ? "Saving…" : product ? "Save changes" : "Add product"}</button>
+        <button className="btn-primary" disabled={saving || uploading || (((!product || product.is_active === false) && trialProductLimitReached) || (productLimit !== null && Number(activeProductCount) >= Number(productLimit) && form.is_active && (!product || product.is_active === false)))}>{saving ? "Saving…" : product ? "Save changes" : "Add product"}</button>
         <button type="button" className="btn-secondary" onClick={() => router.back()}>Cancel</button>
         {product && <button type="button" className="btn-danger ml-auto" onClick={remove}>Delete product</button>}
       </div>

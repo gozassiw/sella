@@ -168,11 +168,12 @@ export default async function Home() {
           <div className="seller-wrap">
             <div className="seller-eyebrow">Pricing</div>
             <h2>Try it properly, free.</h2>
-            <p className="seller-lede" style={{ marginTop: 10 }}>10 days free, up to 15 products, no card needed. After that, pick what fits — every plan has the same features.</p>
+            <p className="seller-lede" style={{ marginTop: 10 }}>Start on Starter for free with up to 40 active products and no expiry. Upgrade when you need more capacity or want a lower commission rate.</p>
             <div className="seller-plans-grid">
-              <div className="seller-plan"><div className="seller-plan-name">Basic</div><div className="seller-price">₦7,500</div><div className="seller-per">every 3 months</div><ul><li><CheckIcon /> Unlimited products</li><li><CheckIcon /> Orders, wallet &amp; withdrawals</li><li><CheckIcon /> In-app buyer chat</li></ul></div>
-              <div className="seller-plan seller-featured"><div className="seller-plan-name">Plus</div><div className="seller-price">₦14,000</div><div className="seller-per">every 6 months</div><ul><li><CheckIcon /> Everything in Basic</li><li><CheckIcon /> Better value per month</li><li><CheckIcon /> Same features, less admin</li></ul></div>
-              <div className="seller-plan"><div className="seller-plan-name">Premium</div><div className="seller-price">₦25,000</div><div className="seller-per">every 12 months</div><ul><li><CheckIcon /> Everything in Basic</li><li><CheckIcon /> Lowest monthly cost</li><li><CheckIcon /> One payment, a full year</li></ul></div>
+              <div className="seller-plan"><div className="seller-plan-name">Starter</div><div className="seller-price">Free</div><div className="seller-per">no expiry</div><ul><li><CheckIcon /> Up to 40 active products</li><li><CheckIcon /> Orders, wallet &amp; withdrawals</li><li><CheckIcon /> In-app buyer chat</li><li><CheckIcon /> 3.2% commission</li></ul></div>
+              <div className="seller-plan"><div className="seller-plan-name">Basic</div><div className="seller-price">₦7,500</div><div className="seller-per">every 3 months</div><ul><li><CheckIcon /> Up to 150 active products</li><li><CheckIcon /> Analytics, expenses &amp; invoices</li><li><CheckIcon /> 2.8% commission</li></ul></div>
+              <div className="seller-plan seller-featured"><div className="seller-plan-name">Plus</div><div className="seller-price">₦14,000</div><div className="seller-per">every 6 months</div><ul><li><CheckIcon /> Up to 500 active products</li><li><CheckIcon /> Everything in Basic</li><li><CheckIcon /> 2.6% commission</li></ul></div>
+              <div className="seller-plan"><div className="seller-plan-name">Premium</div><div className="seller-price">₦25,000</div><div className="seller-per">every 12 months</div><ul><li><CheckIcon /> Unlimited active products</li><li><CheckIcon /> Everything in Plus</li><li><CheckIcon /> 2.4% commission</li></ul></div>
             </div>
           </div>
         </section>
