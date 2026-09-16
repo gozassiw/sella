@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { Bell, CircleHelp, Home, Landmark, MapPin, Package, Search, Settings, Store, WalletCards } from "lucide-react";
 import { redirect } from "next/navigation";
-import { Bell } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import BuyerBottomNav from "@/components/BuyerBottomNav";
 import LiveWorkspaceRefresh from "@/components/LiveWorkspaceRefresh";
@@ -8,13 +8,15 @@ import NotificationBell from "@/components/NotificationBell";
 import SellaBrand from "@/components/SellaBrand";
 import CartIcon from "@/components/CartIcon";
 
+const links = [
+  ["/account", "Home", Home], ["/account", "My Stores", Store], ["/account/wallet", "Wallet", WalletCards], ["/account/orders", "Orders", Package], ["/account/wallet", "Transactions", Landmark], ["/account/profile", "Saved Addresses", MapPin], ["/account/notifications", "Notifications", Bell], ["/faq", "Help & Support", CircleHelp], ["/account/profile", "Settings", Settings],
+];
+
 export default async function AccountLayout({ children }) {
   const { supabase, user } = await getCurrentUser();
   if (!user) redirect("/login?next=/account");
-  const [{ data: held }, { data: wallet }] = await Promise.all([
-    supabase.rpc("is_account_held", { p_user_id: user.id }),
-    supabase.rpc("get_or_create_buyer_wallet"),
-  ]);
+  const [{ data: held }, { data: wallet }, { data: profile }] = await Promise.all([supabase.rpc("is_account_held", { p_user_id: user.id }), supabase.rpc("get_or_create_buyer_wallet"), supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle()]);
   if (held) return <div className="min-h-screen bg-surface"><header className="border-b border-line bg-white"><div className="mx-auto flex max-w-[1120px] items-center justify-between px-4 py-4 sm:px-6"><SellaBrand compact /><span className="text-xs font-bold text-warning">Account on hold</span></div></header><main className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-10"><div className="app-card w-full p-7 text-center sm:p-10"><p className="eyebrow text-warning">Sella Team review</p><h1 className="display mt-3 text-3xl">Your buyer account is temporarily paused</h1><p className="mt-4 text-sm leading-6 text-muted">Shopping, wallet transfers, and orders are paused while Sella Team reviews this account. Contact Sella support if you believe this is a mistake.</p></div></main></div>;
-  return <div className="min-h-screen bg-surface pb-28"><LiveWorkspaceRefresh scope="buyer" userId={user.id} walletId={wallet?.id} /><header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-[1120px] items-center justify-between gap-4 px-4 py-3 sm:px-6"><SellaBrand href="/account" compact /><div className="flex items-center gap-2"><NotificationBell><Link href="/account/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full bg-surface text-ink"><Bell size={18} /></Link></NotificationBell><CartIcon /></div></div></header><main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 lg:px-8">{children}</main><BuyerBottomNav /></div>;
+  const firstName = profile?.full_name?.split(" ")?.[0] || user.email?.split("@")[0] || "Buyer";
+  return <div className="buyer-workspace min-h-screen bg-surface pb-28 md:pb-0 md:pl-[232px]"><LiveWorkspaceRefresh scope="buyer" userId={user.id} walletId={wallet?.id} /><aside className="fixed inset-y-0 left-0 z-40 hidden w-[232px] border-r border-line bg-white px-4 py-5 md:block"><SellaBrand href="/account" compact /><nav className="mt-10 space-y-1">{links.map(([href, label, Icon], index) => <Link key={`${label}-${index}`} href={href} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold ${index === 0 ? "bg-kola-light text-kola" : "text-muted hover:bg-surface hover:text-ink"}`}><Icon size={18} strokeWidth={index === 0 ? 2.3 : 1.8} />{label}{label === "Notifications" && <span className="ml-auto h-2 w-2 rounded-full bg-success" />}</Link>)}</nav><div className="absolute bottom-6 left-4 right-4 rounded-2xl bg-kola-light p-4"><p className="text-sm font-extrabold text-kola-dark">Shop smarter with Sella</p><p className="mt-1 text-xs leading-5 text-kola">Trusted stores, one wallet, safer checkout.</p></div></aside><header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur md:fixed md:left-[232px] md:right-0"><div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6"><div className="hidden min-w-0 flex-1 md:block"><div className="flex max-w-[620px] items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-muted"><Search size={17} /><span>Search for products, stores or categories...</span><span className="ml-auto rounded-md border border-line bg-white px-1.5 py-0.5 text-[10px] font-bold">⌘ K</span></div></div><div className="md:hidden"><SellaBrand href="/account" compact /></div><div className="flex items-center gap-2"><span className="hidden text-xs font-bold text-muted lg:inline">Hi, {firstName}</span><NotificationBell><Link href="/account/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-xl bg-surface text-ink"><Bell size={18} /></Link></NotificationBell><CartIcon /></div></div></header><main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 md:pt-24 lg:px-8">{children}</main><BuyerBottomNav /></div>;
 }

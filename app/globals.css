@@ -73,6 +73,44 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .seller-homepage .seller-company-bar p { color: var(--seller-muted); font-size: 11px; line-height: 1.35; }
 .seller-homepage .seller-navlinks { display: flex; align-items: center; gap: 22px; }
 .seller-homepage .seller-navlinks a { text-decoration: none; }
+.seller-homepage .seller-navlinks > a:not(.seller-button) { color: var(--seller-muted); font-size: 13px; font-weight: 700; }
+.seller-homepage .seller-navlinks > a:not(.seller-button):hover { color: var(--seller-kola-dark); }
+.seller-homepage .seller-hero h1 span { color: var(--seller-kola); }
+.seller-homepage .seller-hero-proof { display: flex; align-items: center; gap: 10px; margin-top: 25px; color: var(--seller-muted); font-size: 12px; }
+.seller-homepage .seller-proof-dots { display: flex; }
+.seller-homepage .seller-proof-dots i { width: 24px; height: 24px; margin-left: -5px; border: 2px solid var(--seller-bg); border-radius: 50%; background: var(--seller-kola-light); }
+.seller-homepage .seller-proof-dots i:first-child { margin-left: 0; background: var(--seller-kola-dark); }
+.seller-homepage .seller-proof-dots i:nth-child(2) { background: #d6b08b; }
+.seller-homepage .seller-proof-dots i:nth-child(3) { background: #1c2723; }
+.seller-homepage .seller-proof-dots i:nth-child(4) { background: #d98e72; }
+.seller-homepage .seller-hero-dashboard { padding: 18px; border: 1px solid var(--seller-line); border-radius: 22px; background: var(--seller-white); box-shadow: 0 18px 45px rgba(9,84,58,.10); }
+.seller-homepage .seller-dashboard-preview-head, .seller-homepage .seller-preview-chart-label, .seller-homepage .seller-dashboard-preview-list > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.seller-homepage .seller-dashboard-preview-head { color: var(--seller-muted); font-size: 12px; }
+.seller-homepage .seller-dashboard-preview-head b { color: var(--seller-kola-dark); font-size: 16px; }
+.seller-homepage .seller-dashboard-preview-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.seller-homepage .seller-dashboard-preview-metrics > div { min-width: 0; padding: 12px; border-radius: 13px; background: var(--seller-bg); }
+.seller-homepage .seller-dashboard-preview-metrics svg { color: var(--seller-kola); }
+.seller-homepage .seller-dashboard-preview-metrics small, .seller-homepage .seller-dashboard-preview-metrics strong, .seller-homepage .seller-dashboard-preview-metrics em { display: block; }
+.seller-homepage .seller-dashboard-preview-metrics small { margin-top: 8px; color: var(--seller-muted); font-size: 10px; }
+.seller-homepage .seller-dashboard-preview-metrics strong { margin-top: 3px; color: var(--seller-ink); font-size: 14px; }
+.seller-homepage .seller-dashboard-preview-metrics em { margin-top: 4px; color: var(--seller-kola); font-size: 9px; font-style: normal; font-weight: 700; }
+.seller-homepage .seller-dashboard-preview-chart { margin-top: 10px; padding: 13px; border: 1px solid var(--seller-line); border-radius: 14px; }
+.seller-homepage .seller-preview-chart-label b { font-size: 12px; }
+.seller-homepage .seller-preview-chart-label span { color: var(--seller-muted); font-size: 10px; }
+.seller-homepage .seller-chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 94px; margin-top: 15px; padding: 0 4px; border-bottom: 1px solid var(--seller-line); }
+.seller-homepage .seller-chart-bars i { flex: 1; min-height: 8px; border-radius: 5px 5px 0 0; background: linear-gradient(to top, var(--seller-kola), #8ed6b0); }
+.seller-homepage .seller-dashboard-preview-list { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--seller-line); }
+.seller-homepage .seller-dashboard-preview-list > div { color: var(--seller-ink); font-size: 12px; font-weight: 800; }
+.seller-homepage .seller-dashboard-preview-list > div svg { color: var(--seller-kola); }
+.seller-homepage .seller-dashboard-preview-list > div b { margin-left: auto; color: var(--seller-kola); font-size: 10px; }
+.seller-homepage .seller-dashboard-preview-list p { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; color: var(--seller-muted); font-size: 10px; }
+.seller-homepage .seller-dashboard-preview-list p strong { color: var(--seller-ink); }
+.seller-homepage .seller-benefit-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 1120px; margin: -10px auto 0; padding: 0 24px; position: relative; z-index: 2; }
+.seller-homepage .seller-benefit-strip > div { display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px solid var(--seller-line); border-radius: 14px; background: var(--seller-white); box-shadow: 0 8px 22px rgba(16,35,27,.04); }
+.seller-homepage .seller-benefit-strip svg { flex: 0 0 auto; color: var(--seller-kola); }
+.seller-homepage .seller-benefit-strip b, .seller-homepage .seller-benefit-strip small { display: block; }
+.seller-homepage .seller-benefit-strip b { font-size: 12px; }
+.seller-homepage .seller-benefit-strip small { margin-top: 2px; color: var(--seller-muted); font-size: 10px; }
 .seller-homepage .seller-navlinks .seller-plain-link { font-weight: 600; font-size: 15px; }
 .seller-homepage .seller-button { display: inline-flex; align-items: center; gap: 8px; font-family: inherit; font-weight: 700; font-size: 15px; border-radius: 999px; padding: 12px 22px; border: none; cursor: pointer; text-decoration: none; white-space: nowrap; }
 .seller-homepage .seller-button-primary { background: var(--seller-kola-dark); color: #fff; }
@@ -238,6 +276,14 @@ a, button { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 1100px) { .seller-homepage .seller-plans-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 800px) { .seller-homepage .seller-plans-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
+  .seller-homepage .seller-desktop-links { display: none; }
+  .seller-homepage .seller-hero-dashboard { padding: 12px; }
+  .seller-homepage .seller-dashboard-preview-metrics { gap: 5px; }
+  .seller-homepage .seller-dashboard-preview-metrics > div { padding: 9px; }
+  .seller-homepage .seller-dashboard-preview-metrics strong { font-size: 11px; }
+  .seller-homepage .seller-benefit-strip { grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 20px; }
+  .seller-homepage .seller-benefit-strip > div { padding: 10px; }
+  .seller-homepage .seller-benefit-strip small { font-size: 9px; }
   .seller-homepage .seller-wrap { padding: 0 20px; }
   .seller-homepage .seller-company-bar { padding: 8px 20px 9px; }
   .seller-homepage .seller-company-bar p { font-size: 10px; }
