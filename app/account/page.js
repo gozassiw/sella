@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Landmark, WalletCards, Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { ensureBuyerWallet } from "@/lib/buyer";
+import { getBuyerProfile, getBuyerWallet } from "@/lib/buyer";
 import { formatNaira } from "@/lib/utils";
 import UnfollowStoreButton from "@/components/UnfollowStoreButton";
 import StoreAccessForm from "@/components/StoreAccessForm";
@@ -23,17 +23,13 @@ function VerifiedStoreCard({ store }) {
 
 export default async function AccountPage() {
   const { supabase, user } = await getCurrentUser();
-  const [{ data: profile }, { data: follows }, { data: existingWallet }, { data: verifiedStores }] = await Promise.all([
-    supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle(),
+  const [profile, { data: follows }, wallet, { data: verifiedStores }] = await Promise.all([
+    getBuyerProfile(user.id),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,category,logo_url,brand_color,paid_verification_approved)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
-    supabase.from("buyer_wallets").select("*").eq("user_id", user.id).maybeSingle(),
+    getBuyerWallet(user.id),
     supabase.rpc("get_public_verified_store_ids"),
   ]);
   if (!profile) redirect("/account/setup");
-  let wallet = existingWallet;
-  if (!wallet) {
-    try { wallet = await ensureBuyerWallet(user); } catch { wallet = null; }
-  }
   const trustedStores = (follows || []).map((item) => item.stores).filter(Boolean);
   const verifiedStoreIds = new Set((verifiedStores || []).map((item) => item.store_id));
   trustedStores.forEach((store) => { store.paid_verification_approved = verifiedStoreIds.has(store.id); });
