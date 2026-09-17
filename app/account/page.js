@@ -23,20 +23,20 @@ function VerifiedStoreCard({ store }) {
 
 export default async function AccountPage() {
   const { supabase, user } = await getCurrentUser();
-  const [{ data: profile }, { data: follows }] = await Promise.all([
+  const [{ data: profile }, { data: follows }, { data: existingWallet }, { data: verifiedStores }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name").eq("user_id", user.id).maybeSingle(),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,category,logo_url,brand_color,paid_verification_approved)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("buyer_wallets").select("*").eq("user_id", user.id).maybeSingle(),
+    supabase.rpc("get_public_verified_store_ids"),
   ]);
   if (!profile) redirect("/account/setup");
-  let wallet = null;
-  try { wallet = await ensureBuyerWallet(user); } catch { wallet = null; }
+  let wallet = existingWallet;
+  if (!wallet) {
+    try { wallet = await ensureBuyerWallet(user); } catch { wallet = null; }
+  }
   const trustedStores = (follows || []).map((item) => item.stores).filter(Boolean);
-  const activeBadgeStates = await Promise.all(trustedStores.map(async (store) => {
-    const { data } = await supabase.rpc("store_has_active_paid_verification", { p_store_id: store.id });
-    return [store.id, data === true];
-  }));
-  const badgeMap = new Map(activeBadgeStates);
-  trustedStores.forEach((store) => { store.paid_verification_approved = badgeMap.get(store.id) === true; });
+  const verifiedStoreIds = new Set((verifiedStores || []).map((item) => item.store_id));
+  trustedStores.forEach((store) => { store.paid_verification_approved = verifiedStoreIds.has(store.id); });
   const { data: products } = trustedStores.length ? await supabase.from("products").select("id,store_id,name,price,image_urls,created_at").in("store_id", trustedStores.map((store) => store.id)).eq("is_active", true).order("created_at", { ascending: false }).limit(48) : { data: [] };
   const storeMap = new Map(trustedStores.map((store) => [store.id, store]));
   const feed = (products || []).map((product) => ({ product, store: storeMap.get(product.store_id) })).filter((item) => item.store);
