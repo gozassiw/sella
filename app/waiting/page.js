@@ -32,7 +32,7 @@ export default async function WaitingPage() {
           <div className="app-card border-kola/20 p-6 sm:p-8">
             <p className="eyebrow text-kola">Launching soon</p>
             <h2 className="display mt-2 text-2xl sm:text-3xl">Be first to know.</h2>
-            <p className="mt-3 text-sm leading-6 text-muted">Join the launch list with your full name, email, and WhatsApp number.</p>
+            <p className="mt-3 text-sm leading-6 text-muted">Join the waiting list with your full name, email, and WhatsApp number.</p>
             <WaitlistForm launchAt={launchAt} />
           </div>
         </section>
