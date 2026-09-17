@@ -97,7 +97,7 @@ export default function WaitlistForm({ launchAt }) {
         <input id="waitlist-whatsapp" className="input" type="tel" value={whatsapp} onChange={(event) => setWhatsapp(event.target.value)} autoComplete="tel" inputMode="tel" maxLength={40} placeholder="e.g. 0803 123 4567" required />
       </div>
       {error && <p className="text-sm font-bold text-danger" role="alert">{error}</p>}
-      <button type="submit" className="btn-primary w-full" disabled={busy}>{busy ? "Joining the list…" : "Join the launch list"}</button>
+      <button type="submit" className="btn-primary w-full" disabled={busy}>{busy ? "Joining the list…" : "Join the waiting list"}</button>
       <div className="border-t border-line pt-4">
         <p className="text-xs leading-5 text-muted">{launchLabel ? `Expected launch: ${launchLabel}` : "We will publish the launch date here when it is confirmed."}</p>
         <Countdown launchAt={launchAt} />
