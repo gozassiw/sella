@@ -15,8 +15,18 @@ export default function LoginPage({ searchParams }) {
     setLoading(true);
     setError("");
     try {
+      // Remove legacy host-only Supabase cookies before the server sets the
+      // shared-domain session. Safari can otherwise send duplicate names.
+      document.cookie.split(";").forEach((entry) => {
+        const name = entry.split("=")[0].trim();
+        if (name.startsWith("sb-")) {
+          document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+        }
+      });
       const response = await fetch("/api/auth/login", {
         method: "POST",
+        credentials: "include",
+        cache: "no-store",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
