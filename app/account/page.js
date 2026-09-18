@@ -10,7 +10,17 @@ import StoreAccessForm from "@/components/StoreAccessForm";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
 function ProductCard({ product, store }) {
-  return <Link href={`/s/${store.slug}/p/${product.id}`} className="group block min-w-0"><div className="relative aspect-square overflow-hidden rounded-2xl bg-surface">{product.image_urls?.[0] ? <Image src={product.image_urls[0]} alt={product.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition duration-300 group-hover:scale-[1.035]" /> : <div className="grid h-full place-items-center text-xs font-semibold text-muted">Product photo</div>}</div><p className="mt-3 truncate text-sm font-bold">{product.name}</p><div className="mt-1 flex items-center justify-between gap-2"><p className="flex min-w-0 items-center gap-1 truncate text-xs text-muted"><span className="truncate">{store.name}</span>{store.paid_verification_approved && <VerifiedBadge className="shrink-0" />}</p><p className="shrink-0 text-sm font-extrabold text-kola">{formatNaira(product.price)}</p></div></Link>;
+  return <Link href={`/s/${store.slug}/p/${product.id}`} className="group block min-w-0">
+    <div className="relative aspect-square overflow-hidden rounded-[20px] bg-surface ring-1 ring-transparent transition duration-300 group-hover:-translate-y-0.5 group-hover:ring-kola/15">
+      {product.image_urls?.[0] ? <Image src={product.image_urls[0]} alt={product.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition duration-500 group-hover:scale-[1.045]" /> : <div className="grid h-full place-items-center text-xs font-semibold text-muted">Product photo</div>}
+      <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold text-ink shadow-sm">From {store.name}</span>
+    </div>
+    <p className="mt-3 truncate text-sm font-bold transition-colors group-hover:text-kola">{product.name}</p>
+    <div className="mt-1.5 flex items-center justify-between gap-2">
+      <p className="flex min-w-0 items-center gap-1 truncate text-xs text-muted"><span className="truncate">{store.name}</span>{store.paid_verification_approved && <VerifiedBadge className="shrink-0" />}</p>
+      <p className="shrink-0 text-sm font-extrabold text-kola">{formatNaira(product.price)}</p>
+    </div>
+  </Link>;
 }
 
 function StoreAvatar({ store, size = "h-11 w-11" }) {
@@ -18,7 +28,17 @@ function StoreAvatar({ store, size = "h-11 w-11" }) {
 }
 
 function VerifiedStoreCard({ store }) {
-  return <div className="app-card flex min-w-0 items-center gap-3 p-3.5"><Link href={`/s/${store.slug}`} className="group flex min-w-0 flex-1 items-center gap-3"><StoreAvatar store={store} /><div className="min-w-0 flex-1"><p className="flex items-center gap-1 text-sm font-extrabold"><span className="truncate">{store.name}</span>{store.paid_verification_approved && <VerifiedBadge className="shrink-0" />}</p><p className="mt-1 truncate text-xs text-muted">{store.category || "Independent store"}</p><p className="mt-2 text-[11px] font-bold text-success">● Connected</p></div></Link><UnfollowStoreButton storeId={store.id} /></div>;
+  return <div className="app-card flex min-w-0 items-center gap-3 p-3.5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+    <Link href={`/s/${store.slug}`} className="group flex min-w-0 flex-1 items-center gap-3">
+      <StoreAvatar store={store} />
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-1 text-sm font-extrabold"><span className="truncate">{store.name}</span>{store.paid_verification_approved && <VerifiedBadge className="shrink-0" />}</p>
+        <p className="mt-1 truncate text-xs text-muted">{store.category || "Independent store"}</p>
+        <p className="mt-2 text-[11px] font-bold text-success">● Connected</p>
+      </div>
+    </Link>
+    <UnfollowStoreButton storeId={store.id} />
+  </div>;
 }
 
 export default async function AccountPage() {
@@ -39,15 +59,24 @@ export default async function AccountPage() {
   const firstName = profile?.full_name?.split(" ")?.[0] || user.email?.split("@")[0] || "there";
   const today = new Date().toLocaleDateString("en-NG", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 
-  return <div className="space-y-7 sm:space-y-9">
-    <section className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow text-kola">Buyer workspace</p><h1 className="display mt-2 text-3xl sm:text-4xl">Welcome back, {firstName}.</h1><p className="mt-2 text-sm text-muted">Shop trusted stores, track orders and manage your wallet.</p></div><p className="hidden text-right text-xs text-muted sm:block">{today}<br /><span className="mt-1 inline-block font-bold">A good day to shop on Sella.</span></p></section>
-    <section className="grid gap-4 xl:grid-cols-[1.05fr_1fr_.86fr]">
-      <div className="relative overflow-hidden rounded-[24px] bg-kola-dark p-5 text-white sm:p-6"><div className="flex items-start justify-between"><div><p className="text-xs font-bold text-white/65">WALLET BALANCE</p><p className="display mt-3 text-3xl sm:text-4xl">{formatNaira(wallet?.balance)}</p></div><span className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-mango"><WalletCards size={20} /></span></div><div className="mt-7 flex gap-2"><Link href="/account/wallet" className="btn bg-white px-4 py-2.5 text-xs text-kola-dark">Fund wallet</Link><Link href="/account/wallet" className="btn border border-white/40 px-4 py-2.5 text-xs text-white">View details</Link></div></div>
-      <div className="app-card p-5"><div className="flex items-start gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-kola-light text-kola"><Landmark size={19} /></span><div className="min-w-0"><p className="text-sm font-extrabold">Your Sella account number</p><p className="mt-1 text-xs text-muted">Use it to fund your wallet by bank transfer.</p></div></div>{wallet?.dedicated_account_number ? <><p className="mt-5 text-xl font-extrabold tracking-wide">{wallet.dedicated_account_number}</p><p className="mt-1 text-xs text-muted">{wallet.dedicated_bank_name || "Partner bank"} · {wallet.dedicated_account_name || "Sella wallet"}</p></> : <Link href="/account/wallet" className="btn-soft mt-5 inline-flex w-full text-xs">Create account number <ArrowRight size={15} /></Link>}<p className="mt-4 rounded-xl bg-kola-light px-3 py-2.5 text-xs leading-5 text-kola">Transfers to this account credit your Sella wallet.</p></div>
-      <StoreAccessForm />
+  return <div className="space-y-8 sm:space-y-10">
+    <section className="relative overflow-hidden rounded-[28px] bg-kola-light px-5 py-6 sm:px-7 sm:py-7">
+      <div className="relative z-10 flex flex-wrap items-end justify-between gap-5">
+        <div><p className="eyebrow text-kola">Buyer workspace</p><h1 className="display mt-2 text-3xl sm:text-4xl">Welcome back, {firstName}.</h1><p className="mt-2 max-w-md text-sm text-muted">Your trusted stores, wallet and shopping feed — all in one place.</p></div>
+        <p className="text-xs text-muted sm:text-right">{today}<br /><span className="mt-1 inline-block font-bold text-ink">A good day to shop on Sella.</span></p>
+      </div>
+      <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full border-[24px] border-white/45" />
     </section>
-    <section id="my-trusted-stores"><div className="mb-3 flex items-center justify-between"><div><p className="eyebrow text-kola">Your network</p><h2 className="display mt-1 text-xl">My Trusted Stores</h2></div><span className="text-xs font-bold text-kola">{trustedStores.length} stores</span></div>{trustedStores.length ? <><div className="grid gap-3 md:grid-cols-3">{trustedStores.slice(0, 3).map((store) => <VerifiedStoreCard key={store.id} store={store} />)}</div>{trustedStores.length > 3 && <details className="mt-3"><summary className="cursor-pointer list-none text-center text-sm font-bold text-kola underline">See more stores</summary><div className="mt-3 grid gap-3 md:grid-cols-3">{trustedStores.slice(3).map((store) => <VerifiedStoreCard key={store.id} store={store} />)}</div></details>}</> : <div className="app-card p-5 text-sm text-muted">Stores you trust will appear here after you open a seller link.</div>}</section>
-    <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-muted">Have a concern about a store or order?</p><Link href="/account/reports" className="text-sm font-bold text-kola underline">Reports &amp; Safety</Link></div>
-    <section id="trusted-stores"><div className="flex items-end justify-between"><div><p className="eyebrow text-kola">Shopping feed</p><h2 className="display mt-1 text-xl">Latest from your stores</h2></div></div>{feed.length ? <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">{feed.map(({ product, store }) => <ProductCard key={product.id} product={product} store={store} />)}</div> : <div className="app-card mt-4 flex flex-col items-center px-6 py-10 text-center"><Zap size={22} className="text-kola" /><h3 className="mt-3 text-sm font-extrabold">Your shopping feed is empty</h3><p className="mt-2 max-w-sm text-xs leading-5 text-muted">Open a seller&apos;s store ID and tap Trust to start shopping.</p></div>}</section>
+    <section>
+      <div className="mb-3 flex items-center justify-between"><div><p className="eyebrow text-kola">Your money</p><h2 className="display mt-1 text-xl">Wallet &amp; funding</h2></div><Link href="/account/wallet" className="text-xs font-bold text-kola transition-opacity hover:opacity-70">Manage wallet <ArrowRight className="ml-1 inline" size={13} /></Link></div>
+      <div className="grid gap-4 xl:grid-cols-[1.05fr_1fr_.86fr]">
+        <div className="relative overflow-hidden rounded-[24px] bg-kola-dark p-5 text-white transition duration-300 hover:shadow-lg sm:p-6"><div className="flex items-start justify-between"><div><p className="text-xs font-bold text-white/65">WALLET BALANCE</p><p className="display mt-3 text-3xl sm:text-4xl">{formatNaira(wallet?.balance)}</p></div><span className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-mango"><WalletCards size={20} /></span></div><div className="mt-7 flex gap-2"><Link href="/account/wallet" className="btn bg-white px-4 py-2.5 text-xs text-kola-dark">Fund wallet</Link><Link href="/account/wallet" className="btn border border-white/40 px-4 py-2.5 text-xs text-white">View details</Link></div></div>
+        <div className="app-card p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md"><div className="flex items-start gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-kola-light text-kola"><Landmark size={19} /></span><div className="min-w-0"><p className="text-sm font-extrabold">Your Sella account number</p><p className="mt-1 text-xs text-muted">Use it to fund your wallet by bank transfer.</p></div></div>{wallet?.dedicated_account_number ? <><p className="mt-5 text-xl font-extrabold tracking-wide">{wallet.dedicated_account_number}</p><p className="mt-1 text-xs text-muted">{wallet.dedicated_bank_name || "Partner bank"} · {wallet.dedicated_account_name || "Sella wallet"}</p></> : <Link href="/account/wallet" className="btn-soft mt-5 inline-flex w-full text-xs">Create account number <ArrowRight size={15} /></Link>}<p className="mt-4 rounded-xl bg-kola-light px-3 py-2.5 text-xs leading-5 text-kola">Transfers to this account credit your Sella wallet.</p></div>
+        <StoreAccessForm />
+      </div>
+    </section>
+    <section id="my-trusted-stores"><div className="mb-3 flex items-end justify-between"><div><p className="eyebrow text-kola">Your network</p><h2 className="display mt-1 text-xl">My Trusted Stores</h2></div><span className="rounded-full bg-kola-light px-3 py-1 text-xs font-bold text-kola">{trustedStores.length} stores</span></div>{trustedStores.length ? <><div className="grid gap-3 md:grid-cols-3">{trustedStores.slice(0, 3).map((store) => <VerifiedStoreCard key={store.id} store={store} />)}</div>{trustedStores.length > 3 && <details className="mt-3"><summary className="cursor-pointer list-none text-center text-sm font-bold text-kola underline">See more stores</summary><div className="mt-3 grid gap-3 md:grid-cols-3">{trustedStores.slice(3).map((store) => <VerifiedStoreCard key={store.id} store={store} />)}</div></details>}</> : <div className="app-card p-5 text-sm text-muted">Stores you trust will appear here after you open a seller link.</div>}</section>
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-kola/10 bg-kola-light/45 px-4 py-3"><p className="text-sm text-muted">Have a concern about a store or order?</p><Link href="/account/reports" className="text-sm font-bold text-kola underline transition-opacity hover:opacity-70">Reports &amp; Safety</Link></div>
+    <section id="trusted-stores"><div className="flex items-end justify-between"><div><p className="eyebrow text-kola">Shopping feed</p><h2 className="display mt-1 text-xl">Latest from your stores</h2><p className="mt-1 text-xs text-muted">New finds from the sellers you trust.</p></div></div>{feed.length ? <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">{feed.map(({ product, store }) => <ProductCard key={product.id} product={product} store={store} />)}</div> : <div className="app-card mt-4 flex flex-col items-center px-6 py-10 text-center"><Zap size={22} className="text-kola" /><h3 className="mt-3 text-sm font-extrabold">Your shopping feed is empty</h3><p className="mt-2 max-w-sm text-xs leading-5 text-muted">Open a seller&apos;s store ID and tap Trust to start shopping.</p></div>}</section>
   </div>;
 }
