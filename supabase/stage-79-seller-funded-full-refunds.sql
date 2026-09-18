@@ -155,12 +155,14 @@ declare
   v_seller_tx uuid;
   v_buyer_tx uuid;
   v_is_admin boolean := false;
+  v_is_service boolean := false;
 begin
-  if auth.uid() is null then raise exception 'Please log in'; end if;
+  v_is_service := coalesce(auth.role(), '') = 'service_role';
+  if auth.uid() is null and not v_is_service then raise exception 'Please log in'; end if;
   select * into v_refund from public.refund_obligations where id = p_refund_id for update;
   if not found then raise exception 'Refund obligation not found'; end if;
   v_is_admin := public.is_platform_admin();
-  if v_refund.seller_id <> auth.uid() and not v_is_admin then raise exception 'Refund access denied'; end if;
+  if v_refund.seller_id <> auth.uid() and not v_is_admin and not v_is_service then raise exception 'Refund access denied'; end if;
   if v_refund.refund_status = 'refunded' then return jsonb_build_object('success', true, 'already_refunded', true, 'refund_id', v_refund.id, 'buyer_id', v_refund.buyer_id, 'seller_id', v_refund.seller_id, 'refund_due', v_refund.refund_due); end if;
 
   select * into v_wallet from public.wallets where store_id = v_refund.store_id for update;
@@ -261,7 +263,7 @@ grant execute on function public.set_refund_payment_account(uuid,text,text,text,
 
 create or replace function public.record_refund_funding_payment(p_event_key text, p_payload jsonb, p_successful boolean, p_account_number text default null, p_account_reference text default null, p_amount numeric default 0, p_payment_reference text default null)
 returns jsonb language plpgsql security definer set search_path = public, pg_temp as $$
-declare v_refund public.refund_obligations%rowtype; v_wallet public.wallets%rowtype; v_store public.stores%rowtype; v_payment_id uuid; v_shortfall numeric(12,2);
+declare v_refund public.refund_obligations%rowtype; v_wallet public.wallets%rowtype; v_store public.stores%rowtype; v_payment_id uuid; v_shortfall numeric(12,2); v_auto_result jsonb;
 begin
   if not coalesce(p_successful,false) or coalesce(p_amount,0)<=0 then return jsonb_build_object('handled',false); end if;
   select r.* into v_refund from public.refund_obligations r where (nullif(p_account_number,'') is not null and r.funding_account_number=p_account_number) or (nullif(p_account_reference,'') is not null and r.funding_account_reference=p_account_reference) order by r.created_at desc limit 1 for update;
@@ -280,6 +282,10 @@ begin
   insert into public.refund_ledger_entries(refund_obligation_id,entry_type,amount,idempotency_key,provider_reference,details) values(v_refund.id,'seller_funding',p_amount,'seller-funding:'||v_payment_id::text,p_payment_reference,jsonb_build_object('provider_event_key',p_event_key));
   select * into v_store from public.stores where id=v_refund.store_id;
   update public.refund_obligations set seller_funding_received=seller_funding_received+p_amount, outstanding_seller_contribution=greatest(0,round(refund_due-coalesce(v_wallet.available,0),2)), refund_status=case when coalesce(v_wallet.available,0)>=refund_due then 'pending_review' else 'pending_funding' end, updated_at=now(), last_failure_reason=null where id=v_refund.id;
+  if coalesce(v_wallet.available,0) >= v_refund.refund_due then
+    v_auto_result := public.process_refund_obligation(v_refund.id);
+    return jsonb_build_object('handled',true,'credited','seller_refund_funding','refund_id',v_refund.id,'user_id',v_store.owner_id,'amount',p_amount,'refund_reference',v_refund.refund_reference,'auto_refunded',coalesce((v_auto_result->>'refunded')::boolean,false)) || v_auto_result;
+  end if;
   insert into public.notifications(user_id,type,title,body,link) values(v_store.owner_id,'wallet','Refund funding received','Your verified refund funding payment was added to your Sella balance. You can now process the refund when the full amount is available.','/dashboard');
   return jsonb_build_object('handled',true,'credited','seller_refund_funding','refund_id',v_refund.id,'user_id',v_store.owner_id,'amount',p_amount,'refund_reference',v_refund.refund_reference);
 end;
