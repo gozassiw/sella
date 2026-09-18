@@ -1,12 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
 
 export default function LoginPage({ searchParams }) {
-  const router = useRouter();
   const nextPath = typeof searchParams?.next === "string" && searchParams.next.startsWith("/") ? searchParams.next : "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +24,7 @@ export default function LoginPage({ searchParams }) {
       const { data: store } = await supabase.from("stores").select("id").eq("owner_id", data.user.id).maybeSingle();
       if (!store) destination = "/account";
     }
-    router.push(destination);
-    router.refresh();
+    window.location.assign(destination);
   }
 
   return (
