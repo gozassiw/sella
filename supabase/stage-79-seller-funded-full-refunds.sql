@@ -100,7 +100,7 @@ begin
   where o.id = p_order_id and s.owner_id = auth.uid()
   for update;
   if not found then raise exception 'Order not found'; end if;
-  if v_order.status in ('shipped','delivered','cancelled') then raise exception 'This order cannot be cancelled'; end if;
+  if v_order.status in ('delivered','cancelled') then raise exception 'Delivered or already cancelled orders cannot be cancelled'; end if;
 
   if v_order.payment_status <> 'paid' then
     update public.products p set stock = p.stock + oi.quantity
