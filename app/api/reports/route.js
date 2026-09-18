@@ -46,7 +46,7 @@ export async function POST(request) {
     const {count,error:countError}=await admin.from("reports").select("id",{head:true,count:"exact"}).eq("reported_by",user.id).gte("created_at",new Date(Date.now()-60*60*1000).toISOString());
     if(countError) throw new Error("Reports are temporarily unavailable.");
     if(count>=10) return NextResponse.json({error:"You have submitted several reports recently. Please try again later."},{status:429});
-    const {data:report,error}=await admin.from("reports").insert({type:input.type,store_id:input.storeId,product_id:input.productId,order_id:input.orderId,reported_by:user.id,buyer_id:user.id,reason:input.reason,report_reason:input.reason,details:input.details,status:"Submitted"}).select("id,case_ref,type,status").single();
+    const {data:report,error}=await admin.from("reports").insert({type:input.type,store_id:target.storeId,product_id:input.productId,order_id:input.orderId,reported_by:user.id,buyer_id:user.id,reason:input.reason,report_reason:input.reason,details:input.details,status:"Submitted"}).select("id,case_ref,type,status").single();
     if(error) throw new Error("The report could not be submitted.");
     let missingEvidence=0;const evidence=[];
     for(const {file,bytes} of prepared){
