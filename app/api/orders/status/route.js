@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notifications";
 
 const statusMessages = {
@@ -24,11 +25,12 @@ export async function POST(request) {
     if (!order || order.stores?.owner_id !== user.id) return NextResponse.json({ error: "Order not found." }, { status: 404 });
     if (order.status === status) return NextResponse.json({ success: true, unchanged: true });
 
-    const patch = { status };
+    const patch = { status, shipped_at: null, delivered_at: null, cancelled_at: null };
     if (status === "shipped") patch.shipped_at = new Date().toISOString();
     if (status === "delivered") patch.delivered_at = new Date().toISOString();
     if (status === "cancelled") patch.cancelled_at = new Date().toISOString();
-    const { error } = await supabase.from("orders").update(patch).eq("id", order.id).eq("store_id", order.store_id);
+    const admin = createAdminClient();
+    const { error } = await admin.from("orders").update(patch).eq("id", order.id).eq("store_id", order.store_id);
     if (error) throw error;
 
     const message = statusMessages[status];

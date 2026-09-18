@@ -15,7 +15,7 @@ function matchesFileType(bytes, type) {
 export async function GET() {
   const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
-  const { data, error } = await supabase.from("reports").select("id,case_ref,type,store_id,order_id,reason,report_reason,details,status,created_at,updated_at,stores(id,name,slug),orders(id,order_number,total)").or(`buyer_id.eq.${user.id},reported_by.eq.${user.id}`).neq("type", "message").order("created_at", { ascending: false }).limit(100);
+  const { data, error } = await supabase.from("reports").select("id,case_ref,type,store_id,order_id,reason,report_reason,details,status,created_at,updated_at,stores(id,name,slug),orders(id,order_code,total)").or(`buyer_id.eq.${user.id},reported_by.eq.${user.id}`).neq("type", "message").order("created_at", { ascending: false }).limit(100);
   if (error) return NextResponse.json({ error: "Reports could not be loaded." }, { status: 400 });
   return NextResponse.json({ reports: data || [] });
 }

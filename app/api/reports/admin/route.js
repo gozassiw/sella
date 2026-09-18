@@ -9,7 +9,8 @@ export async function GET() {
   const auth = createClient();
   const { data: { user } } = await auth.auth.getUser();
   if (!(await isPlatformAdmin(auth, user))) return NextResponse.json({ error: "Admin access required." }, { status: 403 });
-  const { data, error } = await auth.from("reports").select("id,case_ref,type,store_id,order_id,reported_by,buyer_id,reason,report_reason,details,status,created_at,updated_at,stores(id,name,slug,owner_id),orders(id,order_number,total)").order("created_at", { ascending: false }).limit(250);
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("reports").select("id,case_ref,type,store_id,order_id,reported_by,buyer_id,reason,report_reason,details,status,created_at,updated_at,stores(id,name,slug,owner_id),orders(id,order_code,total)").order("created_at", { ascending: false }).limit(250);
   if (error) return NextResponse.json({ error: "Reports could not be loaded." }, { status: 400 });
   return NextResponse.json({ reports: data || [] });
 }
