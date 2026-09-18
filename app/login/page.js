@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
 
 export default function LoginPage({ searchParams }) {
@@ -15,16 +14,23 @@ export default function LoginPage({ searchParams }) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) return setError("That email and password don't match. Try again.");
-    let destination = nextPath;
-    if (nextPath === "/dashboard" && data.user) {
-      const { data: store } = await supabase.from("stores").select("id").eq("owner_id", data.user.id).maybeSingle();
-      if (!store) destination = "/account";
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setLoading(false);
+        return setError(data.error || "That email and password don't match. Try again.");
+      }
+      const destination = nextPath === "/dashboard" && !data.hasStore ? "/account" : nextPath;
+      window.location.assign(destination);
+    } catch {
+      setLoading(false);
+      setError("Unable to log in right now. Please try again.");
     }
-    window.location.assign(destination);
   }
 
   return (
