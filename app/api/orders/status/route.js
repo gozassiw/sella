@@ -3,6 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notifications";
 
+const allowedTransitions = {
+  pending: new Set(["processing", "cancelled"]),
+  processing: new Set(["pending", "shipped", "cancelled"]),
+  shipped: new Set(["delivered", "cancelled"]),
+  delivered: new Set(),
+  cancelled: new Set(),
+};
+
 const statusMessages = {
   pending: { title: "Order status updated", body: "Your order is awaiting processing." },
   processing: { title: "Order packed", body: "Your order has been packed by the seller." },
@@ -24,9 +32,21 @@ export async function POST(request) {
     if (orderError) throw orderError;
     if (!order || order.stores?.owner_id !== user.id) return NextResponse.json({ error: "Order not found." }, { status: 404 });
     if (order.status === status) return NextResponse.json({ success: true, unchanged: true });
+    if (!allowedTransitions[order.status]?.has(status)) {
+      return NextResponse.json({ error: order.status === "delivered" ? "Delivered orders cannot be moved backward or cancelled." : order.status === "shipped" ? "Orders out for delivery can only be marked delivered or cancelled." : "That order status change is not allowed." }, { status: 409 });
+    }
 
-    const patch = { status, shipped_at: null, delivered_at: null, cancelled_at: null };
-    if (status === "shipped") patch.shipped_at = new Date().toISOString();
+    const patch = { status };
+    if (status === "pending" || status === "processing") {
+      patch.shipped_at = null;
+      patch.delivered_at = null;
+      patch.cancelled_at = null;
+    }
+    if (status === "shipped") {
+      patch.shipped_at = new Date().toISOString();
+      patch.delivered_at = null;
+      patch.cancelled_at = null;
+    }
     if (status === "delivered") patch.delivered_at = new Date().toISOString();
     if (status === "cancelled") patch.cancelled_at = new Date().toISOString();
     const admin = createAdminClient();
