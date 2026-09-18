@@ -45,6 +45,9 @@ export default function AdminReportsPanel({ initialReports = [] }) {
   const [status, setStatus] = useState("");
 
   const filteredReports = useMemo(() => filter === "all" ? reports : reports.filter((report) => report.status === filter), [filter, reports]);
+  const openCount = reports.filter((report) => !["Resolved", "Closed"].includes(report.status)).length;
+  const awaitingCount = reports.filter((report) => report.status === "Awaiting Seller Response").length;
+  const resolvedCount = reports.filter((report) => ["Resolved", "Closed"].includes(report.status)).length;
 
   async function loadReports() {
     setLoading(true);
@@ -111,17 +114,23 @@ export default function AdminReportsPanel({ initialReports = [] }) {
   return (
     <section className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><p className="eyebrow text-kola">Reports & safety</p><h2 className="display mt-1 text-2xl">Buyer-safety cases</h2><p className="mt-2 max-w-2xl text-sm text-muted">Review submitted concerns, keep internal notes private, and request seller context. A report does not promise an automatic refund or recovery of money.</p></div>
-        <button type="button" onClick={loadReports} className="btn-soft inline-flex items-center gap-2 px-3 py-2 text-xs" disabled={loading}><RefreshCw size={14} className={loading ? "animate-spin" : ""} />Refresh</button>
-      </div>
+         <div><p className="eyebrow text-kola">Reports & safety</p><h2 className="display mt-1 text-2xl">Buyer-safety cases</h2><p className="mt-2 max-w-2xl text-sm text-muted">Review submitted concerns, keep internal notes private, and request seller context. A report does not promise an automatic refund or recovery of money.</p></div>
+         <button type="button" onClick={loadReports} className="btn-soft inline-flex items-center gap-2 px-3 py-2 text-xs" disabled={loading}><RefreshCw size={14} className={loading ? "animate-spin" : ""} />Refresh</button>
+       </div>
+       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+         <div className="rounded-2xl border border-line bg-white p-3"><p className="eyebrow text-muted">Total cases</p><p className="mt-1 text-xl font-extrabold">{reports.length}</p></div>
+         <div className="rounded-2xl border border-kola/20 bg-kola-light p-3"><p className="eyebrow text-kola">Open</p><p className="mt-1 text-xl font-extrabold text-kola">{openCount}</p></div>
+         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3"><p className="eyebrow text-amber-800">Seller response</p><p className="mt-1 text-xl font-extrabold text-amber-900">{awaitingCount}</p></div>
+         <div className="rounded-2xl border border-line bg-white p-3"><p className="eyebrow text-muted">Resolved</p><p className="mt-1 text-xl font-extrabold">{resolvedCount}</p></div>
+       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(250px,340px)_1fr]">
-        <div className="overflow-hidden rounded-[22px] border border-line bg-white">
-          <div className="border-b border-line p-3"><label className="sr-only" htmlFor="report-status-filter">Filter cases</label><select id="report-status-filter" className="input py-2.5 text-xs" value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All cases</option>{REPORT_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
+         <div className="overflow-hidden rounded-[22px] border border-line bg-white">
+           <div className="border-b border-line bg-surface p-3"><label className="sr-only" htmlFor="report-status-filter">Filter cases</label><select id="report-status-filter" className="input py-2.5 text-xs" value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All cases</option>{REPORT_STATUSES.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
           {loading && <p className="p-6 text-sm text-muted">Loading cases…</p>}
           {!loading && !filteredReports.length && <p className="p-6 text-sm text-muted">No cases in this view.</p>}
           {!loading && filteredReports.map((report) => <CaseRow key={report.id} report={report} selected={report.id === selectedId} onSelect={setSelectedId} />)}
         </div>
-        <div className="app-card min-w-0 p-5 sm:p-6">
+         <div className="app-card min-w-0 p-5 sm:p-6 xl:sticky xl:top-24 xl:self-start">
           {!detail?.report ? <div className="flex min-h-64 flex-col items-center justify-center text-center"><Flag size={26} className="text-muted" /><p className="mt-3 font-semibold">Select a case to review</p><p className="mt-1 text-sm text-muted">Case evidence and private notes appear here.</p></div> : <>
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-5"><div><p className="text-xs font-bold uppercase tracking-wide text-muted">{detail.report.case_ref}</p><h3 className="mt-1 text-xl font-extrabold">{detail.report.stores?.name || "Store"}</h3><p className="mt-1 text-xs text-muted">{getReportReasonLabel(detail.report.report_reason || detail.report.reason)} · Opened {formatDate(detail.report.created_at)}</p></div><span className={`rounded-full px-3 py-1 text-xs font-bold ${statusTone[detail.report.status] || "bg-surface text-muted"}`}>{detail.report.status}</span></div>
             <div className="mt-5 grid gap-4 md:grid-cols-2"><div><p className="text-xs font-bold uppercase tracking-wide text-muted">Report details</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-ink">{detail.report.details || "No additional details supplied."}</p></div><div className="rounded-2xl bg-surface p-4 text-xs leading-5 text-muted"><p className="font-bold text-ink">Linked context</p><p className="mt-2">Type: {detail.report.type || "—"}</p>{detail.report.orders && <p>Order: #{detail.report.orders.order_code || detail.report.orders.order_number || detail.report.order_id}</p>}<p>Updated: {formatDate(detail.report.updated_at)}</p></div></div>
