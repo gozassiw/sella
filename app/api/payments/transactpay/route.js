@@ -28,19 +28,20 @@ function signatureIsValid(rawBody, request) {
 
 function eventKey(payload) {
   const data = payload.data || payload.Data || payload;
-  return data.paymentReference || data.PaymentReference || data.PayoutReference || data.sessionId || data.SessionId || `${data.orderReference || data.OrderReference || "unknown"}-${data.status || data.Status || "unknown"}-${data.dateUpdated || data.DateUpdated || Date.now()}`;
+  return data.paymentReference || data.PaymentReference || data.transactionReference || data.TransactionReference || data.reference || data.Reference || data.PayoutReference || data.sessionId || data.SessionId || `${data.orderReference || data.OrderReference || "unknown"}-${data.status || data.Status || "unknown"}-${data.dateUpdated || data.DateUpdated || Date.now()}`;
 }
 
 function paymentFields(payload) {
   const data = payload.data || payload.Data || payload;
+  const payment = data.orderPayments?.[0] || data.OrderPayments?.[0] || {};
   return {
     data,
     status: String(data.status || data.Status || payload.status || payload.Status || "").toLowerCase(),
     statusCode: String(data.statusCode || data.StatusCode || payload.statusCode || payload.StatusCode || data.paymentResponseCode || data.PaymentResponseCode || ""),
-    accountNumber: data.orderPayments?.[0]?.orderPaymentInstrument || data.OrderPayments?.[0]?.orderPaymentInstrument || data.accountNumber || data.AccountNumber || null,
-    accountReference: data.accountReference || data.AccountReference || null,
-    amount: Number(data.totalAmountCharged ?? data.TotalAmountCharged ?? data.orderAmount ?? data.OrderAmount ?? data.amount ?? data.Amount ?? 0),
-    paymentReference: data.paymentReference || data.PaymentReference || eventKey(payload),
+    accountNumber: data.accountNumber || data.AccountNumber || data.account_number || data.Account_Number || data.virtualAccountNumber || data.VirtualAccountNumber || data.virtual_account_number || data.paymentAccountNumber || data.PaymentAccountNumber || payment.orderPaymentInstrument || payment.accountNumber || payment.AccountNumber || payment.account_number || null,
+    accountReference: data.accountReference || data.AccountReference || data.account_reference || data.Account_Reference || data.virtualAccountReference || data.VirtualAccountReference || data.reference || data.Reference || payment.orderPaymentReference || payment.accountReference || payment.account_reference || null,
+    amount: Number(data.totalAmountCharged ?? data.TotalAmountCharged ?? data.paidAmount ?? data.PaidAmount ?? data.amountPaid ?? data.AmountPaid ?? data.orderAmount ?? data.OrderAmount ?? data.amount ?? data.Amount ?? 0),
+    paymentReference: data.paymentReference || data.PaymentReference || data.transactionReference || data.TransactionReference || data.reference || data.Reference || eventKey(payload),
     orderReference: data.orderReference || data.OrderReference || null,
     sessionId: data.sessionId || data.SessionId || null,
   };
@@ -52,14 +53,15 @@ function isSuccessful(fields) {
 
 function verifiedFields(response) {
   const payload = response?.data || response?.Data || response;
-  const accountNumber = payload?.orderPayments?.[0]?.orderPaymentInstrument || payload?.OrderPayments?.[0]?.orderPaymentInstrument || payload?.accountNumber || payload?.AccountNumber || null;
+  const payment = payload?.orderPayments?.[0] || payload?.OrderPayments?.[0] || {};
+  const accountNumber = payload?.accountNumber || payload?.AccountNumber || payload?.account_number || payload?.virtualAccountNumber || payload?.VirtualAccountNumber || payment?.orderPaymentInstrument || payment?.accountNumber || payment?.AccountNumber || payment?.account_number || null;
   return {
     status: String(payload?.status || payload?.Status || response?.status || response?.Status || "").toLowerCase(),
     statusCode: String(payload?.statusCode || payload?.StatusCode || response?.statusCode || response?.StatusCode || payload?.paymentResponseCode || payload?.PaymentResponseCode || ""),
-    amount: Number(payload?.totalAmountCharged ?? payload?.TotalAmountCharged ?? payload?.orderAmount ?? payload?.OrderAmount ?? payload?.amount ?? payload?.Amount ?? payload?.paidAmount ?? payload?.PaidAmount ?? 0),
-    paymentReference: payload?.paymentReference || payload?.PaymentReference || payload?.reference || payload?.Reference || null,
+    amount: Number(payload?.totalAmountCharged ?? payload?.TotalAmountCharged ?? payload?.paidAmount ?? payload?.PaidAmount ?? payload?.amountPaid ?? payload?.AmountPaid ?? payload?.orderAmount ?? payload?.OrderAmount ?? payload?.amount ?? payload?.Amount ?? 0),
+    paymentReference: payload?.paymentReference || payload?.PaymentReference || payload?.transactionReference || payload?.TransactionReference || payload?.reference || payload?.Reference || null,
     accountNumber,
-    accountReference: payload?.accountReference || payload?.AccountReference || null,
+    accountReference: payload?.accountReference || payload?.AccountReference || payload?.account_reference || payload?.reference || payload?.Reference || payment?.orderPaymentReference || payment?.accountReference || payment?.account_reference || null,
     orderReference: payload?.orderReference || payload?.OrderReference || null,
   };
 }
