@@ -19,13 +19,15 @@ export async function POST(request) {
   const action = body.action;
   try {
     if (action === "cancel") {
-      const { data: order } = await supabase.from("orders").select("id,store_id,order_code,buyer_id,stores(owner_id,name)").eq("id", body.orderId).maybeSingle();
+      const { data: order } = await supabase.from("orders").select("id,store_id,order_code,total,payment_status,buyer_id,stores(owner_id,name)").eq("id", body.orderId).maybeSingle();
       const guard = await requireOperationalStore(supabase, order?.store_id, user.id);
       if (guard.error) return guard.error;
       const { data, error } = await supabase.rpc("cancel_order_and_refund", { p_order_id: body.orderId, p_reason: body.reason || null });
       if (error) throw error;
-      const title = "Order cancelled";
-      const bodyText = `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
+      const refundRequired = data?.refund_required === true;
+      const refundStatus = data?.refund_status === "pending_funding" ? "Refund funding is required before the buyer can be credited." : "The full refund is ready for the seller to process from the seller balance.";
+      const title = refundRequired ? "Refund required" : "Order cancelled";
+      const bodyText = refundRequired ? `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled. A full refund of ₦${Number(data.refund_due || order.total || 0).toLocaleString("en-NG")} is due. ${refundStatus}` : `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
       if (order.buyer_id) {
         const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: order.buyer_id, p_type: "order", p_title: title, p_body: bodyText, p_link: `/account/orders/${order.id}` });
         if (buyerNotificationError) console.error("Buyer operations notification record failed", buyerNotificationError);
@@ -34,6 +36,7 @@ export async function POST(request) {
       const { error: sellerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: user.id, p_type: "order", p_title: title, p_body: bodyText, p_link: `/dashboard/orders?order=${order.id}` });
       if (sellerNotificationError) console.error("Seller operations notification record failed", sellerNotificationError);
       await notifyUser({ userId: user.id, type: "order", title, body: bodyText, link: `/dashboard/orders?order=${order.id}`, save: false });
+      if (refundRequired) await notifyPlatformAdmins({ type: "refund", title: "Outstanding refund obligation", body: `Order #${order.order_code} was cancelled by ${order.stores?.name || "a seller"}. Full refund due: ₦${Number(data.refund_due || order.total || 0).toLocaleString("en-NG")}. Status: ${data.refund_status}.`, link: "/admin?section=refunds" });
       return NextResponse.json(data);
     }
     if (["withdraw", "offline_sale"].includes(action)) {

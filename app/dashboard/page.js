@@ -6,6 +6,7 @@ import { formatNaira, storeUrl } from "@/lib/utils";
 import { SITE_URL } from "@/lib/config";
 import ShareStore from "@/components/ShareStore";
 import CopyStoreLink from "@/components/CopyStoreLink";
+import RefundActions from "@/components/RefundActions";
 
 function StatusPill({ status }) {
   const tone = status === "delivered" ? "bg-green-50 text-success" : status === "cancelled" ? "bg-red-50 text-danger" : "bg-amber-50 text-warning";
@@ -23,7 +24,7 @@ function Metric({ label, value, detail, icon: Icon, href, accent = false }) {
 
 export default async function DashboardHome() {
   const { supabase, store } = await getMyStore();
-  const [{ count: productCount }, { count: lowStockCount }, { count: openOrderCount }, { data: recentOrders }, { data: wallet }, { data: activeSubscription }, { data: paidRows }, { data: lowStockProducts }] = await Promise.all([
+  const [{ count: productCount }, { count: lowStockCount }, { count: openOrderCount }, { data: recentOrders }, { data: wallet }, { data: activeSubscription }, { data: paidRows }, { data: lowStockProducts }, { data: refundRows }] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).eq("is_active", true),
     supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).eq("is_active", true).lte("stock", 3),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("store_id", store.id).in("status", ["pending", "processing", "shipped"]),
@@ -32,6 +33,7 @@ export default async function DashboardHome() {
     supabase.from("subscriptions").select("plan,expires_at,status").eq("store_id", store.id).in("status", ["paid", "active"]).gt("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("orders").select("total").eq("store_id", store.id).eq("payment_status", "paid").limit(1000),
     supabase.from("products").select("id,name,stock,price,image_urls").eq("store_id", store.id).eq("is_active", true).lte("stock", 3).order("stock", { ascending: true }).limit(5),
+    supabase.rpc("get_seller_refund_obligations", { p_store_id: store.id }),
   ]);
   const paidSales = (paidRows || []).reduce((sum, row) => sum + Number(row.total || 0), 0);
   const planName = activeSubscription ? ({ basic: "Basic", plus: "Plus", premium: "Premium", quarterly: "Basic", biannual: "Plus", yearly: "Premium" }[activeSubscription.plan] || activeSubscription.plan) : "Starter";
@@ -56,6 +58,8 @@ export default async function DashboardHome() {
     </section>
 
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Paid sales" value={formatNaira(paidSales)} detail="Across all paid orders" icon={BarChart3} href="/dashboard/orders" accent /><Metric label="Orders to fulfil" value={openOrderCount || 0} detail="Pending, processing or shipped" icon={ShoppingBag} href="/dashboard/orders" /><Metric label="Live products" value={productCount || 0} detail={`${lowStockCount || 0} low stock`} icon={Package} href="/dashboard/products" /><Metric label="Wallet balance" value={formatNaira(wallet?.available)} detail="Available to withdraw" icon={WalletCards} href="/dashboard/wallet" /></section>
+
+    <section className="app-card overflow-hidden"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5"><div><p className="eyebrow text-danger">Refund obligations</p><h2 className="mt-1 text-base font-extrabold">Outstanding refunds</h2><p className="mt-1 text-xs text-muted">Paid seller-side cancellations remain visible until the buyer receives the full original payment amount.</p></div><span className="chip">{refundRows?.length || 0} open</span></div>{refundRows?.length ? <div className="divide-y divide-line">{refundRows.map((refund) => <article key={refund.id} className="p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm font-extrabold">{refund.refund_reference} · Order #{refund.order_code}</p><p className="mt-1 text-xs text-muted">Buyer: {refund.buyer_name || "Buyer"} · Created {new Date(refund.created_at).toLocaleDateString("en-NG")}</p></div><div className="text-right"><p className="text-sm font-extrabold text-danger">{formatNaira(refund.refund_due)} due</p><p className="mt-1 text-[11px] text-muted">Outstanding contribution: {formatNaira(refund.outstanding_seller_contribution)}</p></div></div><p className="mt-3 text-xs leading-5 text-muted">Reason: {refund.cancellation_reason}</p><RefundActions refund={refund} /></article>)}</div> : <div className="p-7 text-center"><p className="text-sm font-extrabold">No outstanding refunds</p><p className="mt-1 text-xs text-muted">When a paid order is cancelled, Sella will show the full refund obligation here.</p></div>}</section>
 
     <section className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
       <div className="app-card p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="eyebrow text-kola">Money & momentum</p><h2 className="display mt-2 text-2xl">Your store at a glance</h2><p className="mt-2 text-xs text-muted">The numbers that matter for today&apos;s decisions.</p></div><Link href="/dashboard/analytics" className="btn-soft hidden text-xs sm:inline-flex">Analytics <ArrowRight size={14} /></Link></div><div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-kola-light p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">Paid sales</p><p className="mt-2 text-lg font-extrabold text-kola">{formatNaira(paidSales)}</p></div><div className="rounded-2xl bg-surface p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">Paid orders</p><p className="mt-2 text-lg font-extrabold">{paidRows?.length || 0}</p></div><div className="rounded-2xl bg-surface p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">Completed</p><p className="mt-2 text-lg font-extrabold">{Number(store.completed_orders || 0)}</p></div></div><div className="mt-5 flex items-center justify-between border-t border-line pt-4"><span className="text-xs text-muted">See what is converting</span><Link href="/dashboard/analytics" className="text-xs font-bold text-kola">Open analytics <ArrowRight size={14} className="inline" /></Link></div></div>

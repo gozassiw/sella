@@ -26,6 +26,13 @@ export async function POST(request) {
       if (launchAt && Number.isNaN(launchAt.getTime())) return NextResponse.json({ error: "Enter a valid launch date and time." }, { status: 400 });
       const { error } = await auth.rpc("admin_apply_action", { p_action: "setting", p_payload: { key: "launch_mode", value: { enabled: Boolean(body.enabled), launch_at: launchAt ? launchAt.toISOString() : null } } });
       if (error) throw error;
+    } else if (body.action === "refund_action") {
+      if (!body.refundId || !["retry", "note", "escalated"].includes(body.refundAction)) return NextResponse.json({ error: "Invalid refund action." }, { status: 400 });
+      const { data: refundResult, error: refundError } = body.refundAction === "retry"
+        ? await auth.rpc("process_refund_obligation", { p_refund_id: body.refundId })
+        : await auth.rpc("record_refund_admin_action", { p_refund_id: body.refundId, p_action: body.refundAction, p_note: body.note || null });
+      if (refundError) throw refundError;
+      return NextResponse.json(refundResult || { success: true });
     } else if (body.action === "paid_verification") {
       const { data: review, error: reviewError } = await auth.rpc("admin_review_paid_verification", { p_purchase_id: body.purchaseId, p_approved: Boolean(body.approved), p_note: body.note || null });
       if (reviewError) throw reviewError;

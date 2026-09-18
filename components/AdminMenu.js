@@ -12,6 +12,7 @@ const items = [
   ["verification", "Verification", ShieldCheck],
   ["orders", "Orders & revenue", Banknote],
   ["withdrawals", "Withdrawals", WalletCards],
+  ["refunds", "Outstanding refunds", WalletCards],
   ["reports", "Reports & safety", Flag],
   ["demos", "Demo requests", CalendarDays],
   ["waitlist", "Launch waitlist", ClipboardList],

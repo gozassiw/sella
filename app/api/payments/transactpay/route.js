@@ -121,6 +121,7 @@ export async function POST(request) {
 
     const { data: result, error } = await supabase.rpc("process_transactpay_webhook", { p_event_key: key, p_payload: payload, p_successful: successful, p_account_number: fields.accountNumber, p_account_reference: fields.accountReference, p_amount: fields.amount, p_payment_reference: fields.paymentReference, p_order_reference: fields.orderReference });
     if (error) throw error;
+    if (result?.user_id && result?.credited === "seller_refund_funding") await notifySafely({ userId: result.user_id, type: "wallet", title: "Refund funding received", body: `Your verified refund funding payment of ₦${Number(result.amount || fields.amount).toLocaleString("en-NG")} was added to your seller balance.`, link: "/dashboard", save: false });
     if (result?.user_id && result?.credited === "buyer_wallet") await notifySafely({ userId: result.user_id, type: "wallet", title: "Wallet funded", body: `Your Sella wallet received ₦${Number(result.amount || fields.amount).toLocaleString("en-NG")}.`, link: "/account/wallet", save: false });
     if (result?.user_id && result?.credited === "seller_wallet") await notifySafely({ userId: result.user_id, type: "order", title: "Payment received", body: "A buyer payment has been confirmed and added to your seller wallet.", link: "/dashboard/wallet", save: false });
     return NextResponse.json(result || { received: true });
