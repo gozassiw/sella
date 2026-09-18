@@ -6,7 +6,7 @@ import { notifyUser } from "@/lib/notifications";
 const allowedTransitions = {
   pending: new Set(["processing", "cancelled"]),
   processing: new Set(["pending", "shipped", "cancelled"]),
-  shipped: new Set(["delivered", "cancelled"]),
+  shipped: new Set(["delivered"]),
   delivered: new Set(),
   cancelled: new Set(),
 };
@@ -33,7 +33,7 @@ export async function POST(request) {
     if (!order || order.stores?.owner_id !== user.id) return NextResponse.json({ error: "Order not found." }, { status: 404 });
     if (order.status === status) return NextResponse.json({ success: true, unchanged: true });
     if (!allowedTransitions[order.status]?.has(status)) {
-      return NextResponse.json({ error: order.status === "delivered" ? "Delivered orders cannot be moved backward or cancelled." : order.status === "shipped" ? "Orders out for delivery can only be marked delivered or cancelled." : "That order status change is not allowed." }, { status: 409 });
+      return NextResponse.json({ error: order.status === "delivered" ? "Delivered orders cannot be moved backward or cancelled." : order.status === "shipped" ? "Orders out for delivery can only be marked delivered." : "That order status change is not allowed." }, { status: 409 });
     }
 
     const patch = { status };
