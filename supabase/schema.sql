@@ -1,4 +1,9 @@
 -- =====================================================================
+
+-- Stage 79 snapshot: paid-order refund obligations and refund accounting are
+-- defined in supabase/stage-79-paid-refunds.sql (the additive migration that
+-- follows this repository snapshot).  Keep that migration applied after the
+-- stage 78 service-role grants.
 -- Oja: Bumpa-style commerce platform — database (Stage 1)
 -- Paste this whole file into Supabase > SQL Editor > New query > Run.
 -- It creates every table the first stages need, so later stages only

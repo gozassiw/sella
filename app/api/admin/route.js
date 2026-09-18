@@ -10,7 +10,16 @@ export async function POST(request) {
   if (!user || authorized !== true) return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   const body = await request.json().catch(() => ({}));
   try {
-    if (body.action === "setting") {
+    if (body.action === "refund_retry") {
+      const { data, error } = await auth.rpc("admin_retry_refund", { p_refund_id: body.refundId });
+      if (error) throw error;
+      if (data?.success !== true) return NextResponse.json(data || { success: false, error: "Refund retry failed." }, { status: 409 });
+      return NextResponse.json(data);
+    } else if (body.action === "refund_note") {
+      const { data, error } = await auth.rpc("admin_refund_note", { p_refund_id: body.refundId, p_action: body.noteAction || "note", p_body: body.body });
+      if (error) throw error;
+      return NextResponse.json(data);
+    } else if (body.action === "setting") {
       const definitions = {
         withdrawal_fee: { field: "amount", max: 1000000 },
         paid_verification_fee: { field: "amount", max: 1000000 },

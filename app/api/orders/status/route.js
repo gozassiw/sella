@@ -25,7 +25,8 @@ export async function POST(request) {
   if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
   const body = await request.json().catch(() => ({}));
   const status = String(body.status || "");
-  if (!Object.hasOwn(statusMessages, status) || !body.orderId) return NextResponse.json({ error: "A valid order status is required." }, { status: 400 });
+   if (status === "cancelled") return NextResponse.json({ error: "Paid and unpaid cancellations must use the cancellation flow." }, { status: 409 });
+   if (!Object.hasOwn(statusMessages, status) || !body.orderId) return NextResponse.json({ error: "A valid order status is required." }, { status: 400 });
 
   try {
     const { data: order, error: orderError } = await supabase.from("orders").select("id,order_code,status,buyer_id,store_id,stores(owner_id,name)").eq("id", body.orderId).maybeSingle();

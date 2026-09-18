@@ -25,7 +25,10 @@ export async function POST(request) {
       const { data, error } = await supabase.rpc("cancel_order_and_refund", { p_order_id: body.orderId, p_reason: body.reason || null });
       if (error) throw error;
       const title = "Order cancelled";
-      const bodyText = `Order #${order.order_code} from ${order.stores?.name || "the seller"} was cancelled.`;
+      const isRefunded = data?.refund_status === "refunded";
+      const bodyText = isRefunded
+        ? `Order #${order.order_code} was cancelled and ${Number(data?.refund_amount || 0).toLocaleString("en-NG", { style: "currency", currency: "NGN" })} was credited to the buyer wallet.`
+        : `Order #${order.order_code} was cancelled. Refund status: ${data?.refund_status || "pending funding"}; buyer credit has not been completed.`;
       if (order.buyer_id) {
         const { error: buyerNotificationError } = await supabase.rpc("notify_order_user", { p_order_id: order.id, p_user_id: order.buyer_id, p_type: "order", p_title: title, p_body: bodyText, p_link: `/account/orders/${order.id}` });
         if (buyerNotificationError) console.error("Buyer operations notification record failed", buyerNotificationError);
