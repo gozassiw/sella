@@ -13,7 +13,7 @@ export default async function BuyerProfilePage() {
   const [{ data: profile }, { data: follows }, { data: orders }] = await Promise.all([
     supabase.from("buyer_profiles").select("full_name,call_number,whatsapp,delivery_address").eq("user_id", user.id).maybeSingle(),
     supabase.from("buyer_store_follows").select("store_id,stores(id,name,slug,logo_url,category)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
-    supabase.from("orders").select("id,total,payment_status,store_id,stores(name,slug,logo_url,category)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(500),
+    supabase.from("orders").select("id,total,payment_status,store_id,stores(name,slug,logo_url,category)").eq("buyer_id", user.id).order("created_at", { ascending: false }).limit(100),
   ]);
   const spendByStore = new Map();
   (orders || []).filter((order) => order.payment_status === "paid").forEach((order) => {

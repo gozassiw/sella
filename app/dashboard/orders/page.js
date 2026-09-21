@@ -9,7 +9,7 @@ import RefundActions from "@/components/RefundActions";
 export default async function SellerOrdersPage() {
   const { supabase, store } = await getMyStore();
   const [{ data: orders }, { data: sellerWallet }, { data: refundSnapshot }] = await Promise.all([
-    supabase.from("orders").select("id,store_id,buyer_id,order_code,total,payment_total,status,payment_status,fulfilment_method,created_at,customers(name,phone,whatsapp,email,address),order_items(name,price,quantity)").eq("store_id", store.id).order("created_at", { ascending: false }),
+    supabase.from("orders").select("id,store_id,buyer_id,order_code,total,payment_total,status,payment_status,fulfilment_method,created_at,customers(name,phone,whatsapp,email,address),order_items(name,price,quantity)").eq("store_id", store.id).order("created_at", { ascending: false }).limit(100),
     supabase.from("wallets").select("available").eq("store_id", store.id).maybeSingle(),
     supabase.rpc("get_seller_refund_obligations", { p_store_id: store.id }),
   ]);

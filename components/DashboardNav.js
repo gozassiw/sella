@@ -18,7 +18,7 @@ const tools = [
   { href: "/dashboard/customers", label: "Customers", icon: Users }, { href: "/dashboard/offline-sales", label: "Offline sales", icon: Receipt }, { href: "/dashboard/invoices", label: "Invoices", icon: Receipt }, { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 }, { href: "/dashboard/expenses", label: "Expenses", icon: Receipt }, { href: "/dashboard/referrals", label: "Referrals", icon: Users }, { href: "/dashboard/billing", label: "Plans & billing", icon: WalletCards }, { href: "/dashboard/reports", label: "Reports & Safety", icon: ShieldCheck }, { href: "/dashboard/notifications", label: "Notifications", icon: Bell }, { href: "/dashboard/verification", label: "Seller verification", icon: Settings }, { href: "/dashboard/verification-badge", label: "Verification checkmark", icon: BadgeCheck }, { href: "/dashboard/settings", label: "Store settings", icon: Settings },
 ];
 
-export default function DashboardNav({ store }) {
+export default function DashboardNav({ store, ownerId }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -30,13 +30,13 @@ export default function DashboardNav({ store }) {
   const toolLink = (item) => {
     const Icon = item.icon;
     const link = <Link key={item.href} href={item.href} prefetch onClick={() => setMenuOpen(false)} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold ${active(item.href) ? "bg-kola-light text-kola" : "text-ink hover:bg-kola-light"}`}><Icon size={16} />{item.label}</Link>;
-    return item.href === "/dashboard/notifications" ? <NotificationBell key={item.href}>{link}</NotificationBell> : link;
+    return item.href === "/dashboard/notifications" ? <NotificationBell key={item.href} userId={ownerId}>{link}</NotificationBell> : link;
   };
   const primaryLink = (item, mobile = false) => {
     const Icon = item.icon;
     const selected = active(item.href);
     const link = <Link key={`${mobile ? "mobile" : "desktop"}-${item.href}`} href={item.href} prefetch onClick={() => mobile && setMenuOpen(false)} className={`${mobile ? "flex min-h-[52px] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold" : "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold"} ${selected ? (mobile ? "bg-kola text-white" : "bg-kola-light text-kola") : (mobile ? "text-muted" : "text-muted hover:bg-surface hover:text-ink")}`}><Icon size={mobile ? 19 : 18} strokeWidth={selected ? 2.3 : 1.8} /><span>{item.label}</span></Link>;
-    return item.href === "/dashboard/messages" ? <ChatBadge key={`${mobile ? "mobile" : "desktop"}-${item.href}`}>{link}</ChatBadge> : link;
+    return item.href === "/dashboard/messages" ? <ChatBadge key={`${mobile ? "mobile" : "desktop"}-${item.href}`} userId={ownerId}>{link}</ChatBadge> : link;
   };
   return <>
     <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col border-r border-line bg-white px-4 py-5 md:flex">

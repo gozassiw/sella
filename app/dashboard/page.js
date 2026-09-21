@@ -24,8 +24,12 @@ function Metric({ label, value, detail, icon: Icon, href, accent = false }) {
 
 export default async function DashboardHome() {
   const { supabase, store } = await getMyStore();
-  const { data: snapshot, error: snapshotError } = await supabase.rpc("get_seller_dashboard_snapshot", { p_store_id: store.id });
+  const [{ data: snapshot, error: snapshotError }, { data: renewalReminder }] = await Promise.all([
+    supabase.rpc("get_seller_dashboard_snapshot", { p_store_id: store.id }),
+    supabase.rpc("create_combined_renewal_reminder", { p_store_id: store.id }),
+  ]);
   if (snapshotError) throw snapshotError;
+  const reminder = renewalReminder?.show ? renewalReminder : null;
   const productCount = Number(snapshot?.product_count || 0);
   const lowStockCount = Number(snapshot?.low_stock_count || 0);
   const openOrderCount = Number(snapshot?.open_order_count || 0);
@@ -49,6 +53,7 @@ export default async function DashboardHome() {
       <div><p className="eyebrow text-kola">Seller command centre</p><h1 className="display mt-2 text-3xl sm:text-4xl">Good morning, {store.name}.</h1><p className="mt-2 text-sm text-muted">Your next best actions, money and store health in one view.</p></div>
       <div className="hidden text-right text-xs text-muted sm:block">{new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}<br /><Link href={`/s/${store.slug}`} className="mt-1 inline-flex items-center gap-1 font-bold text-kola">Open storefront <ExternalLink size={12} /></Link></div>
     </header>
+    {reminder && <div className="rounded-[20px] bg-amber-50 p-4 text-sm text-warning"><p className="font-extrabold">Your Sella renewals are coming up</p><p className="mt-1 leading-6">{reminder.body}</p><div className="mt-3 flex flex-wrap gap-3"><Link href="/dashboard/billing" className="font-bold underline">Manage plan</Link><Link href="/dashboard/verification-badge" className="font-bold underline">Manage checkmark</Link></div></div>}
     {store.approval_status === "pending" && <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-warning"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-warning" /><div><p className="text-sm font-extrabold">Your store is being reviewed</p><p className="mt-1 text-xs leading-5">After approval, your free Starter plan includes up to 40 active product listings.</p></div></div>}
     {store.approval_status === "rejected" && <div className="rounded-2xl bg-red-50 p-4 text-danger"><p className="text-sm font-extrabold">Your store needs an update</p><p className="mt-1 text-xs leading-5">{store.rejection_reason || "Review your store details and submit them again."}</p></div>}
 

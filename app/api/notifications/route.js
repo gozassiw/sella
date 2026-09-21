@@ -6,6 +6,14 @@ export async function GET() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
+  const summary = new URL(request.url).searchParams.get("summary") === "1";
+  if (summary) {
+    const [{ count: unreadCount }, { count: chatUnreadCount }] = await Promise.all([
+      supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("read_at", null),
+      supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("type", "chat").is("read_at", null),
+    ]);
+    return NextResponse.json({ unreadCount: unreadCount || 0, chatUnreadCount: chatUnreadCount || 0 });
+  }
   const { data, error } = await supabase.from("notifications").select("id,type,title,body,link,read_at,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   const { count: subscriptionCount } = await supabase.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("disabled_at", null);
