@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ShieldCheck, BarChart3, BadgeCheck, Bell, ChevronDown, Home, LogOut, Menu, MessageCircle, Package, Receipt, Search, Settings, ShoppingBag, Users, WalletCards, X } from "lucide-react";
 import SellaBrand from "@/components/SellaBrand";
 import NotificationBell from "@/components/NotificationBell";
@@ -20,8 +20,15 @@ const tools = [
 
 export default function DashboardNav({ store, ownerId }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  useEffect(() => {
+    const routes = primary.map((item) => item.href).filter((href) => href !== pathname);
+    const prefetch = () => routes.forEach((href) => router.prefetch(href));
+    const idle = window.requestIdleCallback ? window.requestIdleCallback(prefetch, { timeout: 1200 }) : window.setTimeout(prefetch, 350);
+    return () => window.requestIdleCallback ? window.cancelIdleCallback(idle) : window.clearTimeout(idle);
+  }, [pathname, router]);
   const active = (href) => href === "/dashboard" ? pathname === href : pathname.startsWith(href);
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include", cache: "no-store" });
@@ -35,7 +42,7 @@ export default function DashboardNav({ store, ownerId }) {
   const primaryLink = (item, mobile = false) => {
     const Icon = item.icon;
     const selected = active(item.href);
-    const link = <Link key={`${mobile ? "mobile" : "desktop"}-${item.href}`} href={item.href} prefetch onClick={() => mobile && setMenuOpen(false)} className={`${mobile ? "flex min-h-[52px] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold" : "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold"} ${selected ? (mobile ? "bg-kola text-white" : "bg-kola-light text-kola") : (mobile ? "text-muted" : "text-muted hover:bg-surface hover:text-ink")}`}><Icon size={mobile ? 19 : 18} strokeWidth={selected ? 2.3 : 1.8} /><span>{item.label}</span></Link>;
+    const link = <Link key={`${mobile ? "mobile" : "desktop"}-${item.href}`} href={item.href} prefetch onMouseEnter={() => router.prefetch(item.href)} onTouchStart={() => router.prefetch(item.href)} onClick={() => mobile && setMenuOpen(false)} className={`${mobile ? "flex min-h-[52px] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-bold" : "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold"} ${selected ? (mobile ? "bg-kola text-white" : "bg-kola-light text-kola") : (mobile ? "text-muted" : "text-muted hover:bg-surface hover:text-ink")}`}><Icon size={mobile ? 19 : 18} strokeWidth={selected ? 2.3 : 1.8} /><span>{item.label}</span></Link>;
     return item.href === "/dashboard/messages" ? <ChatBadge key={`${mobile ? "mobile" : "desktop"}-${item.href}`} userId={ownerId}>{link}</ChatBadge> : link;
   };
   return <>
