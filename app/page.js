@@ -7,6 +7,7 @@ import SellaBrand from "@/components/SellaBrand";
 import InstallPrompt from "@/components/InstallPrompt";
 import HomepageTop from "@/components/HomepageTop";
 import { HomepageModeContent, HomepageModeProvider } from "@/components/HomepageMode";
+import { getPublicLaunchSettings } from "@/lib/launch-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export default async function Home() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    const { data: launchSettings } = await supabase.rpc("get_public_launch_settings");
+    const launchSettings = await getPublicLaunchSettings();
     const previewEnabled = cookies().get("sella_preview")?.value === "1";
     if (launchSettings?.enabled === true && !previewEnabled) redirect("/waiting");
   }

@@ -1,12 +1,11 @@
 import SellaBrand from "@/components/SellaBrand";
 import WaitlistForm from "@/components/WaitlistForm";
-import { createClient } from "@/lib/supabase/server";
+import { getPublicLaunchSettings } from "@/lib/launch-settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function WaitingPage() {
-  const supabase = createClient();
-  const { data: settings } = await supabase.rpc("get_public_launch_settings");
+  const settings = await getPublicLaunchSettings();
   const launchAt = settings?.launch_at || null;
 
   return (
