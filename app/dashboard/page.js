@@ -24,19 +24,18 @@ function Metric({ label, value, detail, icon: Icon, href, accent = false }) {
 
 export default async function DashboardHome() {
   const { supabase, store } = await getMyStore();
-  const [{ count: productCount }, { count: lowStockCount }, { count: openOrderCount }, { data: recentOrders }, { data: wallet }, { data: activeSubscription }, { data: dashboardMetrics }, { data: lowStockProducts }, { data: refundRows }] = await Promise.all([
-    supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).eq("is_active", true),
-    supabase.from("products").select("id", { count: "exact", head: true }).eq("store_id", store.id).eq("is_active", true).lte("stock", 3),
-    supabase.from("orders").select("id", { count: "exact", head: true }).eq("store_id", store.id).in("status", ["pending", "processing", "shipped"]),
-    supabase.from("orders").select("id,order_code,total,status,payment_status,created_at,customers(name)").eq("store_id", store.id).order("created_at", { ascending: false }).limit(5),
-    supabase.from("wallets").select("available").eq("store_id", store.id).maybeSingle(),
-    supabase.from("subscriptions").select("plan,expires_at,status").eq("store_id", store.id).in("status", ["paid", "active"]).gt("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.rpc("get_seller_dashboard_metrics", { p_store_id: store.id }),
-    supabase.from("products").select("id,name,stock,price,image_urls").eq("store_id", store.id).eq("is_active", true).lte("stock", 3).order("stock", { ascending: true }).limit(5),
-    supabase.rpc("get_seller_refund_obligations", { p_store_id: store.id }),
-  ]);
-  const paidSales = Number(dashboardMetrics?.paid_sales || 0);
-  const paidOrderCount = Number(dashboardMetrics?.paid_orders || 0);
+  const { data: snapshot, error: snapshotError } = await supabase.rpc("get_seller_dashboard_snapshot", { p_store_id: store.id });
+  if (snapshotError) throw snapshotError;
+  const productCount = Number(snapshot?.product_count || 0);
+  const lowStockCount = Number(snapshot?.low_stock_count || 0);
+  const openOrderCount = Number(snapshot?.open_order_count || 0);
+  const recentOrders = snapshot?.recent_orders || [];
+  const wallet = snapshot?.wallet || null;
+  const activeSubscription = snapshot?.active_subscription || null;
+  const lowStockProducts = snapshot?.low_stock_products || [];
+  const refundRows = snapshot?.refund_rows || [];
+  const paidSales = Number(snapshot?.metrics?.paid_sales || 0);
+  const paidOrderCount = Number(snapshot?.metrics?.paid_orders || 0);
   const planName = activeSubscription ? ({ basic: "Basic", plus: "Plus", premium: "Premium", quarterly: "Basic", biannual: "Plus", yearly: "Premium" }[activeSubscription.plan] || activeSubscription.plan) : "Starter";
   const planLimit = { Starter: 40, Basic: 150, Plus: 500, Premium: null }[planName];
   const storeLink = storeUrl(SITE_URL, store.slug);
