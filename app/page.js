@@ -1,212 +1,111 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-import SellaBrand from "@/components/SellaBrand";
-import InstallPrompt from "@/components/InstallPrompt";
-import HomepageTop from "@/components/HomepageTop";
-import { HomepageModeContent, HomepageModeProvider } from "@/components/HomepageMode";
-import { getPublicLaunchSettings } from "@/lib/launch-settings";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useState } from "react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  Heart,
+  LockKeyhole,
+  Menu,
+  PieChart,
+  Plus,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  X,
+  Zap,
+} from "lucide-react";
 
-function CrossIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>;
-}
+const posters = [
+  { image: "/marketing/moniused-launch.png", kicker: "Launch", title: "Where did your moni go?", copy: "MoniUsed is live." },
+  { image: "/marketing/moniused-speed.png", kicker: "Speed", title: "Add a spend in 5 seconds.", copy: "Amount. Category. Save." },
+  { image: "/marketing/moniused-insights.png", kicker: "Insights", title: "See where your moni went.", copy: "Your spending story, made clear." },
+  { image: "/marketing/moniused-salary-day.png", kicker: "Relatable", title: "Salary day vs 5 days later.", copy: "Know where your moni goes." },
+  { image: "/marketing/moniused-privacy.png", kicker: "Privacy", title: "Your money. Your eyes only.", copy: "Private by design." },
+];
 
-function CheckIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-}
-
-const loginHref = "/login?next=%2Fdashboard";
-const signupHref = "/signup";
-
-export default async function Home() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    const launchSettings = await getPublicLaunchSettings();
-    const previewEnabled = cookies().get("sella_preview")?.value === "1";
-    if (launchSettings?.enabled === true && !previewEnabled) redirect("/waiting");
-  }
-  if (user) {
-    const { data: admin, error: adminError } = await supabase.rpc("is_platform_admin");
-    if (!adminError && admin === true) redirect("/admin");
-    const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle();
-    if (store) redirect("/dashboard");
-    redirect("/account");
-  }
-
+function Mark({ white = false }) {
   return (
-    <div className="seller-homepage">
-      <HomepageModeProvider>
-        <InstallPrompt />
-        <HomepageTop signupHref={signupHref} />
-        <HomepageModeContent>
-          <main>
-        <section>
-          <div className="seller-wrap">
-            <div className="seller-problem">
-              <div className="seller-eyebrow">Sound familiar?</div>
-              <h2>Running a business through chats gets messy.</h2>
-              <div className="seller-problem-list">
-                <div className="seller-problem-item"><CrossIcon /> Prices repeated in every single DM</div>
-                <div className="seller-problem-item"><CrossIcon /> Payment confirmed by screenshot</div>
-                <div className="seller-problem-item"><CrossIcon /> Stock tracked in your head</div>
-                <div className="seller-problem-item"><CrossIcon /> No real sense of what you&apos;re making</div>
-              </div>
-              <div className="seller-problem-close">Sella brings all of it into one place.</div>
-            </div>
-          </div>
-        </section>
+    <span className={`brand-mark ${white ? "brand-mark-white" : ""}`} aria-hidden="true">
+      <svg viewBox="0 0 40 40" fill="none"><path d="M7 27.5 13.6 13l6.8 8.3L26.9 7 34 14.4 27.1 28l-6.7-8.2-6.3 12.4L7 27.5Z" fill="currentColor" /><path d="M8 19.4 13.4 7 20 15.2 26.5 2.8 34 10.5l-7 13.6-6.7-8.2-5.1 10.2L8 19.4Z" fill="currentColor" opacity=".85" /></svg>
+    </span>
+  );
+}
 
-        <section style={{ paddingTop: 0 }}>
-          <div className="seller-wrap">
-            <div className="seller-mood-grid">
-              <div className="seller-mood-card seller-mood-before">
-                <img className="seller-mood-photo" src="/homepage/before-sella.jpeg" alt="A seller overwhelmed by scattered orders and receipts" />
-                <div className="seller-mood-label">Before Sella</div>
-                <div className="seller-mood-text">Juggling WhatsApp chats, screenshots, and a notebook to know what&apos;s actually selling.</div>
-              </div>
-              <div className="seller-mood-card seller-mood-after">
-                <img className="seller-mood-photo" src="/homepage/with-sella.jpeg" alt="A seller confidently checking her Sella dashboard" />
-                <div className="seller-mood-label">With Sella</div>
-                <div className="seller-mood-text">One place for orders, stock, and money — checked in seconds, not stitched together.</div>
-              </div>
-            </div>
-          </div>
-        </section>
+function Logo({ light = false }) {
+  return <a href="#top" className={`marketing-logo ${light ? "marketing-logo-light" : ""}`} aria-label="MoniUsed home"><Mark white={light} /><span><b>Moni</b><strong>Used</strong></span></a>;
+}
 
-        <section className="seller-feature">
-          <div className="seller-wrap seller-feature-grid">
-            <div>
-              <div className="seller-feature-num">Your store</div>
-              <h2>One link for every customer.</h2>
-              <p className="seller-body-text">Set up your business name, logo, description, pickup point or address, and WhatsApp contact. Share your store link or your Sella seller ID with the customers you already have — on WhatsApp, Instagram, or in person.</p>
-            </div>
-            <div className="seller-mock">
-              <div className="seller-mock-head"><span className="seller-mock-title">Your store link</span><span className="seller-pill seller-pill-green">Live</span></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, background: "var(--seller-bg)", borderRadius: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--seller-kola-dark)", flex: "0 0 auto", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800 }}>C</div>
-                <div style={{ minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 14.5 }}>chichiluxury.sella.com.ng</div><div style={{ fontSize: 12.5, color: "var(--seller-muted)" }}>Seller ID: CHL-2291</div></div>
-              </div>
-              <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-                <span className="seller-button seller-button-outline seller-button-sm" style={{ flex: 1, justifyContent: "center" }}>Copy link</span>
-                <Link className="seller-button seller-button-primary seller-button-sm" href={signupHref} style={{ flex: 1, justifyContent: "center" }}>Share</Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="seller-feature seller-feature-reverse">
-          <div className="seller-wrap seller-feature-grid">
-            <div className="seller-mock">
-              <img className="seller-product-thumb" src="/homepage/kola-edge-two-piece-set.jpeg" alt="Kola Edge Two-Piece Set" />
-              <div style={{ fontWeight: 700, fontSize: 15 }}>Kola Edge Two-Piece Set</div>
-              <div className="seller-margin-grid">
-                <div className="seller-margin-box"><div className="seller-k">Selling price</div><div className="seller-v">₦32,000</div></div>
-                <div className="seller-margin-box"><div className="seller-k">Cost price</div><div className="seller-v">₦19,000</div></div>
-                <div className="seller-margin-box seller-win" style={{ gridColumn: "1 / -1" }}><div className="seller-k">Your margin</div><div className="seller-v">₦13,000 · 41%</div></div>
-              </div>
-            </div>
-            <div>
-              <div className="seller-feature-num">Products &amp; stock</div>
-              <h2>Know what you&apos;re really making.</h2>
-              <p className="seller-body-text">Add products with photos, descriptions, selling price, and cost price — Sella works out your margin automatically. Know exactly what&apos;s running low before you&apos;re caught out.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="seller-feature">
-          <div className="seller-wrap seller-feature-grid">
-            <div>
-              <div className="seller-feature-num">Orders</div>
-              <h2>Every order, one place.</h2>
-              <p className="seller-body-text">See payment status, customer details, totals, and order codes at a glance. Move each order through paid, packed, out for delivery, and delivered — so nothing gets lost in a chat thread.</p>
-            </div>
-            <div className="seller-mock">
-              <div className="seller-mock-head"><span className="seller-mock-title">Orders</span><span className="seller-pill seller-pill-muted">4 today</span></div>
-              <div className="seller-order-row"><span className="seller-order-dot" style={{ background: "#B7791F" }} /><div><div className="seller-order-name">#5AD8 · Chioma O.</div><div className="seller-order-sub">₦28,000 · 2 items</div></div><span className="seller-order-status seller-pill seller-pill-lime">Packed</span></div>
-              <div className="seller-order-row"><span className="seller-order-dot" style={{ background: "var(--seller-kola)" }} /><div><div className="seller-order-name">#5AD7 · Tunde B.</div><div className="seller-order-sub">₦16,500 · 1 item</div></div><span className="seller-order-status seller-pill seller-pill-green">Delivered</span></div>
-              <div className="seller-order-row"><span className="seller-order-dot" style={{ background: "var(--seller-muted)" }} /><div><div className="seller-order-name">#5AD6 · Amina Y.</div><div className="seller-order-sub">₦9,500 · 1 item</div></div><span className="seller-order-status seller-pill seller-pill-muted">New</span></div>
-            </div>
-          </div>
-        </section>
-
-        <section className="seller-feature seller-feature-reverse">
-          <div className="seller-wrap seller-feature-grid">
-            <div className="seller-mock" style={{ padding: "20px 20px 16px" }}>
-              <div className="seller-mock-head" style={{ marginBottom: 14 }}><span className="seller-mock-title">Chioma O.</span><span className="seller-pill seller-pill-muted">Order #5AD8</span></div>
-              <div className="seller-bubble seller-bubble-them">Is this still in stock in blue?</div>
-              <div className="seller-bubble seller-bubble-me">Yes! I&apos;ll pack it today</div>
-              <div className="seller-bubble seller-bubble-them">Perfect, I&apos;m home after 5pm</div>
-            </div>
-            <div>
-              <div className="seller-feature-num">Messages</div>
-              <h2>Message buyers, right in Sella.</h2>
-              <p className="seller-body-text">Once an order&apos;s paid, chat with your buyer directly — text and photos — to sort out delivery and details. One continuing conversation, not a new one every time.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="seller-feature">
-          <div className="seller-wrap seller-feature-grid">
-            <div>
-              <div className="seller-feature-num">Wallet</div>
-              <h2>Know your money.</h2>
-              <p className="seller-body-text">Available balance, held funds, and withdrawals — all in one wallet. Request a payout to your bank and track the amount and status until it lands.</p>
-            </div>
-            <div className="seller-mock">
-              <div className="seller-mock-head"><span className="seller-mock-title">Withdraw</span><span className="seller-pill seller-pill-green">Processing</span></div>
-              <div className="seller-margin-box"><div className="seller-k">Amount</div><div className="seller-v">₦40,000</div></div>
-              <div style={{ marginTop: 14, padding: "12px 14px", background: "var(--seller-kola-light)", borderRadius: 12, fontSize: 13, color: "var(--seller-kola-dark)" }}>Sent to GTBank ••4521 · usually within 30 minutes – 1 hour</div>
-            </div>
-          </div>
-        </section>
-
-        <section style={{ paddingTop: 0, paddingBottom: 0 }}>
-          <div className="seller-wrap">
-            <div className="seller-extras"><span className="seller-extras-title">Plus, built into your dashboard:</span><span className="seller-extras-list">Offline sales · Invoices · Expenses · Customer records · Reports</span></div>
-          </div>
-        </section>
-
-        <section>
-          <div className="seller-wrap">
-            <div className="seller-eyebrow">Pricing</div>
-            <h2>Try it properly, free.</h2>
-            <p className="seller-lede" style={{ marginTop: 10 }}>Start on Starter for free with up to 40 active products and no expiry. Upgrade when you need more capacity or want a lower commission rate.</p>
-            <div className="seller-plans-grid">
-              <div className="seller-plan"><div className="seller-plan-name">Starter</div><div className="seller-price">Free</div><div className="seller-per">no expiry</div><ul><li><CheckIcon /> Up to 40 active products</li><li><CheckIcon /> Orders, wallet &amp; withdrawals</li><li><CheckIcon /> In-app buyer chat</li><li><CheckIcon /> 3.2% commission</li></ul></div>
-              <div className="seller-plan"><div className="seller-plan-name">Basic</div><div className="seller-price">₦7,500</div><div className="seller-per">every 3 months</div><ul><li><CheckIcon /> Up to 150 active products</li><li><CheckIcon /> Analytics, expenses &amp; invoices</li><li><CheckIcon /> 2.8% commission</li></ul></div>
-              <div className="seller-plan seller-featured"><div className="seller-plan-name">Plus</div><div className="seller-price">₦14,000</div><div className="seller-per">every 6 months</div><ul><li><CheckIcon /> Up to 500 active products</li><li><CheckIcon /> Everything in Basic</li><li><CheckIcon /> 2.6% commission</li></ul></div>
-              <div className="seller-plan"><div className="seller-plan-name">Premium</div><div className="seller-price">₦25,000</div><div className="seller-per">every 12 months</div><ul><li><CheckIcon /> Unlimited active products</li><li><CheckIcon /> Everything in Plus</li><li><CheckIcon /> 2.4% commission</li></ul></div>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="seller-wrap">
-            <div className="seller-closing">
-              <div className="seller-eyebrow">Ready when you are</div>
-              <h2>Your next customer can start here.</h2>
-              <Link className="seller-button seller-button-primary" style={{ marginTop: 26 }} href={signupHref}>Open your store <ArrowRight size={17} /></Link>
-            </div>
-          </div>
-        </section>
-          </main>
-
-          <footer className="seller-site-footer">
-        <div className="seller-wrap">
-          <div className="seller-foot-row">
-            <SellaBrand />
-            <div className="seller-foot-links"><Link href={loginHref}>Login</Link><Link href={signupHref}>Create account</Link><Link href="/terms">Terms of Use</Link><Link href="/privacy">Privacy Policy</Link></div>
-          </div>
-          <div className="seller-copyright">© 2026 Jojokev Concepts · sella.com.ng</div>
+function PhoneMockup() {
+  return (
+    <div className="phone-wrap" aria-label="A preview of the MoniUsed app">
+      <div className="phone-shadow" />
+      <div className="phone-shell">
+        <div className="phone-top"><span>10:31</span><div><span className="signal" /><span className="wifi" /><span className="battery" /></div></div>
+        <div className="phone-brand"><Logo /></div>
+        <div className="phone-body">
+          <p className="phone-greeting">Good morning, Oweipade</p>
+          <div className="phone-balance"><span>Left in September</span><b>₦1,407,000</b><div><em>↓ Money in<strong>₦1,500,000</strong></em><em>↑ Money out<strong>₦93,000</strong></em></div></div>
+          <div className="phone-actions"><span>− Add expense</span><span>+ Add income</span></div>
+          <p className="phone-section-title">Recent</p>
+          <div className="phone-entry"><span className="mini-food">Ψ</span><div><b>ate at beeland</b><small>Food · Today</small></div><strong>−₦93,000</strong></div>
+          <div className="phone-entry muted-entry"><span className="mini-salary">▥</span><div><b>salary</b><small>Salary · Today</small></div><strong>+₦1,500,000</strong></div>
         </div>
-          </footer>
-        </HomepageModeContent>
-      </HomepageModeProvider>
+        <div className="phone-nav"><span className="active">⌂<small>Home</small></span><span>☷<small>Entries</small></span><span>◔<small>Insights</small></span><span>♙<small>Profile</small></span></div>
+      </div>
     </div>
   );
+}
+
+function PosterCard({ poster, index }) {
+  return <article className={`poster-card poster-${index}`}><div className="poster-image-wrap"><img src={poster.image} alt={`${poster.kicker} MoniUsed poster: ${poster.title}`} /></div><div className="poster-card-copy"><span>{poster.kicker}</span><h3>{poster.title}</h3><p>{poster.copy}</p><a href={poster.image} target="_blank" rel="noreferrer">Open poster <ArrowRight size={15} /></a></div></article>;
+}
+
+function MarketingHeader() {
+  const [open, setOpen] = useState(false);
+  return <header className="marketing-header"><div className="marketing-container header-inner"><Logo /><nav className={`marketing-nav ${open ? "is-open" : ""}`}><a href="#why" onClick={() => setOpen(false)}>Why MoniUsed</a><a href="#how" onClick={() => setOpen(false)}>How it works</a><a href="#posters" onClick={() => setOpen(false)}>Campaign</a><a href="#download" className="header-cta" onClick={() => setOpen(false)}>Get MoniUsed <ArrowRight size={15} /></a></nav><button className="header-menu" onClick={() => setOpen(!open)} aria-label="Toggle menu">{open ? <X size={23} /> : <Menu size={23} />}</button></div></header>;
+}
+
+export default function Home() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!email.trim()) return;
+    setSubmitted(true);
+  }
+
+  return <main className="marketing-site" id="top">
+    <MarketingHeader />
+    <section className="marketing-hero">
+      <div className="marketing-container hero-grid">
+        <div className="hero-copy">
+          <div className="eyebrow-pill"><Sparkles size={15} /> Made for your everyday moni</div>
+          <h1>Where did your <span>moni</span> go?</h1>
+          <p className="hero-lede">MoniUsed helps you track what comes in, what goes out, and what&apos;s left — so your salary doesn&apos;t mysteriously disappear before month-end.</p>
+          <div className="hero-actions"><a className="button button-dark" href="#download">Start tracking free <ArrowRight size={18} /></a><a className="text-link" href="#how">See how it works <ChevronRight size={17} /></a></div>
+          <div className="hero-proof"><div className="proof-dots"><i /><i /><i /><i /></div><span>Simple enough for salary earners, students and side hustlers.</span></div>
+        </div>
+        <div className="hero-visual"><div className="lemon-sticker">salary<br /><b>don land</b></div><PhoneMockup /><div className="hero-note"><PieChart size={18} /><span><b>See your patterns.</b><small>Not just your balance.</small></span></div></div>
+      </div>
+    </section>
+
+    <section className="trust-strip"><div className="marketing-container trust-grid"><div><LockKeyhole size={20} /><span><b>No bank login</b><small>Record only what you choose</small></span></div><div><Zap size={20} /><span><b>Add in seconds</b><small>Amount → category → save</small></span></div><div><ShieldCheck size={20} /><span><b>Private by design</b><small>Your moni, your eyes only</small></span></div><div><Download size={20} /><span><b>Free to use</b><small>Install from the website</small></span></div></div></section>
+
+    <section className="problem-section" id="why"><div className="marketing-container problem-grid"><div><span className="section-kicker">Sound familiar?</span><h2>Salary came in on the 25th. By the 5th, it&apos;s gone.</h2><p>You know you spent it somewhere. You just don&apos;t know where. MoniUsed turns that mystery into something you can actually see.</p></div><div className="problem-list"><div><span>01</span><b>Too many little spends</b><p>Lunch, data, rides, transfers. They add up quietly.</p></div><div><span>02</span><b>Nothing to look back on</b><p>By month-end, the details have already blurred.</p></div><div><span>03</span><b>No shame. Just clarity.</b><p>Awareness is the first step to keeping more of your moni.</p></div></div></div></section>
+
+    <section className="features-section" id="how"><div className="marketing-container"><div className="center-heading"><span className="section-kicker">Your money, made visible</span><h2>Small steps. Clearer choices.</h2><p>MoniUsed is intentionally simple. No bank integrations, no confusing charts, no lectures about what you spend.</p></div><div className="feature-grid"><article className="feature-card feature-violet"><span className="feature-icon"><Plus size={22} /></span><h3>Add a spend in seconds</h3><p>Log an expense or income with just the essentials. Keep moving.</p><div className="feature-demo"><span>₦2,500</span><b>Lunch</b><i>Food</i><Check size={18} /></div></article><article className="feature-card feature-lemon"><span className="feature-icon"><PieChart size={22} /></span><h3>See where it went</h3><p>Spot your biggest categories, daily average and spending patterns.</p><div className="bar-demo"><i style={{ height: "82%" }} /><i style={{ height: "54%" }} /><i style={{ height: "68%" }} /><i style={{ height: "34%" }} /><i style={{ height: "48%" }} /><i style={{ height: "24%" }} /></div></article><article className="feature-card feature-white"><span className="feature-icon"><Heart size={22} /></span><h3>Build awareness, not guilt</h3><p>Track your real life: family support, data, outings, food and everything in between.</p><div className="category-pills"><span>Food</span><span>Data</span><span>Family</span><span>Fun</span></div></article></div></div></section>
+
+    <section className="steps-section"><div className="marketing-container steps-grid"><div className="steps-intro"><span className="section-kicker">How it works</span><h2>From “where did it go?” to “I know.”</h2><a className="button button-violet" href="#download">Try it for free <ArrowRight size={17} /></a></div><div className="step-list"><div><span>1</span><div><h3>Record your moni</h3><p>Add money in or money out as it happens.</p></div></div><div><span>2</span><div><h3>Give it a category</h3><p>Food, transport, data, bills — make the pattern visible.</p></div></div><div><span>3</span><div><h3>Check your insights</h3><p>Look back without judgement and make your next choice with context.</p></div></div></div></div></section>
+
+    <section className="posters-section" id="posters"><div className="marketing-container"><div className="poster-heading"><div><span className="section-kicker">The MoniUsed campaign</span><h2>Made for real life in Nigeria.</h2><p>Five reminders for the moments we all know: payday, buka lunch, data runs and that “what happened?” feeling.</p></div><a className="text-link" href="mailto:hello@moniused.com">Work with us <ArrowRight size={17} /></a></div><div className="posters-grid">{posters.map((poster, index) => <PosterCard key={poster.kicker} poster={poster} index={index} />)}</div></div></section>
+
+    <section className="download-section" id="download"><div className="marketing-container download-panel"><div className="download-copy"><span className="section-kicker">Ready when you are</span><h2>Let&apos;s keep an eye on your moni.</h2><p>MoniUsed is free, private and made for the way Nigerians actually spend. Get started straight from your phone.</p><div className="download-points"><span><Check size={16} /> Free forever</span><span><Check size={16} /> No bank login</span><span><Check size={16} /> iPhone &amp; Android</span></div></div><div className="download-form"><div className="download-icon"><Smartphone size={28} /></div><h3>Get the launch link</h3><p>Leave your email and we&apos;ll send you the easiest way to install MoniUsed.</p>{submitted ? <div className="success-message"><Check size={20} /><b>You&apos;re on the list.</b><span>We&apos;ll be in touch soon.</span></div> : <form onSubmit={handleSubmit}><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" aria-label="Email address" required /><button className="button button-dark" type="submit">Send me the link <ArrowRight size={17} /></button></form>}<small>We won&apos;t spam you. Promise.</small></div></div></section>
+
+    <footer className="marketing-footer"><div className="marketing-container footer-top"><Logo light /><div className="footer-tagline">See where your moni went.</div><div className="footer-links"><a href="#why">Why MoniUsed</a><a href="#how">How it works</a><a href="#posters">Campaign</a><a href="mailto:hello@moniused.com">Contact</a></div></div><div className="marketing-container footer-bottom"><span>© 2026 MoniUsed. Made for everyday Nigerians.</span><span>Free. No bank login needed.</span></div></footer>
+  </main>;
 }

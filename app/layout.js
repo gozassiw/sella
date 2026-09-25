@@ -1,7 +1,5 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { BRAND } from "@/lib/config";
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -11,13 +9,12 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: `${BRAND} — Your business, clear enough to run from your phone.`,
-  description: "No more scattered chats and screenshots. See your storefront, orders, stock, and money in one simple place.",
-  icons: { icon: "/brand/sella-favicon.png", apple: "/brand/sella-favicon.png" },
-  manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: BRAND, statusBarStyle: "default" },
+  title: "MoniUsed — See where your moni went.",
+  description: "A free, private expense tracker made for everyday Nigerians.",
+  icons: { icon: "/brand/moniused-mark.svg" },
+  appleWebApp: { capable: true, title: "MoniUsed", statusBarStyle: "default" },
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en" className={jakarta.variable}><body className="font-sans"><ServiceWorkerRegister />{children}</body></html>;
+  return <html lang="en" className={jakarta.variable}><body>{children}</body></html>;
 }
